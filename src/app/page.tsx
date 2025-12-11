@@ -1,65 +1,106 @@
 'use client'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { JournalForm } from "@/components/journal-form"
-import { PastEntries } from "@/components/past-entries"
-import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader } from "lucide-react"
-import { useUser } from "@/firebase/auth/use-user"
-import { useCollection } from "@/firebase/firestore/use-collection"
-import { collection, query, orderBy } from "firebase/firestore"
-import { useFirestore } from "@/firebase"
-import { useMemoFirebase } from "@/firebase"
-import type { JournalEntry } from "@/lib/types"
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { BookHeart, Feather, TrendingUp, Lock } from 'lucide-react';
+import Link from 'next/link';
 
-export default function Home() {
-  const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
+export default function LandingPage() {
+  const router = useRouter();
 
-  const journalEntriesQuery = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return query(
-      collection(firestore, 'users', user.uid, 'journalEntries'),
-      orderBy('date', 'desc')
-    );
-  }, [firestore, user]);
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('hasVisitedReflectWell');
+    if (hasVisited) {
+      router.replace('/journal');
+    }
+  }, [router]);
 
-  const { data: entries, isLoading: areEntriesLoading } = useCollection<JournalEntry>(journalEntriesQuery);
-
-  if (isUserLoading || areEntriesLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    )
-  }
+  const handleGetStarted = () => {
+    localStorage.setItem('hasVisitedReflectWell', 'true');
+    router.push('/journal');
+  };
 
   return (
-    <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
-      <header className="mb-8 text-center">
-        <div className="inline-flex items-center gap-2 mb-2">
+    <div className="flex flex-col min-h-screen">
+      <header className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="flex items-center gap-2">
           <BookHeart className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-headline font-bold">ReflectWell</h1>
+          <h1 className="text-2xl font-headline font-bold">ReflectWell</h1>
         </div>
-        <p className="text-muted-foreground">Your personal space for daily reflection and mindfulness.</p>
+        <Button asChild onClick={handleGetStarted}>
+          <Link href="/journal">Get Started</Link>
+        </Button>
       </header>
-      
-      <Tabs defaultValue="new-entry" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="new-entry">New Entry</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
-        </TabsList>
-        <TabsContent value="new-entry" className="mt-6">
-          <JournalForm />
-        </TabsContent>
-        <TabsContent value="history" className="mt-6">
-          <PastEntries entries={entries || []} />
-        </TabsContent>
-        <TabsContent value="trends" className="mt-6">
-          <MoodChart entries={entries || []} />
-        </TabsContent>
-      </Tabs>
-    </main>
+
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <section className="text-center py-16 md:py-24 lg:py-32 bg-secondary/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-4xl md:text-5xl font-bold font-headline mb-4">
+              Your Personal Space for Mindfulness
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+              ReflectWell is a simple, beautiful, and private journal to help you track your moods and understand your emotional well-being.
+            </p>
+            <Button size="lg" onClick={handleGetStarted}>
+              Start Your First Entry
+              <Feather className="ml-2" />
+            </Button>
+            <div className="mt-12 rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto">
+              <Image
+                src="https://picsum.photos/seed/journal/1200/600"
+                alt="ReflectWell app screenshot"
+                width={1200}
+                height={600}
+                data-ai-hint="calm desk flatlay"
+                className="w-full"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 className="text-3xl font-bold text-center mb-12 font-headline">Why You'll Love ReflectWell</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+              <div className="flex flex-col items-center">
+                <div className="bg-primary/20 rounded-full p-4 mb-4">
+                  <Feather className="h-8 w-8 text-primary" />
+                </div>
+                <h4 className="text-xl font-semibold mb-2">Effortless Journaling</h4>
+                <p className="text-muted-foreground">
+                  A clean, distraction-free editor to capture your thoughts and feelings easily.
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="bg-primary/20 rounded-full p-4 mb-4">
+                  <TrendingUp className="h-8 w-8 text-primary" />
+                </div>
+                <h4 className="text-xl font-semibold mb-2">Visualize Your Mood</h4>
+                <p className="text-muted-foreground">
+                  Track your emotional trends over time with an insightful and beautiful chart.
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="bg-primary/20 rounded-full p-4 mb-4">
+                  <Lock className="h-8 w-8 text-primary" />
+                </div>
+                <h4 className="text-xl font-semibold mb-2">Completely Private</h4>
+                <p className="text-muted-foreground">
+                  Your entries are your own. Securely stored and only accessible by you.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="text-center py-6 text-muted-foreground">
+        <p>&copy; {new Date().getFullYear()} ReflectWell. All rights reserved.</p>
+      </footer>
+    </div>
   );
 }
