@@ -1,0 +1,155 @@
+{
+  "entities": {
+    "JournalEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JournalEntry",
+      "type": "object",
+      "description": "Represents a user's journal entry for a specific day.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the journal entry."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who created this entry. (Relationship: User 1:N JournalEntry)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the journal entry.",
+          "format": "date"
+        },
+        "text": {
+          "type": "string",
+          "description": "The text content of the journal entry."
+        },
+        "moodId": {
+          "type": "string",
+          "description": "Reference to the Mood associated with this entry. (Relationship: JournalEntry 1:1 Mood)"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "date",
+        "text",
+        "moodId"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the ReflectWell application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "creationDate": {
+          "type": "string",
+          "description": "The date the user account was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "creationDate"
+      ]
+    },
+    "Mood": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Mood",
+      "type": "object",
+      "description": "Represents a mood that can be associated with a journal entry.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the mood."
+        },
+        "emoji": {
+          "type": "string",
+          "description": "The emoji representing the mood."
+        },
+        "description": {
+          "type": "string",
+          "description": "A text description of the mood."
+        }
+      },
+      "required": [
+        "id",
+        "emoji",
+        "description"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information.  Path-based ownership ensures only the authenticated user can access their own profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/journalEntries/{journalEntryId}",
+        "definition": {
+          "entityName": "JournalEntry",
+          "schema": {
+            "$ref": "#/backend/entities/JournalEntry"
+          },
+          "description": "Stores journal entries for each user. Path-based ownership ensures only the authenticated user can access their own journal entries.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "journalEntryId",
+              "description": "The unique identifier of the journal entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/moods/{moodId}",
+        "definition": {
+          "entityName": "Mood",
+          "schema": {
+            "$ref": "#/backend/entities/Mood"
+          },
+          "description": "Stores available moods. This collection is globally readable.",
+          "params": [
+            {
+              "name": "moodId",
+              "description": "The unique identifier of the mood."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure data isolation and straightforward security rules by leveraging path-based ownership. Each user has their own collection of journal entries, eliminating the need for complex authorization logic or cross-collection queries for access control. This design achieves Authorization Independence by structuring data such that access control can be determined directly from the path and the `request.auth.uid`, avoiding the need to `get()` parent documents for authorization checks.\n\nThe structure supports the required QAPs as follows:\n\n1.  **Secure `list` operations**: Because each user's journal entries are stored under their specific `userId`, listing entries is inherently secure. Rules can easily enforce that only the authenticated user can list entries within their own `/users/{userId}/journalEntries` collection.\n\n2.  **Data Isolation**: User data is naturally isolated due to the path-based ownership model, preventing unauthorized access or modification.\n\n3.  **Scalability**: The design scales well because read and write operations are limited to a user's own data, avoiding potential bottlenecks associated with shared collections or complex authorization schemes."
+  }
+}
