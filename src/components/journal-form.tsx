@@ -91,7 +91,7 @@ Journal Entry:
 
     try {
       const aiResponse = await puter.ai.chat(prompt);
-      setReflection(aiResponse.message);
+      setReflection(aiResponse.message.content);
       setShowReflectionDialog(true);
     } catch (error) {
       console.error("Error getting AI reflection from Puter.ai:", error);
