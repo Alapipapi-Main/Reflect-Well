@@ -7,7 +7,6 @@ import { Save, Sparkles } from "lucide-react"
 import { collection, serverTimestamp } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
 import { useState } from "react"
-import { getReflection } from "@/ai/flows/reflection-flow"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +41,8 @@ import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
 import type { Mood } from "@/lib/types"
 
+declare const puter: any;
+
 const formSchema = z.object({
   content: z.string().min(10, {
     message: "Journal entry must be at least 10 characters.",
@@ -68,6 +69,40 @@ export function JournalForm() {
     },
   })
 
+  const handleAiReflection = async (entryText: string) => {
+    if (typeof puter === 'undefined') {
+      console.error("Puter.js is not loaded.");
+      toast({
+        variant: "destructive",
+        title: "AI Feature Not Available",
+        description: "The AI reflection service could not be loaded.",
+      });
+      return;
+    }
+
+    const prompt = `You are a compassionate and insightful journaling companion. Your role is to provide a brief, gentle, and encouraging reflection on a user's journal entry.
+
+You can either provide a warm, affirming statement or ask a soft, open-ended question that encourages deeper thought. Your response should feel like a supportive friend listening without judgment.
+
+Keep your reflection to one or two sentences. Do not give advice.
+
+Journal Entry:
+"${entryText}"`;
+
+    try {
+      const aiResponse = await puter.ai.chat(prompt);
+      setReflection(aiResponse);
+      setShowReflectionDialog(true);
+    } catch (error) {
+      console.error("Error getting AI reflection from Puter.ai:", error);
+      toast({
+        variant: "destructive",
+        title: "AI Reflection Failed",
+        description: "Could not generate a reflection for this entry.",
+      });
+    }
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user || !firestore) {
       toast({
@@ -77,6 +112,8 @@ export function JournalForm() {
       });
       return;
     }
+    
+    setIsGenerating(true);
 
     // 1. Save the entry to Firestore
     const journalEntriesRef = collection(firestore, 'users', user.uid, 'journalEntries');
@@ -93,22 +130,11 @@ export function JournalForm() {
     });
 
     // 2. Trigger the AI reflection
-    setIsGenerating(true);
-    try {
-      const aiResponse = await getReflection({ entry: values.content });
-      setReflection(aiResponse.reflection);
-      setShowReflectionDialog(true);
-    } catch (error) {
-      console.error("Error getting AI reflection:", error);
-      toast({
-        variant: "destructive",
-        title: "AI Reflection Failed",
-        description: "Could not generate a reflection for this entry.",
-      })
-    } finally {
-      setIsGenerating(false);
-      form.reset();
-    }
+    await handleAiReflection(values.content);
+
+    // 3. Reset form and state
+    setIsGenerating(false);
+    form.reset();
   }
 
   return (
