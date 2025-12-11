@@ -6,6 +6,9 @@ import { FirebaseClientProvider } from '@/firebase';
 export const metadata: Metadata = {
   title: 'ReflectWell',
   description: 'A mindful journaling app for daily reflections and mood tracking.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
