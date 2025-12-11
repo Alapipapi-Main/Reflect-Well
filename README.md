@@ -1,6 +1,6 @@
 # ReflectWell - A Mindful Journaling App
 
-[**Live Demo**](https://reflect-well.vercel.app/)
+[**Live Website**](https://reflect-well.vercel.app/)
 
 ReflectWell is a web application designed to help you practice mindfulness through daily journaling and mood tracking. It provides a clean, personal, and secure space to record your thoughts, reflect on your feelings, and visualize your emotional trends over time.
 
