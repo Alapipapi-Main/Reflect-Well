@@ -1,8 +1,11 @@
+import { Timestamp } from "firebase/firestore";
+
 export type Mood = 'ecstatic' | 'happy' | 'neutral' | 'sad' | 'angry';
 
 export interface JournalEntry {
   id: string;
-  date: string; // ISO 8601 format
+  userId: string;
+  date: Timestamp | Date | string; // Firestore timestamp, can be Date object or ISO string
   mood: Mood;
   content: string;
 }

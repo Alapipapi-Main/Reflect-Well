@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Save } from "lucide-react"
+import { collection, doc, serverTimestamp } from "firebase/firestore"
+import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +44,8 @@ const formSchema = z.object({
 
 export function JournalForm() {
   const { toast } = useToast()
+  const firestore = useFirestore()
+  const { user } = useUser()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,11 +55,28 @@ export function JournalForm() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user || !firestore) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "You must be signed in to save an entry.",
+      });
+      return;
+    }
+
+    const journalEntriesRef = collection(firestore, 'users', user.uid, 'journalEntries');
+    
+    addDocumentNonBlocking(journalEntriesRef, {
+      userId: user.uid,
+      date: serverTimestamp(),
+      mood: values.mood,
+      content: values.content,
+    });
+    
     toast({
       title: "Entry Saved!",
       description: "Your journal entry for today has been saved.",
     })
-    console.log(values)
     form.reset()
   }
 

@@ -29,9 +29,13 @@ const moodValues = Object.values(MOODS);
 export function MoodChart({ entries }: MoodChartProps) {
   const chartData = useMemo(() => {
     return [...entries]
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .sort((a, b) => {
+        const dateA = a.date ? (a.date as any).toDate() : new Date(0);
+        const dateB = b.date ? (b.date as any).toDate() : new Date(0);
+        return dateA.getTime() - dateB.getTime();
+      })
       .map(entry => ({
-        date: format(new Date(entry.date), "MMM d"),
+        date: format(entry.date ? (entry.date as any).toDate() : new Date(), "MMM d"),
         moodValue: MOODS[entry.mood].value,
       }))
   }, [entries])

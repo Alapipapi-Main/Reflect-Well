@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'ReflectWell',
@@ -20,7 +21,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,700;1,7..72,400&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased h-full bg-background">
-        {children}
+        <FirebaseClientProvider>
+          {children}
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>

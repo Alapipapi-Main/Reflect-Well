@@ -17,7 +17,11 @@ interface PastEntriesProps {
 }
 
 export function PastEntries({ entries }: PastEntriesProps) {
-  const sortedEntries = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedEntries = [...entries].sort((a, b) => {
+    const dateA = a.date ? (a.date as any).toDate() : new Date(0);
+    const dateB = b.date ? (b.date as any).toDate() : new Date(0);
+    return dateB.getTime() - dateA.getTime();
+  });
 
   return (
     <Card>
@@ -33,7 +37,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                 <AccordionTrigger>
                   <div className="flex items-center gap-4 text-lg">
                     <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
-                    <span>{format(new Date(entry.date), "MMMM d, yyyy")}</span>
+                    <span>{format(entry.date ? (entry.date as any).toDate() : new Date(), "MMMM d, yyyy")}</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-base leading-relaxed whitespace-pre-wrap px-2">
