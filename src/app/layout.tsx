@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang="en" className="h-full light" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,14 +25,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased h-full bg-background">
           <FirebaseClientProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-            </ThemeProvider>
+            {children}
           </FirebaseClientProvider>
           <Toaster />
           <Script src="https://js.puter.com/v2/" strategy="afterInteractive" />

@@ -12,6 +12,7 @@ import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
+import { ThemeProvider } from '@/components/theme-provider';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -47,33 +48,40 @@ function JournalPageContent() {
   }
 
   return (
-    <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
-      <header className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-2">
-          <BookHeart className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-          <h1 className="text-2xl sm:text-4xl font-headline font-bold">ReflectWell</h1>
-        </div>
-        <UserMenu user={user} />
-      </header>
-      <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
-      
-      <Tabs defaultValue="new-entry" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="new-entry">New Entry</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
-        </TabsList>
-        <TabsContent value="new-entry" className="mt-6">
-          <JournalForm />
-        </TabsContent>
-        <TabsContent value="history" className="mt-6">
-          <PastEntries entries={entries || []} />
-        </TabsContent>
-        <TabsContent value="trends" className="mt-6">
-          <MoodChart entries={entries || []} />
-        </TabsContent>
-      </Tabs>
-    </main>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+        <header className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-2">
+            <BookHeart className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+            <h1 className="text-2xl sm:text-4xl font-headline font-bold">ReflectWell</h1>
+          </div>
+          <UserMenu user={user} />
+        </header>
+        <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
+        
+        <Tabs defaultValue="new-entry" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="new-entry">New Entry</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="trends">Trends</TabsTrigger>
+          </TabsList>
+          <TabsContent value="new-entry" className="mt-6">
+            <JournalForm />
+          </TabsContent>
+          <TabsContent value="history" className="mt-6">
+            <PastEntries entries={entries || []} />
+          </TabsContent>
+          <TabsContent value="trends" className="mt-6">
+            <MoodChart entries={entries || []} />
+          </TabsContent>
+        </Tabs>
+      </main>
+    </ThemeProvider>
   );
 }
 

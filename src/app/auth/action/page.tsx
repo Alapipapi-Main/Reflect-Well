@@ -14,17 +14,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookHeart, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
-import { useTheme } from 'next-themes';
 
 function AuthActionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const auth = useAuth();
-  const { setTheme } = useTheme();
-
-  useEffect(() => {
-    setTheme('light');
-  }, [setTheme]);
   
   const mode = searchParams.get('mode');
   const oobCode = searchParams.get('oobCode');

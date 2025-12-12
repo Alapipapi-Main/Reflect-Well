@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { AuthForm } from '@/components/auth-form';
 import { useAuth } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
@@ -8,17 +7,11 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { BookHeart } from 'lucide-react';
 import Link from 'next/link';
-import { useTheme } from 'next-themes';
 
 export default function SignupPage() {
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const { setTheme } = useTheme();
-
-  useEffect(() => {
-    setTheme('light');
-  }, [setTheme]);
 
   const handleSignup = async (email: string, password: string) => {
     try {
