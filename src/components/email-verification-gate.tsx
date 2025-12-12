@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { useToast } from '@/hooks/use-toast';
 import { MailCheck, Loader2, RefreshCw } from 'lucide-react';
 import { UserMenu } from './user-menu';
+import { useRouter } from 'next/navigation';
 
 interface EmailVerificationGateProps {
   user: User;
@@ -15,6 +16,7 @@ interface EmailVerificationGateProps {
 
 export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [isSending, setIsSending] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
 
@@ -28,11 +30,18 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
       // After reload, the onAuthStateChanged listener in FirebaseProvider
       // will fire if the user object has changed (e.g., emailVerified is now true),
       // which will cause the parent component to re-render and this gate to be removed.
-      // If it doesn't automatically hide, it means verification is still pending.
-      toast({
-        title: "Status Checked",
-        description: user.emailVerified ? "Email is verified!" : "Email not verified yet. Please check your inbox.",
-      });
+      if (user.emailVerified) {
+        toast({
+            title: "Email Verified!",
+            description: "Redirecting to your journal...",
+        });
+        router.push('/journal');
+      } else {
+        toast({
+            title: "Status Checked",
+            description: "Email not verified yet. Please check your inbox.",
+        });
+      }
     } catch (error) {
       console.error('Error reloading user:', error);
       toast({
@@ -59,14 +68,26 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
             clearInterval(interval);
           }
         });
+
+        // After reload, the user object might be updated.
+        // We need to check its `emailVerified` status again.
+        if (user.emailVerified) {
+          clearInterval(interval);
+          toast({
+              title: "Email Verified!",
+              description: "Redirecting to your journal...",
+          });
+          router.push('/journal');
+        }
       } else if (user.emailVerified) {
-        // If user is verified, we can stop polling.
+        // If user is verified, we can stop polling and redirect.
         clearInterval(interval);
+        router.push('/journal');
       }
     }, 5000); // Check every 5 seconds
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, router, toast]);
 
 
   const handleResendVerification = async () => {
