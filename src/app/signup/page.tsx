@@ -2,7 +2,7 @@
 
 import { AuthForm } from '@/components/auth-form';
 import { useAuth } from '@/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { BookHeart } from 'lucide-react';
@@ -15,10 +15,13 @@ export default function SignupPage() {
 
   const handleSignup = async (email: string, password: string) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Send verification email
+      await sendEmailVerification(userCredential.user);
+      
       toast({
         title: 'Account Created!',
-        description: 'Welcome to ReflectWell. You can now log in.',
+        description: 'A verification email has been sent. Please check your inbox to continue.',
       });
       router.push('/journal');
     } catch (error: any) {
