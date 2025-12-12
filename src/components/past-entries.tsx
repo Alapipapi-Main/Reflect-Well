@@ -154,7 +154,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                           onClick={(e) => handleDeleteClick(e, entry.id)}
                           aria-label="Delete entry"
                         >
-                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
+                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-400 dark:hover:text-red-300" />
                         </Button>
                       </div>
                   </div>
@@ -199,7 +199,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteCandidateId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-700 dark:hover:bg-red-600">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
