@@ -23,10 +23,16 @@ export default function LoginPage() {
       router.push('/journal');
     } catch (error: any) {
       console.error('Login Error:', error);
+      let description = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/invalid-credential') {
+        description = 'Incorrect email or password. Please check your credentials or sign up if you are a new user.';
+      } else if (error.message) {
+        description = error.message;
+      }
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: error.message || 'An unexpected error occurred.',
+        description: description,
       });
     }
   };
