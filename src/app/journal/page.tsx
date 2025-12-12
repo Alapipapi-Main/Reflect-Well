@@ -51,8 +51,8 @@ export default function JournalPage() {
     <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
       <header className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-2">
-          <BookHeart className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-headline font-bold">ReflectWell</h1>
+          <BookHeart className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+          <h1 className="text-2xl sm:text-4xl font-headline font-bold">ReflectWell</h1>
         </div>
         <UserMenu user={user} />
       </header>
