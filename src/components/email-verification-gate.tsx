@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
-import { sendEmailVerification } from 'firebase/auth';
+import { sendEmailVerification, reload } from 'firebase/auth';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { MailCheck, Loader2 } from 'lucide-react';
+import { MailCheck, Loader2, RefreshCw } from 'lucide-react';
 import { UserMenu } from './user-menu';
 
 interface EmailVerificationGateProps {
@@ -16,6 +16,44 @@ interface EmailVerificationGateProps {
 export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
+
+  // Function to reload the user and check verification status
+  const handleReload = async () => {
+    setIsReloading(true);
+    try {
+      await reload(user);
+      // After reload, the onAuthStateChanged listener in FirebaseProvider
+      // will fire if the user object has changed (e.g., emailVerified is now true),
+      // which will cause the component to re-render and the gate to be removed.
+    } catch (error) {
+      console.error('Error reloading user:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to Check Status',
+        description: 'Could not check your verification status. Please try again in a moment.',
+      });
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
+  // Poll for verification status periodically
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      // Make sure we have the latest user data before reloading
+      if (user) {
+        await reload(user).catch(err => {
+          // Errors are expected if the user is signed out, etc.
+          // We can silently ignore them during polling.
+          console.warn("Polling for user reload failed silently:", err.code);
+        });
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [user]);
+
 
   const handleResendVerification = async () => {
     setIsSending(true);
@@ -57,17 +95,30 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Once you've verified, this page will automatically update.
+              Once you've verified, this page will automatically update. You can also check manually.
             </p>
-            <div>
-              <Button onClick={handleResendVerification} disabled={isSending}>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button onClick={handleReload} disabled={isReloading}>
+                {isReloading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    I've Verified
+                  </>
+                )}
+              </Button>
+              <Button onClick={handleResendVerification} disabled={isSending} variant="secondary">
                 {isSending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Sending...
                   </>
                 ) : (
-                  "Resend Verification Email"
+                  "Resend Email"
                 )}
               </Button>
             </div>
