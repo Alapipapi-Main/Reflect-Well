@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { BookHeart, Feather, TrendingUp, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useUser } from '@/firebase';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function LandingPage() {
   const { user, isUserLoading } = useUser();
@@ -37,7 +36,6 @@ export default function LandingPage() {
           <h1 className="text-xl sm:text-2xl font-headline font-bold">ReflectWell</h1>
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
-          <ThemeToggle />
           <Button variant="ghost" asChild className="px-2 sm:px-4">
             <Link href="/login">Log In</Link>
           </Button>
