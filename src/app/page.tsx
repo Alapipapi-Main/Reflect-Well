@@ -7,10 +7,8 @@ import { Button } from '@/components/ui/button';
 import { BookHeart, Feather, TrendingUp, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useUser } from '@/firebase';
-import { usePublicPageTheme } from '@/hooks/use-public-page-theme';
 
 export default function LandingPage() {
-  usePublicPageTheme();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 

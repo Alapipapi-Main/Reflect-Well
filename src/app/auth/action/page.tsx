@@ -14,10 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookHeart, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
-import { usePublicPageTheme } from '@/hooks/use-public-page-theme';
 
 function AuthActionContent() {
-  usePublicPageTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
   const auth = useAuth();

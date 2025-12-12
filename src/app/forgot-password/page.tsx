@@ -9,10 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookHeart, Loader2, MailQuestion } from 'lucide-react';
 import Link from 'next/link';
-import { usePublicPageTheme } from '@/hooks/use-public-page-theme';
 
 export default function ForgotPasswordPage() {
-  usePublicPageTheme();
   const auth = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
