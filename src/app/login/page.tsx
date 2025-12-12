@@ -51,7 +51,12 @@ export default function LoginPage() {
           mode="login"
           onSubmit={handleLogin}
         />
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <div className="mt-6 text-center text-sm text-muted-foreground">
+          <Link href="/forgot-password" passHref>
+             <span className="font-semibold text-primary hover:underline cursor-pointer">Forgot your password?</span>
+          </Link>
+        </div>
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           Don't have an account?{' '}
           <Link href="/signup" className="font-semibold text-primary hover:underline">
             Sign up
