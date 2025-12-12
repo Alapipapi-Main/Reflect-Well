@@ -33,7 +33,7 @@ export function UserMenu({ user }: UserMenuProps) {
         title: 'Logged Out',
         description: 'You have been successfully logged out.',
       });
-      window.location.href = '/';
+      window.location.href = '/login';
     } catch (error: any) {
       console.error('Logout Error:', error);
       toast({
