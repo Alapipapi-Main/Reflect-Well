@@ -25,11 +25,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { doc } from "firebase/firestore"
 import { useFirestore, useUser, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase"
+import { Input } from "@/components/ui/input"
 
 import type { JournalEntry } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format } from "date-fns"
-import { CalendarDays, Edit, Trash2 } from "lucide-react"
+import { CalendarDays, Edit, Trash2, Search } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 
@@ -54,12 +55,17 @@ export function PastEntries({ entries }: PastEntriesProps) {
   const { user } = useUser()
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
 
   const sortedEntries = [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
     const dateB = b.date ? (b.date as any).toDate() : new Date(0)
     return dateB.getTime() - dateA.getTime()
   })
+
+  const filteredEntries = sortedEntries.filter(entry => 
+    entry.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleEditClick = (event: React.MouseEvent, entryId: string) => {
     event.stopPropagation()
@@ -108,7 +114,14 @@ export function PastEntries({ entries }: PastEntriesProps) {
           <CardDescription>A look back at your thoughts and feelings.</CardDescription>
         </CardHeader>
         <CardContent>
+          <Input 
+            placeholder="Search your entries..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="mb-6"
+          />
           {sortedEntries.length > 0 ? (
+            filteredEntries.length > 0 ? (
             <Accordion type="single" collapsible className="w-full"
               value={editingEntryId || undefined}
               onValueChange={(value) => {
@@ -117,7 +130,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                 }
               }}
             >
-              {sortedEntries.map((entry) => (
+              {filteredEntries.map((entry) => (
                 <AccordionItem value={entry.id} key={entry.id}>
                   <div className="flex items-center w-full">
                     <AccordionTrigger>
@@ -160,6 +173,13 @@ export function PastEntries({ entries }: PastEntriesProps) {
               ))}
             </Accordion>
           ) : (
+             <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
+                <Search className="h-12 w-12 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No Matching Entries</h3>
+                <p>We couldn't find any journal entries that match your search.</p>
+              </div>
+            )
+          ) : (
             <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
               <CalendarDays className="h-12 w-12 mb-4" />
               <h3 className="text-xl font-semibold mb-2">No Entries Yet</h3>
@@ -179,7 +199,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteCandidateId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90 text-black">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -214,3 +234,4 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
     </FormProvider>
   )
 }
+ 
