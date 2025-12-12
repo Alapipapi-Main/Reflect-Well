@@ -99,11 +99,11 @@ ${formattedEntries}
     <Card>
       <CardHeader>
         <CardTitle>Weekly Insights</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <CardDescription>
           Generate an AI-powered summary to reflect on the themes and moods of your past week.
         </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
         {summary && (
           <div className="p-4 bg-secondary/50 border rounded-lg space-y-4">
             <h3 className="font-semibold flex items-center gap-2"><Sparkles className="text-primary" /> Your Weekly Reflection</h3>
@@ -134,7 +134,7 @@ ${formattedEntries}
         </Button>
       </CardFooter>
       {weeklyEntries.length < 2 && (
-         <p className="px-6 pb-4 text-sm text-muted-foreground">
+         <p className="px-6 pb-4 text-sm text-muted-foreground -mt-4">
             You need at least two journal entries in the last 7 days to generate a summary. You currently have {weeklyEntries.length}.
         </p>
       )}
