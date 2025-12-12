@@ -20,12 +20,19 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
 
   // Function to reload the user and check verification status
   const handleReload = async () => {
+    if (isReloading) return;
     setIsReloading(true);
     try {
+      // The user object needs to be reloaded to get the latest emailVerified status
       await reload(user);
       // After reload, the onAuthStateChanged listener in FirebaseProvider
       // will fire if the user object has changed (e.g., emailVerified is now true),
-      // which will cause the component to re-render and the gate to be removed.
+      // which will cause the parent component to re-render and this gate to be removed.
+      // If it doesn't automatically hide, it means verification is still pending.
+      toast({
+        title: "Status Checked",
+        description: user.emailVerified ? "Email is verified!" : "Email not verified yet. Please check your inbox.",
+      });
     } catch (error) {
       console.error('Error reloading user:', error);
       toast({
@@ -42,12 +49,19 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   useEffect(() => {
     const interval = setInterval(async () => {
       // Make sure we have the latest user data before reloading
-      if (user) {
+      if (user && !user.emailVerified) {
         await reload(user).catch(err => {
-          // Errors are expected if the user is signed out, etc.
-          // We can silently ignore them during polling.
+          // Errors are expected if the user is signed out, the network is down, etc.
+          // We can silently ignore them during polling as to not bother the user.
           console.warn("Polling for user reload failed silently:", err.code);
+          // Stop polling if we get an error that indicates the user is no longer valid
+          if (err.code === 'auth/user-token-expired' || err.code === 'auth/user-not-found') {
+            clearInterval(interval);
+          }
         });
+      } else if (user.emailVerified) {
+        // If user is verified, we can stop polling.
+        clearInterval(interval);
       }
     }, 5000); // Check every 5 seconds
 
