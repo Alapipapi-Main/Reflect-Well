@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -126,7 +127,8 @@ ${formattedEntries}
           ) : (
             <>
               <Wand className="mr-2 h-4 w-4" />
-              Generate Your Weekly Summary
+              <span className="sm:hidden">Generate Summary</span>
+              <span className="hidden sm:inline">Generate Your Weekly Summary</span>
             </>
           )}
         </Button>
