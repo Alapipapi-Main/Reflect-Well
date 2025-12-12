@@ -84,7 +84,7 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
         clearInterval(interval);
         router.push('/journal');
       }
-    }, 5000); // Check every 5 seconds
+    }, 2000); // Check every 2 seconds
 
     return () => clearInterval(interval);
   }, [user, router, toast]);
