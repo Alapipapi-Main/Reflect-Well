@@ -150,9 +150,9 @@
         }
       },
       {
-        "path": "/reset-password",
+        "path": "/auth/action",
         "definition": {
-          "description": "Client-side route for handling the final step of password reset."
+          "description": "Client-side route for handling email verification and password reset actions."
         }
       }
     ],

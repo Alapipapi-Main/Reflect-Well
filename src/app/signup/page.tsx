@@ -18,7 +18,7 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
       const actionCodeSettings = {
-        url: `${window.location.origin}/verify-email`,
+        url: `${window.location.origin}/auth/action`,
         handleCodeInApp: true,
       };
       

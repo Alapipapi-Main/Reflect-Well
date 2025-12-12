@@ -30,9 +30,9 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // The actionCodeSettings will redirect the user to our custom reset page.
+      // The actionCodeSettings will redirect the user to our custom action page.
       const actionCodeSettings = {
-        url: `${window.location.origin}/reset-password`,
+        url: `${window.location.origin}/auth/action`,
         handleCodeInApp: true,
       };
       await sendPasswordResetEmail(auth, email, actionCodeSettings);

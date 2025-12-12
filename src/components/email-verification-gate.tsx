@@ -94,7 +94,7 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
     setIsSending(true);
     try {
       const actionCodeSettings = {
-        url: `${window.location.origin}/verify-email`,
+        url: `${window.location.origin}/auth/action`,
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
