@@ -7,8 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { BookHeart } from 'lucide-react';
 import Link from 'next/link';
+import { usePublicPageTheme } from '@/hooks/use-public-page-theme';
 
 export default function SignupPage() {
+  usePublicPageTheme();
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
