@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookHeart, Loader2 } from 'lucide-react';
+import { BookHeart, Loader2, MailQuestion } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
@@ -73,15 +73,21 @@ export default function ForgotPasswordPage() {
             <CardTitle>Forgot Password</CardTitle>
             <CardDescription>
               {isSubmitted
-                ? "You can close this page now."
+                ? "An email is on its way!"
                 : "Enter your email address and we'll send you a link to reset your password."}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isSubmitted ? (
-              <p className="text-center text-green-600">
-                A password reset link has been sent to your email address.
-              </p>
+              <div className="text-center p-4 border-2 border-dashed rounded-lg">
+                <MailQuestion className="h-12 w-12 mx-auto text-primary mb-4" />
+                <p className="text-foreground font-medium">
+                  A password reset link has been sent to your email address.
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Can't find it? Please be sure to check your spam or junk folder.
+                </p>
+              </div>
             ) : (
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-2">
