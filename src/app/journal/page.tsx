@@ -12,8 +12,9 @@ import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
+import { ThemeProvider } from '@/components/theme-provider';
 
-export default function JournalPage() {
+function JournalPageContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
@@ -46,7 +47,6 @@ export default function JournalPage() {
     return <EmailVerificationGate user={user} />;
   }
 
-
   return (
     <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
       <header className="flex justify-between items-center mb-8">
@@ -76,4 +76,17 @@ export default function JournalPage() {
       </Tabs>
     </main>
   );
+}
+
+export default function JournalPage() {
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <JournalPageContent />
+    </ThemeProvider>
+  )
 }
