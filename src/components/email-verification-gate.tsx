@@ -93,7 +93,11 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   const handleResendVerification = async () => {
     setIsSending(true);
     try {
-      await sendEmailVerification(user);
+      const actionCodeSettings = {
+        url: `${window.location.origin}/verify-email`,
+        handleCodeInApp: true,
+      };
+      await sendEmailVerification(user, actionCodeSettings);
       toast({
         title: 'Verification Email Sent',
         description: 'Please check your inbox (and spam folder) for the verification link.',

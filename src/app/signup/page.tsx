@@ -16,8 +16,14 @@ export default function SignupPage() {
   const handleSignup = async (email: string, password: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      const actionCodeSettings = {
+        url: `${window.location.origin}/verify-email`,
+        handleCodeInApp: true,
+      };
+      
       // Send verification email
-      await sendEmailVerification(userCredential.user);
+      await sendEmailVerification(userCredential.user, actionCodeSettings);
       
       toast({
         title: 'Account Created!',
