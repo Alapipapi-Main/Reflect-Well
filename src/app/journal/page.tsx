@@ -1,20 +1,27 @@
 'use client'
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
 import { BookHeart, Loader } from "lucide-react"
-import { useUser } from "@/firebase/auth/use-user"
-import { useCollection } from "@/firebase/firestore/use-collection"
+import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
-import { useFirestore } from "@/firebase"
-import { useMemoFirebase } from "@/firebase"
 import type { JournalEntry } from "@/lib/types"
+import { UserMenu } from '@/components/user-menu';
 
 export default function JournalPage() {
   const { user, isUserLoading } = useUser();
+  const router = useRouter();
   const firestore = useFirestore();
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.replace('/login');
+    }
+  }, [user, isUserLoading, router]);
 
   const journalEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -26,7 +33,7 @@ export default function JournalPage() {
 
   const { data: entries, isLoading: areEntriesLoading } = useCollection<JournalEntry>(journalEntriesQuery);
 
-  if (isUserLoading || areEntriesLoading) {
+  if (isUserLoading || !user || areEntriesLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="h-12 w-12 animate-spin text-primary" />
@@ -36,13 +43,14 @@ export default function JournalPage() {
 
   return (
     <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
-      <header className="mb-8 text-center">
-        <div className="inline-flex items-center gap-2 mb-2">
+      <header className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-2">
           <BookHeart className="h-8 w-8 text-primary" />
           <h1 className="text-4xl font-headline font-bold">ReflectWell</h1>
         </div>
-        <p className="text-muted-foreground">Your personal space for daily reflection and mindfulness.</p>
+        <UserMenu user={user} />
       </header>
+      <p className="text-muted-foreground text-center mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
       
       <Tabs defaultValue="new-entry" className="w-full">
         <TabsList className="grid w-full grid-cols-3">

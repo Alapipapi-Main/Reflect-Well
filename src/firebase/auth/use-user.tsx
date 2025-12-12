@@ -1,18 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useAuth, useFirebase } from '@/firebase/provider';
-import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
+import { useFirebase } from '@/firebase/provider';
 
+// This hook is now a simple wrapper around the main useFirebase hook.
+// The logic for initiating anonymous sign-in has been removed.
+// Authentication is now handled by the login/signup pages.
 export const useUser = () => {
   const { user, isUserLoading, userError } = useFirebase();
-  const auth = useAuth();
-
-  useEffect(() => {
-    if (!isUserLoading && !user && !userError) {
-      initiateAnonymousSignIn(auth);
-    }
-  }, [isUserLoading, user, userError, auth]);
 
   return { user, isUserLoading, userError };
 };

@@ -6,21 +6,28 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { BookHeart, Feather, TrendingUp, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { useUser } from '@/firebase';
+import { UserMenu } from '@/components/user-menu';
 
 export default function LandingPage() {
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    const hasVisited = localStorage.getItem('hasVisitedReflectWell');
-    if (hasVisited) {
+    // If user is logged in, redirect to the journal page.
+    if (!isUserLoading && user) {
       router.replace('/journal');
     }
-  }, [router]);
+  }, [user, isUserLoading, router]);
 
-  const handleGetStarted = () => {
-    localStorage.setItem('hasVisitedReflectWell', 'true');
-    router.push('/journal');
-  };
+  if (isUserLoading || user) {
+    // Show a loading screen or nothing while checking auth/redirecting
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <BookHeart className="h-12 w-12 animate-pulse text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -29,9 +36,14 @@ export default function LandingPage() {
           <BookHeart className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-headline font-bold">ReflectWell</h1>
         </div>
-        <Button asChild onClick={handleGetStarted}>
-          <Link href="/journal">Get Started</Link>
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" asChild>
+            <Link href="/login">Log In</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/signup">Sign Up</Link>
+          </Button>
+        </div>
       </header>
 
       <main className="flex-grow">
@@ -44,9 +56,11 @@ export default function LandingPage() {
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
               ReflectWell is a simple, beautiful, and private journal to help you track your moods and understand your emotional well-being.
             </p>
-            <Button size="lg" onClick={handleGetStarted}>
-              Start Your First Entry
-              <Feather className="ml-2" />
+            <Button size="lg" asChild>
+              <Link href="/signup">
+                Start Your First Entry
+                <Feather className="ml-2" />
+              </Link>
             </Button>
             <div className="mt-12 rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto">
               <Image
