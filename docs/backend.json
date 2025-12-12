@@ -148,6 +148,12 @@
             }
           ]
         }
+      },
+      {
+        "path": "/reset-password",
+        "definition": {
+          "description": "Client-side route for handling the final step of password reset."
+        }
       }
     ],
     "reasoning": "The Firestore structure is designed to ensure data isolation and straightforward security rules by leveraging path-based ownership. Each user has their own collection of journal entries, eliminating the need for complex authorization logic or cross-collection queries for access control. This design achieves Authorization Independence by structuring data such that access control can be determined directly from the path and the `request.auth.uid`, avoiding the need to `get()` parent documents for authorization checks.\n\nThe structure supports the required QAPs as follows:\n\n1.  **Secure `list` operations**: Because each user's journal entries are stored under their specific `userId`, listing entries is inherently secure. Rules can easily enforce that only the authenticated user can list entries within their own `/users/{userId}/journalEntries` collection.\n\n2.  **Data Isolation**: User data is naturally isolated due to the path-based ownership model, preventing unauthorized access or modification.\n\n3.  **Scalability**: The design scales well because read and write operations are limited to a user's own data, avoiding potential bottlenecks associated with shared collections or complex authorization schemes."
