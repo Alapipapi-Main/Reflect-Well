@@ -154,7 +154,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                           onClick={(e) => handleDeleteClick(e, entry.id)}
                           aria-label="Delete entry"
                         >
-                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-destructive dark:hover:text-destructive/80" />
+                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
                         </Button>
                       </div>
                   </div>
@@ -235,3 +235,4 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
   )
 }
  
+    
