@@ -34,13 +34,13 @@ export default function LandingPage() {
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <BookHeart className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-headline font-bold">ReflectWell</h1>
+          <h1 className="text-xl sm:text-2xl font-headline font-bold">ReflectWell</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" asChild>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button variant="ghost" asChild className="px-2 sm:px-4">
             <Link href="/login">Log In</Link>
           </Button>
-          <Button asChild>
+          <Button asChild className="px-2 sm:px-4">
             <Link href="/signup">Sign Up</Link>
           </Button>
         </div>
