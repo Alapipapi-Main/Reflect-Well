@@ -6,23 +6,17 @@ import { useEffect } from "react";
 /**
  * A hook to manage the theme for public-facing pages.
  * It temporarily sets the theme to "light" for the duration the component is mounted,
- * and restores the original theme when the component unmounts.
- * This prevents overwriting a user's saved "dark" preference while ensuring
- * public pages always appear in light mode.
+ * but crucially, it does not restore the original theme on unmount. This prevents
+ * overwriting the theme state when a user navigates from a public page (like login)
+ * to a private, themed page (like the journal).
  */
 export function usePublicPageTheme() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
-    // Store the original theme and set the theme to "light" when the component mounts.
-    const originalTheme = theme;
     setTheme("light");
-
-    // When the component unmounts (e.g., user navigates away), restore the original theme.
-    return () => {
-      if (originalTheme) {
-        setTheme(originalTheme);
-      }
-    };
-  }, [setTheme]); // Only run this effect once on mount and cleanup on unmount.
+    // By not including a cleanup function that restores the theme, we avoid
+    // a race condition where the login page would try to set the theme back
+    // at the same time the journal page is trying to load its correct theme.
+  }, [setTheme]);
 }
