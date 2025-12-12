@@ -11,6 +11,7 @@ import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebas
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
+import { EmailVerificationGate } from '@/components/email-verification-gate';
 
 export default function JournalPage() {
   const { user, isUserLoading } = useUser();
@@ -40,6 +41,11 @@ export default function JournalPage() {
       </div>
     )
   }
+
+  if (!user.emailVerified) {
+    return <EmailVerificationGate user={user} />;
+  }
+
 
   return (
     <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
