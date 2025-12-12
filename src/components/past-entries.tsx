@@ -29,7 +29,7 @@ import { useFirestore, useUser, updateDocumentNonBlocking, deleteDocumentNonBloc
 import type { JournalEntry } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format } from "date-fns"
-import { CalendarDays, Edit, Trash2, ChevronDown } from "lucide-react"
+import { CalendarDays, Edit, Trash2 } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 
@@ -125,9 +125,8 @@ export function PastEntries({ entries }: PastEntriesProps) {
                         <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
                         <span>{format(entry.date ? (entry.date as any).toDate() : new Date(), "MMMM d, yyyy")}</span>
                       </div>
-                      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                     </AccordionTrigger>
-                    <div className="flex items-center gap-2 pr-2">
+                    <div className="flex items-center gap-2 pr-4 pl-2">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -180,7 +179,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteCandidateId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90 text-black">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
