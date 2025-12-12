@@ -33,7 +33,7 @@ export function UserMenu({ user }: UserMenuProps) {
         title: 'Logged Out',
         description: 'You have been successfully logged out.',
       });
-      router.push('/');
+      window.location.href = '/';
     } catch (error: any) {
       console.error('Logout Error:', error);
       toast({
