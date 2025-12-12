@@ -56,7 +56,7 @@ export default function JournalPage() {
         </div>
         <UserMenu user={user} />
       </header>
-      <p className="text-muted-foreground text-center mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
+      <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
       
       <Tabs defaultValue="new-entry" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
