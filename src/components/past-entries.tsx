@@ -29,7 +29,7 @@ import { useFirestore, useUser, updateDocumentNonBlocking, deleteDocumentNonBloc
 import type { JournalEntry } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format } from "date-fns"
-import { CalendarDays, Edit, Trash2 } from "lucide-react"
+import { CalendarDays, Edit, Trash2, ChevronDown } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 
@@ -119,13 +119,15 @@ export function PastEntries({ entries }: PastEntriesProps) {
             >
               {sortedEntries.map((entry) => (
                 <AccordionItem value={entry.id} key={entry.id}>
-                  <AccordionTrigger>
-                    <div className="flex justify-between items-center w-full">
+                  <div className="flex items-center w-full">
+                    <AccordionTrigger>
                       <div className="flex items-center gap-4 text-lg">
                         <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
                         <span>{format(entry.date ? (entry.date as any).toDate() : new Date(), "MMMM d, yyyy")}</span>
                       </div>
-                      <div className="flex items-center gap-2 pr-2">
+                      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                    </AccordionTrigger>
+                    <div className="flex items-center gap-2 pr-2">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -143,8 +145,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                           <Trash2 className="h-5 w-5 text-destructive/70 hover:text-destructive" />
                         </Button>
                       </div>
-                    </div>
-                  </AccordionTrigger>
+                  </div>
                   <AccordionContent className="text-base leading-relaxed whitespace-pre-wrap px-2">
                     {editingEntryId === entry.id ? (
                       <EditJournalForm 
