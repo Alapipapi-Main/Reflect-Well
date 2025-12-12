@@ -7,10 +7,17 @@ import { Button } from '@/components/ui/button';
 import { BookHeart, Feather, TrendingUp, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useUser } from '@/firebase';
+import { useTheme } from 'next-themes';
 
 export default function LandingPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    // Force light theme on the landing page
+    setTheme('light');
+  }, [setTheme]);
 
   useEffect(() => {
     // If user is logged in, redirect to the journal page.

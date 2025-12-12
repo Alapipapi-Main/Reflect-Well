@@ -12,7 +12,6 @@ import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
-import { ThemeProvider } from '@/components/theme-provider';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -80,13 +79,6 @@ function JournalPageContent() {
 
 export default function JournalPage() {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
       <JournalPageContent />
-    </ThemeProvider>
   )
 }
