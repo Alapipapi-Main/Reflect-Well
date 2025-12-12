@@ -13,6 +13,7 @@ import type { JournalEntry } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
 import { ThemeProvider } from '@/components/theme-provider';
+import { WeeklyInsights } from '@/components/weekly-insights';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -65,10 +66,11 @@ function JournalPageContent() {
         <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
         
         <Tabs defaultValue="new-entry" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="new-entry">New Entry</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="trends">Trends</TabsTrigger>
+            <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
           <TabsContent value="new-entry" className="mt-6">
             <JournalForm />
@@ -78,6 +80,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="trends" className="mt-6">
             <MoodChart entries={entries || []} />
+          </TabsContent>
+          <TabsContent value="insights" className="mt-6">
+            <WeeklyInsights entries={entries || []} />
           </TabsContent>
         </Tabs>
       </main>
