@@ -33,7 +33,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
-import type { Mood } from "@/lib/types"
+import type { JournalEntry, Mood } from "@/lib/types"
+import { OnThisDay } from "./on-this-day"
 
 declare const puter: any;
 
@@ -48,7 +49,11 @@ const formSchema = z.object({
   }),
 })
 
-export function JournalForm() {
+interface JournalFormProps {
+  entries: JournalEntry[];
+}
+
+export function JournalForm({ entries }: JournalFormProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
   const { user } = useUser()
@@ -220,6 +225,8 @@ Generate one new prompt for the user now.`;
           </form>
         </Form>
       </Card>
+
+      <OnThisDay entries={entries} />
       
       <AlertDialog open={showReflectionDialog} onOpenChange={setShowReflectionDialog}>
         <AlertDialogContent>

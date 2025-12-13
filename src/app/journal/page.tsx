@@ -73,7 +73,7 @@ function JournalPageContent() {
             <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
           <TabsContent value="new-entry" className="mt-6">
-            <JournalForm />
+            <JournalForm entries={entries || []} />
           </TabsContent>
           <TabsContent value="history" className="mt-6">
             <PastEntries entries={entries || []} />
