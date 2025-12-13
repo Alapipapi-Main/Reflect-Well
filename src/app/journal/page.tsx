@@ -70,7 +70,7 @@ function JournalPageContent() {
         <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
         
         <Tabs defaultValue="new-entry" className="w-full">
-          <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+           <ScrollArea className="w-full whitespace-nowrap">
             <TabsList className="w-full justify-start sm:justify-center">
               <TabsTrigger value="new-entry">New Entry</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
