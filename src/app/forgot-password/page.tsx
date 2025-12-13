@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/firebase';
-import { sendPasswordResetEmail, fetchSignInMethodsForEmail } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,26 +30,12 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // First, check if the email is registered
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-
-      if (signInMethods.length === 0) {
-        // Email not found, but we pretend it was successful to prevent email enumeration.
-        // We'll still show the user a success message.
-        // This is a security best practice.
-        setIsSubmitted(true);
-        setIsLoading(false);
-        return;
-      }
-
-      // The actionCodeSettings will redirect the user to our custom action page.
       const actionCodeSettings = {
         url: `${window.location.origin}/auth/action`,
         handleCodeInApp: true,
       };
       await sendPasswordResetEmail(auth, email, actionCodeSettings);
       
-      // Now we can be confident an email was sent.
       toast({
         title: 'Check Your Email',
         description: `If an account exists for ${email}, a password reset link has been sent.`,
@@ -57,11 +43,14 @@ export default function ForgotPasswordPage() {
       setIsSubmitted(true);
     } catch (error: any) {
       console.error('Password Reset Error:', error);
-      // Generic error for other issues (e.g., network).
+      let description = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/user-not-found') {
+          description = 'No account found with this email address.';
+      }
       toast({
         variant: 'destructive',
         title: 'Reset Failed',
-        description: 'An unexpected error occurred. Please try again.',
+        description: description,
       });
     } finally {
       setIsLoading(false);
