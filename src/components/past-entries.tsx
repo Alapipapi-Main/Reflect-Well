@@ -27,12 +27,13 @@ import { doc } from "firebase/firestore"
 import { useFirestore, useUser, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase"
 import { Input } from "@/components/ui/input"
 
-import type { JournalEntry } from "@/lib/types"
+import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format } from "date-fns"
 import { CalendarDays, Edit, Trash2, Search } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 interface PastEntriesProps {
   entries: JournalEntry[]
@@ -56,6 +57,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+  const [moodFilter, setMoodFilter] = useState<Mood | null>(null)
 
   const sortedEntries = [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
@@ -63,9 +65,11 @@ export function PastEntries({ entries }: PastEntriesProps) {
     return dateB.getTime() - dateA.getTime()
   })
 
-  const filteredEntries = sortedEntries.filter(entry => 
-    entry.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEntries = sortedEntries.filter(entry => {
+    const matchesSearchTerm = entry.content.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesMoodFilter = moodFilter ? entry.mood === moodFilter : true
+    return matchesSearchTerm && matchesMoodFilter
+  });
 
   const handleEditClick = (event: React.MouseEvent, entryId: string) => {
     event.stopPropagation()
@@ -114,12 +118,35 @@ export function PastEntries({ entries }: PastEntriesProps) {
           <CardDescription>A look back at your thoughts and feelings.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Input 
-            placeholder="Search your entries..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="mb-6"
-          />
+          <div className="space-y-4 mb-6">
+            <Input 
+              placeholder="Search your entries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Filter by mood:</span>
+              <div className="flex flex-wrap gap-2">
+                {Object.keys(MOODS).map((moodKey) => {
+                  const mood = MOODS[moodKey as Mood]
+                  return (
+                    <button
+                      key={moodKey}
+                      onClick={() => setMoodFilter(moodFilter === moodKey as Mood ? null : moodKey as Mood)}
+                      className={cn(
+                        "text-2xl p-1 rounded-full transition-all duration-200 ease-in-out",
+                        moodFilter === moodKey ? 'grayscale-0 scale-110' : 'grayscale-100 opacity-60 hover:opacity-100 hover:grayscale-0'
+                      )}
+                      title={`Filter by ${mood.label}`}
+                    >
+                      {mood.emoji}
+                      <span className="sr-only">Filter by {mood.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
           {sortedEntries.length > 0 ? (
             filteredEntries.length > 0 ? (
             <Accordion type="single" collapsible className="w-full"
@@ -176,7 +203,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
              <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
                 <Search className="h-12 w-12 mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No Matching Entries</h3>
-                <p>We couldn't find any journal entries that match your search.</p>
+                <p>We couldn't find any journal entries that match your search or mood filter.</p>
               </div>
             )
           ) : (
