@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader } from "lucide-react"
+import { BookHeart, Loader, History } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry } from "@/lib/types"
