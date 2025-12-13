@@ -14,6 +14,7 @@ import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
 import { ThemeProvider } from '@/components/theme-provider';
 import { WeeklyInsights } from '@/components/weekly-insights';
+import { OnThisDay } from '@/components/on-this-day';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -72,8 +73,9 @@ function JournalPageContent() {
             <TabsTrigger value="trends">Trends</TabsTrigger>
             <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
-          <TabsContent value="new-entry" className="mt-6">
+          <TabsContent value="new-entry" className="mt-6 space-y-6">
             <JournalForm entries={entries || []} />
+            <OnThisDay entries={entries || []} />
           </TabsContent>
           <TabsContent value="history" className="mt-6">
             <PastEntries entries={entries || []} />

@@ -34,7 +34,6 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
 import type { JournalEntry, Mood } from "@/lib/types"
-import { OnThisDay } from "./on-this-day"
 
 declare const puter: any;
 
@@ -225,8 +224,6 @@ Generate one new prompt for the user now.`;
           </form>
         </Form>
       </Card>
-
-      <OnThisDay entries={entries} />
       
       <AlertDialog open={showReflectionDialog} onOpenChange={setShowReflectionDialog}>
         <AlertDialogContent>
