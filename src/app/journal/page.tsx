@@ -77,12 +77,12 @@ function JournalPageContent() {
               <TabsTrigger value="trends">Trends</TabsTrigger>
               <TabsTrigger value="insights">Insights</TabsTrigger>
               <TabsTrigger value="stats">Stats</TabsTrigger>
+              <TabsTrigger value="on-this-day">On This Day</TabsTrigger>
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
           <TabsContent value="new-entry" className="mt-6 space-y-6">
             <JournalForm entries={entries || []} />
-            <OnThisDay entries={entries || []} />
           </TabsContent>
           <TabsContent value="history" className="mt-6">
             <PastEntries entries={entries || []} />
@@ -95,6 +95,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="stats" className="mt-6">
             <JournalStats entries={entries || []} />
+          </TabsContent>
+           <TabsContent value="on-this-day" className="mt-6">
+            <OnThisDay entries={entries || []} />
           </TabsContent>
         </Tabs>
       </main>
