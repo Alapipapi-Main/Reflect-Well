@@ -14,12 +14,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { MOODS } from "@/lib/constants"
 import type { Mood } from "@/lib/types"
+import { Button } from "./ui/button"
+import { Wand, Loader2 } from "lucide-react"
 
 interface JournalFormFieldsProps {
   isGenerating?: boolean
+  isGettingPrompt?: boolean
+  onGeneratePrompt: () => void
 }
 
-export function JournalFormFields({ isGenerating }: JournalFormFieldsProps) {
+export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePrompt }: JournalFormFieldsProps) {
   const { control, watch } = useFormContext()
   const moodValue = watch("mood")
 
@@ -70,7 +74,22 @@ export function JournalFormFields({ isGenerating }: JournalFormFieldsProps) {
         name="content"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Your journal entry</FormLabel>
+            <div className="flex justify-between items-center mb-2">
+              <FormLabel>Your journal entry</FormLabel>
+              <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt}>
+                {isGettingPrompt ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand className="mr-2 h-4 w-4" />
+                    Inspire Me
+                  </>
+                )}
+              </Button>
+            </div>
             <FormControl>
               <Textarea
                 placeholder="Tell me about your day..."
