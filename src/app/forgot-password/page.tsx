@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/firebase';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail, fetchSignInMethodsForEmail } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,27 +30,38 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
+      // First, check if the email is registered
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+      if (signInMethods.length === 0) {
+        // Email not found, but we pretend it was successful to prevent email enumeration.
+        // We'll still show the user a success message.
+        // This is a security best practice.
+        setIsSubmitted(true);
+        setIsLoading(false);
+        return;
+      }
+
       // The actionCodeSettings will redirect the user to our custom action page.
       const actionCodeSettings = {
         url: `${window.location.origin}/auth/action`,
         handleCodeInApp: true,
       };
       await sendPasswordResetEmail(auth, email, actionCodeSettings);
+      
+      // Now we can be confident an email was sent.
       toast({
         title: 'Check Your Email',
-        description: `A password reset link has been sent to ${email}.`,
+        description: `If an account exists for ${email}, a password reset link has been sent.`,
       });
       setIsSubmitted(true);
     } catch (error: any) {
       console.error('Password Reset Error:', error);
-      let description = 'An unexpected error occurred. Please try again.';
-      if (error.code === 'auth/user-not-found') {
-        description = 'No account found with this email address.';
-      }
+      // Generic error for other issues (e.g., network).
       toast({
         variant: 'destructive',
         title: 'Reset Failed',
-        description: description,
+        description: 'An unexpected error occurred. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -82,7 +93,7 @@ export default function ForgotPasswordPage() {
               <div className="text-center p-4 border-2 border-dashed rounded-lg">
                 <MailQuestion className="h-12 w-12 mx-auto text-primary mb-4" />
                 <p className="text-foreground font-medium">
-                  A password reset link has been sent to your email address.
+                  If an account with that email exists, a password reset link has been sent.
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Can't find it? Please be sure to check your spam or junk folder.
