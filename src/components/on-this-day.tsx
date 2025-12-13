@@ -2,11 +2,11 @@
 "use client"
 
 import { useMemo } from "react"
-import { format, isSameDay, getYear } from "date-fns"
+import { format, getYear } from "date-fns"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import type { JournalEntry } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
-import { History, CalendarClock } from "lucide-react"
+import { CalendarClock } from "lucide-react"
 
 interface OnThisDayProps {
   entries: JournalEntry[]
@@ -18,32 +18,35 @@ export function OnThisDay({ entries }: OnThisDayProps) {
       return []
     }
     const today = new Date()
-    const currentYear = getYear(today)
 
     return entries.filter(entry => {
       if (!entry.date) return false
       const entryDate = (entry.date as any).toDate()
-      // Check if it's the same month and day, but not the same year
-      return (
-        entryDate.getMonth() === today.getMonth() &&
-        entryDate.getDate() === today.getDate() &&
-        getYear(entryDate) !== currentYear
-      )
-    }).sort((a, b) => (b.date as any).toDate().getTime() - (a.date as any).toDate().getTime()); // Sort most recent year first
+      
+      // Exclude entries from today
+      if (entryDate.getFullYear() === today.getFullYear() &&
+          entryDate.getMonth() === today.getMonth() &&
+          entryDate.getDate() === today.getDate()) {
+        return false;
+      }
+      
+      // Include entries from the same day of the month in the past
+      return entryDate.getDate() === today.getDate() && entryDate < today
+    }).sort((a, b) => (b.date as any).toDate().getTime() - (a.date as any).toDate().getTime()); // Sort most recent first
   }, [entries])
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>On This Day</CardTitle>
-        <CardDescription>A look back at your memories from this day in previous years.</CardDescription>
+        <CardDescription>A look back at memories from this day in previous months and years.</CardDescription>
       </CardHeader>
       <CardContent>
         {onThisDayEntries.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
             <CalendarClock className="h-12 w-12 mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Memories Yet</h3>
-            <p>When you have entries from this day in past years, they will appear here as a pleasant surprise.</p>
+            <p>When you have entries from this day in past months or years, they will appear here.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -66,3 +69,4 @@ export function OnThisDay({ entries }: OnThisDayProps) {
     </Card>
   )
 }
+
