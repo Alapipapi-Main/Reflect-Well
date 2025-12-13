@@ -16,6 +16,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { WeeklyInsights } from '@/components/weekly-insights';
 import { OnThisDay } from '@/components/on-this-day';
 import { JournalStats } from '@/components/journal-stats';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -68,13 +69,16 @@ function JournalPageContent() {
         <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
         
         <Tabs defaultValue="new-entry" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="new-entry">New Entry</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="trends">Trends</TabsTrigger>
-            <TabsTrigger value="insights">Insights</TabsTrigger>
-            <TabsTrigger value="stats">Stats</TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <TabsList className="w-full justify-start sm:justify-center">
+              <TabsTrigger value="new-entry">New Entry</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="trends">Trends</TabsTrigger>
+              <TabsTrigger value="insights">Insights</TabsTrigger>
+              <TabsTrigger value="stats">Stats</TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
           <TabsContent value="new-entry" className="mt-6 space-y-6">
             <JournalForm entries={entries || []} />
             <OnThisDay entries={entries || []} />
