@@ -84,7 +84,7 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   return (
     <div className="flex flex-col min-h-screen">
        <header className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-end items-center">
-        <UserMenu user={user} />
+        <UserMenu user={user} showThemeToggle={false} />
       </header>
       <main className="flex-grow flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center">

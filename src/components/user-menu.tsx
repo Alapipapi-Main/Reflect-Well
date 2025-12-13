@@ -19,9 +19,10 @@ import { ThemeToggle } from './theme-toggle';
 
 interface UserMenuProps {
   user: User;
+  showThemeToggle?: boolean;
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+export function UserMenu({ user, showThemeToggle = true }: UserMenuProps) {
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -51,7 +52,7 @@ export function UserMenu({ user }: UserMenuProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <ThemeToggle />
+      {showThemeToggle && <ThemeToggle />}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
