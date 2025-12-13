@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useEffect, useMemo } from 'react';
@@ -64,12 +65,12 @@ function JournalPageContent() {
             <BookHeart className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             <h1 className="text-2xl sm:text-4xl font-headline font-bold">ReflectWell</h1>
           </div>
-          <UserMenu user={user} />
+          <UserMenu user={user} entries={entries || []} />
         </header>
         <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
         
         <Tabs defaultValue="new-entry" className="w-full">
-          <ScrollArea className="w-full whitespace-nowrap">
+          <ScrollArea className="w-full whitespace-nowrap rounded-md border">
             <TabsList className="w-full justify-start sm:justify-center">
               <TabsTrigger value="new-entry">New Entry</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
