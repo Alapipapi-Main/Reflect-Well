@@ -32,6 +32,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
+import { MOODS } from "@/lib/constants"
+import type { Mood } from "@/lib/types"
 
 declare const puter: any;
 
@@ -108,18 +110,27 @@ Journal Entry:
 
     setIsGettingPrompt(true);
 
+    const selectedMood = form.getValues("mood");
+    const moodLabel = selectedMood ? MOODS[selectedMood as Mood].label : null;
+
+    const moodContext = moodLabel 
+      ? `The user is currently feeling ${moodLabel}. The prompt should be relevant to this mood. For example, if they are happy, ask what's bringing them joy. If they are sad, gently ask what's on their mind.`
+      : 'The user has not selected a mood. The prompt should be general and open-ended.';
+
     const prompt = `You are an insightful and creative journaling assistant. Your task is to generate a single, open-ended, and thought-provoking journal prompt for a user.
 
 The prompt should encourage self-reflection, mindfulness, or creativity. Avoid simple "yes/no" questions. Make it personal and gentle.
 
-Examples:
+${moodContext}
+
+Examples of good prompts:
 - What is one thing you're proud of from the past week, no matter how small?
 - Describe a place, real or imagined, where you feel completely at peace.
 - If you could give your younger self one piece of advice, what would it be and why?
 - What's a worry that's been on your mind, and what's a more compassionate way to look at it?
 - Write about a sound, smell, or taste that brings back a strong memory.
 
-Generate one new prompt now.`;
+Generate one new prompt for the user now.`;
 
     try {
       const aiResponse = await puter.ai.chat(prompt);

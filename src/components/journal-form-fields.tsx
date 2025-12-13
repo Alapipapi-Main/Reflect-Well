@@ -76,7 +76,7 @@ export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePro
           <FormItem>
             <div className="flex justify-between items-center mb-2">
               <FormLabel>Your journal entry</FormLabel>
-              <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt}>
+              <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt || !moodValue}>
                 {isGettingPrompt ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
