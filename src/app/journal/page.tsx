@@ -15,7 +15,7 @@ import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
 import { ThemeProvider } from '@/components/theme-provider';
 import { WeeklyInsights } from '@/components/weekly-insights';
-import { OnThisDay } from '@/components/on-this-day';
+import { YesterdaysReflection } from '@/components/yesterdays-reflection';
 import { JournalStats } from '@/components/journal-stats';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
@@ -71,13 +71,13 @@ function JournalPageContent() {
         
         <Tabs defaultValue="new-entry" className="w-full">
            <ScrollArea className="w-full whitespace-nowrap">
-            <TabsList className="w-full justify-start sm:justify-center">
+            <TabsList className="w-full justify-start sm:justify-center p-2 h-auto">
               <TabsTrigger value="new-entry">New Entry</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="trends">Trends</TabsTrigger>
               <TabsTrigger value="insights">Insights</TabsTrigger>
               <TabsTrigger value="stats">Stats</TabsTrigger>
-              <TabsTrigger value="on-this-day">On This Day</TabsTrigger>
+              <TabsTrigger value="yesterday">Yesterday</TabsTrigger>
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -96,8 +96,8 @@ function JournalPageContent() {
           <TabsContent value="stats" className="mt-6">
             <JournalStats entries={entries || []} />
           </TabsContent>
-           <TabsContent value="on-this-day" className="mt-6">
-            <OnThisDay entries={entries || []} />
+           <TabsContent value="yesterday" className="mt-6">
+            <YesterdaysReflection entries={entries || []} />
           </TabsContent>
         </Tabs>
       </main>
