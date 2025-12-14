@@ -202,11 +202,6 @@ export function PastEntries({ entries }: PastEntriesProps) {
             >
               {filteredEntries.map((entry) => (
                 <AccordionItem value={entry.id} key={entry.id}>
-                    {entry.imageUrl && (
-                      <div className="relative aspect-video w-full rounded-t-lg overflow-hidden mb-2">
-                        <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
-                      </div>
-                    )}
                   <div className="flex items-center w-full">
                     <AccordionTrigger>
                       <div className="flex items-center gap-4 text-lg">
@@ -234,6 +229,11 @@ export function PastEntries({ entries }: PastEntriesProps) {
                       </div>
                   </div>
                   <AccordionContent className="text-base leading-relaxed whitespace-pre-wrap px-2">
+                     {entry.imageUrl && (
+                      <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
+                        <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
+                      </div>
+                    )}
                     {editingEntryId === entry.id ? (
                       <EditJournalForm 
                         entry={entry} 
@@ -313,3 +313,4 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
     
 
     
+
