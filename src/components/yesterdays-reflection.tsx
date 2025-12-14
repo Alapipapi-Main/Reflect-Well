@@ -13,17 +13,20 @@ interface YesterdaysReflectionProps {
 }
 
 export function YesterdaysReflection({ entries }: YesterdaysReflectionProps) {
-  const yesterdaysEntry = useMemo(() => {
+  const yesterdaysEntries = useMemo(() => {
     if (!entries || entries.length === 0) {
-      return null
+      return []
     }
     
-    // Find the first entry that was from yesterday
-    return entries.find(entry => {
+    return entries.filter(entry => {
       if (!entry.date) return false
       const entryDate = (entry.date as any).toDate()
       return isYesterday(entryDate)
-    })
+    }).sort((a, b) => {
+        const dateA = a.date ? (a.date as any).toDate() : new Date(0)
+        const dateB = b.date ? (b.date as any).toDate() : new Date(0)
+        return dateA.getTime() - dateB.getTime()
+    });
   }, [entries])
 
   return (
@@ -33,7 +36,7 @@ export function YesterdaysReflection({ entries }: YesterdaysReflectionProps) {
         <CardDescription>A look back at how you were feeling yesterday.</CardDescription>
       </CardHeader>
       <CardContent>
-        {!yesterdaysEntry ? (
+        {yesterdaysEntries.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
             <CalendarClock className="h-12 w-12 mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Entry From Yesterday</h3>
@@ -41,17 +44,19 @@ export function YesterdaysReflection({ entries }: YesterdaysReflectionProps) {
           </div>
         ) : (
           <div className="space-y-6">
-            <Card key={yesterdaysEntry.id} className="bg-secondary/30">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between text-xl">
-                  <span>{format((yesterdaysEntry.date as any).toDate(), "MMMM d, yyyy")}</span>
-                  <span className="text-3xl">{MOODS[yesterdaysEntry.mood].emoji}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap">{yesterdaysEntry.content}</p>
-              </CardContent>
-            </Card>
+            {yesterdaysEntries.map(entry => (
+                <Card key={entry.id} className="bg-secondary/30">
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-between text-xl">
+                    <span>{format((entry.date as any).toDate(), "MMMM d, yyyy")}</span>
+                    <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="whitespace-pre-wrap">{entry.content}</p>
+                </CardContent>
+                </Card>
+            ))}
           </div>
         )}
       </CardContent>
