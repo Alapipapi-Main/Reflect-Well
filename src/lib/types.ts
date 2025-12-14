@@ -8,4 +8,5 @@ export interface JournalEntry {
   date: Timestamp | Date | string; // Firestore timestamp, can be Date object or ISO string
   mood: Mood;
   content: string;
+  imageUrl?: string | null;
 }

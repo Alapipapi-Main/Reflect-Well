@@ -4,11 +4,12 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand } from "lucide-react"
-import { collection, serverTimestamp } from "firebase/firestore"
-import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2 } from "lucide-react"
+import { collection, serverTimestamp, doc } from "firebase/firestore"
+import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase"
 import { useState } from "react"
 import { JournalFormFields } from "./journal-form-fields"
+import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -56,9 +57,12 @@ export function JournalForm({ entries }: JournalFormProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
   const { user } = useUser()
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGettingPrompt, setIsGettingPrompt] = useState(false)
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
+  const [activeEntry, setActiveEntry] = useState<{ id: string, content: string, mood: Mood } | null>(null)
   const [reflection, setReflection] = useState<string | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [showReflectionDialog, setShowReflectionDialog] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -68,7 +72,14 @@ export function JournalForm({ entries }: JournalFormProps) {
     },
   })
 
-  const handleAiReflection = async (entryText: string) => {
+  const resetDialogState = () => {
+    setReflection(null);
+    setImageUrl(null);
+    setActiveEntry(null);
+    setIsGeneratingImage(false);
+  }
+
+  const handleAiReflection = async (entry: { content: string }) => {
     if (typeof puter === 'undefined') {
       console.error("Puter.js is not loaded.");
       toast({
@@ -86,12 +97,11 @@ You can either provide a warm, affirming statement or ask a soft, open-ended que
 Keep your reflection to one or two sentences. Do not give advice.
 
 Journal Entry:
-"${entryText}"`;
+"${entry.content}"`;
 
     try {
       const aiResponse = await puter.ai.chat(prompt);
       setReflection(aiResponse.message.content);
-      setShowReflectionDialog(true);
     } catch (error) {
       console.error("Error getting AI reflection from Puter.ai:", error);
       toast({
@@ -101,6 +111,52 @@ Journal Entry:
       });
     }
   }
+
+  const handleAiImage = async () => {
+    if (!activeEntry || !user || !firestore) return;
+
+    if (typeof puter === 'undefined') {
+      toast({
+        variant: "destructive",
+        title: "AI Feature Not Available",
+        description: "The AI image service could not be loaded.",
+      });
+      return;
+    }
+
+    setIsGeneratingImage(true);
+
+    const moodLabel = MOODS[activeEntry.mood].label;
+    const prompt = `Create a beautiful, abstract, and artistic image that visually represents the mood and themes of the following journal entry. The dominant mood is "${moodLabel}". The style should be ethereal, painterly, and evocative, not literal. Use a soft color palette that matches the mood.
+
+Journal Entry:
+"${activeEntry.content}"`;
+
+    try {
+      const imageResponse = await puter.ai.imagine(prompt);
+      const generatedImageUrl = imageResponse.url; // Assuming this is the structure
+      setImageUrl(generatedImageUrl);
+
+      // Save the image URL to the Firestore entry
+      const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', activeEntry.id);
+      updateDocumentNonBlocking(entryRef, { imageUrl: generatedImageUrl });
+
+      toast({
+        title: "Image Generated!",
+        description: "A cover image has been created and saved with your entry.",
+      });
+
+    } catch (error) {
+      console.error("Error getting AI image from Puter.ai:", error);
+      toast({
+        variant: "destructive",
+        title: "AI Image Failed",
+        description: "Could not generate an image for this entry.",
+      });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
 
   const handleGeneratePrompt = async () => {
     if (typeof puter === 'undefined') {
@@ -166,27 +222,34 @@ Generate one new prompt for the user now.`;
       return;
     }
     
-    setIsGenerating(true);
+    setIsSubmitting(true);
+    resetDialogState();
 
     // 1. Save the entry to Firestore
     const journalEntriesRef = collection(firestore, 'users', user.uid, 'journalEntries');
-    addDocumentNonBlocking(journalEntriesRef, {
+    const newDoc = await addDocumentNonBlocking(journalEntriesRef, {
       userId: user.uid,
       date: serverTimestamp(),
       mood: values.mood,
       content: values.content,
+      imageUrl: null,
     });
+
+    if (newDoc) {
+      setActiveEntry({ id: newDoc.id, content: values.content, mood: values.mood });
+    }
     
     toast({
       title: "Entry Saved!",
       description: "Your journal entry has been saved.",
     });
 
-    // 2. Trigger the AI reflection
-    await handleAiReflection(values.content);
-
+    // 2. Trigger the AI reflection and show dialog
+    await handleAiReflection(values);
+    setShowReflectionDialog(true);
+    
     // 3. Reset form and state
-    setIsGenerating(false);
+    setIsSubmitting(false);
     form.reset();
   }
 
@@ -201,14 +264,14 @@ Generate one new prompt for the user now.`;
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
               <JournalFormFields 
-                isGenerating={isGenerating || isGettingPrompt} 
+                isGenerating={isSubmitting || isGettingPrompt} 
                 onGeneratePrompt={handleGeneratePrompt}
                 isGettingPrompt={isGettingPrompt}
               />
             </CardContent>
             <CardFooter>
-              <Button type="submit" disabled={isGenerating || isGettingPrompt}>
-                {isGenerating ? (
+              <Button type="submit" disabled={isSubmitting || isGettingPrompt}>
+                {isSubmitting ? (
                   <>
                     <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
                     Saving & Reflecting...
@@ -225,18 +288,45 @@ Generate one new prompt for the user now.`;
         </Form>
       </Card>
       
-      <AlertDialog open={showReflectionDialog} onOpenChange={setShowReflectionDialog}>
+      <AlertDialog open={showReflectionDialog} onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            resetDialogState();
+          }
+          setShowReflectionDialog(isOpen);
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Sparkles className="text-primary" />
               A Moment of Reflection
             </AlertDialogTitle>
+            {imageUrl && (
+              <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden">
+                <Image src={imageUrl} alt="AI-generated image representing the journal entry" layout="fill" objectFit="cover" />
+              </div>
+            )}
             <AlertDialogDescription className="text-base text-foreground pt-4">
-              {reflection}
+              {reflection || <Loader2 className="h-5 w-5 animate-spin mx-auto" />}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="sm:justify-between gap-2">
+             <Button 
+                onClick={handleAiImage} 
+                disabled={isGeneratingImage || !reflection || !!imageUrl}
+                variant="outline"
+              >
+                {isGeneratingImage ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Visualizing...
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="mr-2 h-4 w-4" />
+                    {imageUrl ? 'Image Generated' : 'Generate Image'}
+                  </>
+                )}
+              </Button>
             <AlertDialogAction onClick={() => setShowReflectionDialog(false)}>Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
