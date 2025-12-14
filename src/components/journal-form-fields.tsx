@@ -20,10 +20,11 @@ import { Wand, Loader2 } from "lucide-react"
 interface JournalFormFieldsProps {
   isGenerating?: boolean
   isGettingPrompt?: boolean
-  onGeneratePrompt: () => void
+  onGeneratePrompt?: () => void
+  isEditing?: boolean
 }
 
-export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePrompt }: JournalFormFieldsProps) {
+export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePrompt, isEditing = false }: JournalFormFieldsProps) {
   const { control, watch } = useFormContext()
   const moodValue = watch("mood")
 
@@ -76,19 +77,21 @@ export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePro
           <FormItem>
             <div className="flex justify-between items-center mb-2">
               <FormLabel>Your journal entry</FormLabel>
-              <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt || !moodValue}>
-                {isGettingPrompt ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Wand className="mr-2 h-4 w-4" />
-                    Inspire Me
-                  </>
-                )}
-              </Button>
+              {!isEditing && onGeneratePrompt && (
+                <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt || !moodValue}>
+                  {isGettingPrompt ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Wand className="mr-2 h-4 w-4" />
+                      Inspire Me
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
             <FormControl>
               <Textarea

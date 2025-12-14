@@ -274,6 +274,7 @@ Generate one new prompt for the user now.`;
                 isGenerating={isSubmitting || isGettingPrompt} 
                 onGeneratePrompt={handleGeneratePrompt}
                 isGettingPrompt={isGettingPrompt}
+                isEditing={false}
               />
             </CardContent>
             <CardFooter>

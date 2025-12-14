@@ -300,7 +300,7 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSave)} className="space-y-6 pt-4">
-        <JournalFormFields />
+        <JournalFormFields isEditing={true} />
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
           <Button type="submit">Save Changes</Button>
@@ -313,4 +313,3 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
     
 
     
-
