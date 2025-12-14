@@ -21,27 +21,24 @@ export function OnThisDay({ entries }: OnThisDayProps) {
     const today = new Date()
     const currentDay = today.getDate()
     const currentMonth = today.getMonth()
-    const currentYear = today.getFullYear()
 
     return entries.filter(entry => {
       if (!entry.date) return false
       const entryDate = (entry.date as any).toDate()
       const entryDay = entryDate.getDate()
       const entryMonth = entryDate.getMonth()
-      const entryYear = entryDate.getFullYear()
-
+      
       // Don't show today's entry
-      if (entryYear === currentYear && entryMonth === currentMonth && entryDay === currentDay) {
-        return false
+      if (format(today, 'yyyy-MM-dd') === format(entryDate, 'yyyy-MM-dd')) {
+        return false;
       }
-
-      // Show if the day of the month matches, from a past month or year
-      return entryDay === currentDay
+      
+      return entryDay === currentDay && entryMonth === currentMonth
     })
     .sort((a, b) => {
         const dateA = a.date ? (a.date as any).toDate() : new Date(0)
         const dateB = b.date ? (b.date as any).toDate() : new Date(0)
-        return dateB.getTime() - dateA.getTime()
+        return dateA.getTime() - dateB.getTime()
     });
   }, [entries])
 
@@ -49,14 +46,14 @@ export function OnThisDay({ entries }: OnThisDayProps) {
     <Card>
       <CardHeader>
         <CardTitle>On This Day</CardTitle>
-        <CardDescription>A look back at your entries from this day in past months and years.</CardDescription>
+        <CardDescription>A look back at your entries from this day in past years.</CardDescription>
       </CardHeader>
       <CardContent>
         {memories.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
             <Clock className="h-12 w-12 mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Memories Yet</h3>
-            <p>Entries you write on this day in the future will appear here in later months and years.</p>
+            <p>Entries you write on this day in the future will appear here in later years.</p>
           </div>
         ) : (
           <div className="space-y-6">
