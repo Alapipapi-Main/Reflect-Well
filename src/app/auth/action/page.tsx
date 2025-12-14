@@ -100,6 +100,30 @@ function AuthActionContent() {
 
   const toast = useToast().toast;
 
+  const renderHeader = () => {
+    const isClickable = mode === 'resetPassword';
+    const HeaderContent = () => (
+      <>
+        <BookHeart className="h-10 w-10 text-primary" />
+        <h1 className="text-4xl font-headline font-bold">ReflectWell</h1>
+      </>
+    );
+
+    if (isClickable) {
+      return (
+        <Link href="/" className="inline-flex items-center gap-2 mb-2">
+          <HeaderContent />
+        </Link>
+      );
+    }
+
+    return (
+      <div className="inline-flex items-center gap-2 mb-2">
+        <HeaderContent />
+      </div>
+    );
+  };
+
   const renderLoading = () => (
     <Card className="w-full max-w-md text-center">
       <CardHeader>
@@ -200,10 +224,7 @@ function AuthActionContent() {
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-2">
-            <BookHeart className="h-10 w-10 text-primary" />
-            <h1 className="text-4xl font-headline font-bold">ReflectWell</h1>
-          </Link>
+          {renderHeader()}
         </div>
         
         {status === 'loading' && renderLoading()}
