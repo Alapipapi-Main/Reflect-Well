@@ -2,7 +2,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { format } from "date-fns"
+import { format, subMonths } from "date-fns"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import type { JournalEntry } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
@@ -22,19 +22,32 @@ export function OnThisDay({ entries }: OnThisDayProps) {
     const currentDay = today.getDate()
     const currentMonth = today.getMonth()
 
+    const lastMonthDate = subMonths(today, 1);
+    const lastMonthDay = lastMonthDate.getDate();
+    const lastMonth = lastMonthDate.getMonth();
+    const lastMonthYear = lastMonthDate.getFullYear();
+
     // The entries are now pre-sorted chronologically from the parent
     return entries.filter(entry => {
       if (!entry.date) return false
       const entryDate = (entry.date as any).toDate()
-      const entryDay = entryDate.getDate()
-      const entryMonth = entryDate.getMonth()
       
       // Don't show today's entry
       if (format(today, 'yyyy-MM-dd') === format(entryDate, 'yyyy-MM-dd')) {
         return false;
       }
+
+      const entryDay = entryDate.getDate()
+      const entryMonth = entryDate.getMonth()
+      const entryYear = entryDate.getFullYear()
       
-      return entryDay === currentDay && entryMonth === currentMonth
+      // Condition for same day, same month, past years
+      const isPastYearMemory = entryDay === currentDay && entryMonth === currentMonth;
+
+      // Condition for same day, previous month
+      const isPastMonthMemory = entryDay === lastMonthDay && entryMonth === lastMonth && entryYear === lastMonthYear;
+
+      return isPastYearMemory || isPastMonthMemory;
     });
   }, [entries])
 
@@ -42,14 +55,14 @@ export function OnThisDay({ entries }: OnThisDayProps) {
     <Card>
       <CardHeader>
         <CardTitle>On This Day</CardTitle>
-        <CardDescription>A look back at your entries from this day in past years.</CardDescription>
+        <CardDescription>A look back at entries from this day last month and in past years.</CardDescription>
       </CardHeader>
       <CardContent>
         {memories.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
             <Clock className="h-12 w-12 mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Memories Yet</h3>
-            <p>Entries you write on this day in the future will appear here in later years.</p>
+            <p>Entries you write on this day will appear here in the future.</p>
           </div>
         ) : (
           <div className="space-y-6">
