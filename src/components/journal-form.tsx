@@ -133,8 +133,8 @@ Journal Entry:
 "${activeEntry.content}"`;
 
     try {
-      const imageResponse = await puter.ai.imagine(prompt);
-      const generatedImageUrl = imageResponse.url; // Assuming this is the structure
+      const imageElement = await puter.ai.txt2img(prompt);
+      const generatedImageUrl = imageElement.src;
       setImageUrl(generatedImageUrl);
 
       // Save the image URL to the Firestore entry
