@@ -18,6 +18,7 @@ import { WeeklyInsights } from '@/components/weekly-insights';
 import { YesterdaysReflection } from '@/components/yesterdays-reflection';
 import { JournalStats } from '@/components/journal-stats';
 import { OnThisDay } from '@/components/on-this-day';
+import { AskJournal } from '@/components/ask-journal';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 function JournalPageContent() {
@@ -74,6 +75,7 @@ function JournalPageContent() {
            <ScrollArea className="w-full whitespace-nowrap">
             <TabsList className="w-full justify-start sm:justify-center p-2 h-auto bg-muted/50">
               <TabsTrigger value="new-entry">New Entry</TabsTrigger>
+              <TabsTrigger value="ask">Ask</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="trends">Trends</TabsTrigger>
               <TabsTrigger value="insights">Insights</TabsTrigger>
@@ -85,6 +87,9 @@ function JournalPageContent() {
           </ScrollArea>
           <TabsContent value="new-entry" className="mt-6 space-y-6">
             <JournalForm entries={entries || []} />
+          </TabsContent>
+          <TabsContent value="ask" className="mt-6">
+            <AskJournal entries={entries || []} />
           </TabsContent>
           <TabsContent value="history" className="mt-6">
             <PastEntries entries={entries || []} />
