@@ -35,9 +35,9 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
             clearInterval(interval);
             toast({
               title: "Email Verified!",
-              description: "Redirecting to your journal...",
+              description: "Refreshing your journal...",
             });
-            router.push('/journal');
+            window.location.reload();
           }
         } catch (err: any) {
           console.warn("Polling for user reload failed silently:", err.code);
