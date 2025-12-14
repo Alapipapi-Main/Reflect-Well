@@ -64,6 +64,8 @@ export function JournalForm({ entries }: JournalFormProps) {
   const [reflection, setReflection] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [showReflectionDialog, setShowReflectionDialog] = useState(false)
+  const [formKey, setFormKey] = useState(() => Date.now());
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -254,6 +256,7 @@ Generate one new prompt for the user now.`;
       content: "",
       mood: undefined,
     });
+    setFormKey(Date.now());
   }
 
   return (
@@ -266,7 +269,8 @@ Generate one new prompt for the user now.`;
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
-              <JournalFormFields 
+              <JournalFormFields
+                key={formKey} 
                 isGenerating={isSubmitting || isGettingPrompt} 
                 onGeneratePrompt={handleGeneratePrompt}
                 isGettingPrompt={isGettingPrompt}
