@@ -28,7 +28,7 @@ import { useFirestore, useUser, updateDocumentNonBlocking, deleteDocumentNonBloc
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
+import { CustomCalendar } from "@/components/custom-calendar"
 
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
@@ -62,6 +62,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [moodFilter, setMoodFilter] = useState<Mood | null>(null)
   const [dateFilter, setDateFilter] = useState<Date | null>(null)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const sortedEntries = [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
@@ -124,7 +125,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
           <CardDescription>A look back at your thoughts and feelings.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4 mb-6">
+           <div className="space-y-4 mb-6">
             <div className="flex flex-col sm:flex-row items-center gap-2">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -132,11 +133,11 @@ export function PastEntries({ entries }: PastEntriesProps) {
                   placeholder="Search your entries..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 w-full"
                 />
               </div>
               <div className="flex w-full sm:w-auto items-center gap-2">
-               <Popover>
+               <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
@@ -150,11 +151,11 @@ export function PastEntries({ entries }: PastEntriesProps) {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={dateFilter || undefined}
-                    onSelect={(date) => setDateFilter(date || null)}
-                    initialFocus
+                  <CustomCalendar
+                    onDateSelect={(date) => {
+                      setDateFilter(date);
+                      setIsCalendarOpen(false);
+                    }}
                   />
                 </PopoverContent>
               </Popover>
