@@ -34,13 +34,25 @@ function JournalPageContent() {
 
   const journalEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
+    // We can keep the 'desc' order here as it's often efficient for 'latest' queries,
+    // and we will reverse it client-side for chronological display.
     return query(
       collection(firestore, 'users', user.uid, 'journalEntries'),
       orderBy('date', 'desc')
     );
   }, [firestore, user]);
 
-  const { data: entries, isLoading: areEntriesLoading } = useCollection<JournalEntry>(journalEntriesQuery);
+  const { data: rawEntries, isLoading: areEntriesLoading } = useCollection<JournalEntry>(journalEntriesQuery);
+
+  const entries = useMemo(() => {
+    if (!rawEntries) return [];
+    // Sort once here to ensure chronological order (oldest first)
+    return [...rawEntries].sort((a, b) => {
+      const dateA = a.date ? (a.date as any).toDate() : new Date(0);
+      const dateB = b.date ? (b.date as any).toDate() : new Date(0);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }, [rawEntries]);
 
   if (isUserLoading || !user || areEntriesLoading) {
     return (

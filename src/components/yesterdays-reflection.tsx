@@ -18,14 +18,11 @@ export function YesterdaysReflection({ entries }: YesterdaysReflectionProps) {
       return []
     }
     
+    // The entries are now pre-sorted chronologically from the parent
     return entries.filter(entry => {
       if (!entry.date) return false
       const entryDate = (entry.date as any).toDate()
       return isYesterday(entryDate)
-    }).sort((a, b) => {
-        const dateA = a.date ? (a.date as any).toDate() : new Date(0)
-        const dateB = b.date ? (b.date as any).toDate() : new Date(0)
-        return dateA.getTime() - dateB.getTime()
     });
   }, [entries])
 

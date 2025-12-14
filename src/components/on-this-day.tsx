@@ -22,6 +22,7 @@ export function OnThisDay({ entries }: OnThisDayProps) {
     const currentDay = today.getDate()
     const currentMonth = today.getMonth()
 
+    // The entries are now pre-sorted chronologically from the parent
     return entries.filter(entry => {
       if (!entry.date) return false
       const entryDate = (entry.date as any).toDate()
@@ -34,11 +35,6 @@ export function OnThisDay({ entries }: OnThisDayProps) {
       }
       
       return entryDay === currentDay && entryMonth === currentMonth
-    })
-    .sort((a, b) => {
-        const dateA = a.date ? (a.date as any).toDate() : new Date(0)
-        const dateB = b.date ? (b.date as any).toDate() : new Date(0)
-        return dateA.getTime() - dateB.getTime()
     });
   }, [entries])
 
