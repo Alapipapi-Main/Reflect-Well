@@ -125,8 +125,8 @@ export function PastEntries({ entries }: PastEntriesProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4 mb-6">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-grow">
+            <div className="flex flex-col sm:flex-row items-center gap-2">
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input 
                   placeholder="Search your entries..."
@@ -135,12 +135,13 @@ export function PastEntries({ entries }: PastEntriesProps) {
                   className="pl-10"
                 />
               </div>
+              <div className="flex w-full sm:w-auto items-center gap-2">
                <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-[200px] justify-start text-left font-normal",
+                      "w-full sm:w-[200px] justify-start text-left font-normal",
                       !dateFilter && "text-muted-foreground"
                     )}
                   >
@@ -163,6 +164,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                   <span className="sr-only">Clear date filter</span>
                 </Button>
               )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Filter by mood:</span>
@@ -248,7 +250,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
              <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
                 <Search className="h-12 w-12 mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No Matching Entries</h3>
-                <p>We couldn't find any journal entries that match your search or mood filter.</p>
+                <p>We couldn't find any journal entries that match your search or filter criteria.</p>
               </div>
             )
           ) : (
@@ -307,4 +309,6 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
   )
 }
  
+    
+
     
