@@ -27,11 +27,13 @@ import { doc } from "firebase/firestore"
 import { useFirestore, useUser, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
 
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
-import { format } from "date-fns"
-import { CalendarDays, Edit, Trash2, Search } from "lucide-react"
+import { format, isSameDay } from "date-fns"
+import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -59,6 +61,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [moodFilter, setMoodFilter] = useState<Mood | null>(null)
+  const [dateFilter, setDateFilter] = useState<Date | null>(null)
 
   const sortedEntries = [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
@@ -67,9 +70,11 @@ export function PastEntries({ entries }: PastEntriesProps) {
   })
 
   const filteredEntries = sortedEntries.filter(entry => {
+    const entryDate = entry.date ? (entry.date as any).toDate() : null
     const matchesSearchTerm = entry.content.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesMoodFilter = moodFilter ? entry.mood === moodFilter : true
-    return matchesSearchTerm && matchesMoodFilter
+    const matchesDateFilter = dateFilter && entryDate ? isSameDay(entryDate, dateFilter) : true
+    return matchesSearchTerm && matchesMoodFilter && matchesDateFilter
   });
 
   const handleEditClick = (event: React.MouseEvent, entryId: string) => {
@@ -120,11 +125,45 @@ export function PastEntries({ entries }: PastEntriesProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4 mb-6">
-            <Input 
-              placeholder="Search your entries..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input 
+                  placeholder="Search your entries..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+               <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[200px] justify-start text-left font-normal",
+                      !dateFilter && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateFilter ? format(dateFilter, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateFilter || undefined}
+                    onSelect={(date) => setDateFilter(date || null)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+               {dateFilter && (
+                <Button variant="ghost" size="icon" onClick={() => setDateFilter(null)}>
+                  <XIcon className="h-5 w-5" />
+                  <span className="sr-only">Clear date filter</span>
+                </Button>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Filter by mood:</span>
               <div className="flex flex-wrap gap-2">
