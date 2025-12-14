@@ -133,7 +133,7 @@ Journal Entry:
 "${activeEntry.content}"`;
 
     try {
-      const imageElement = await puter.ai.txt2img(prompt);
+      const imageElement = await puter.ai.txt2img(prompt, {});
       const generatedImageUrl = imageElement.src;
       setImageUrl(generatedImageUrl);
 
