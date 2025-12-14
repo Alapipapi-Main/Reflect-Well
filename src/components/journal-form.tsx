@@ -250,7 +250,10 @@ Generate one new prompt for the user now.`;
     
     // 3. Reset form and state
     setIsSubmitting(false);
-    form.reset();
+    form.reset({
+      content: "",
+      mood: undefined,
+    });
   }
 
   return (
