@@ -314,7 +314,7 @@ Generate one new prompt for the user now.`;
                 isEditing={false}
               />
             </CardContent>
-            <CardFooter className="flex justify-between items-center">
+            <CardFooter className="flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-2">
               <Button type="submit" disabled={isSubmitting || isGettingPrompt}>
                 {isSubmitting ? (
                   <>
@@ -334,7 +334,6 @@ Generate one new prompt for the user now.`;
                 variant={isRecording ? "destructive" : "outline"}
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={voiceButtonDisabled}
-                className="w-[150px]"
               >
                 {isRecording ? (
                   <>
