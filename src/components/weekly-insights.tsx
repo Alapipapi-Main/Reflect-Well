@@ -162,9 +162,9 @@ ${formattedEntries}
             <h3 className="font-semibold flex items-center gap-2"><Sparkles className="text-primary" /> Your Weekly Reflection</h3>
             {summary && <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">{summary}</p>}
             {isLoading && (
-              <div className="flex items-center justify-center p-8 text-muted-foreground">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Generating your weekly insights...
+              <div className="flex flex-col items-center justify-center p-8 text-muted-foreground gap-4">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p>Generating your weekly insights...</p>
               </div>
             )}
             {!isLoading && weeklyStats.mostFrequentMood && (
@@ -198,7 +198,7 @@ ${formattedEntries}
         <Button onClick={handleGenerateSummary} disabled={isLoading || weeklyEntries.length < 2}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               Analyzing...
             </>
           ) : (
