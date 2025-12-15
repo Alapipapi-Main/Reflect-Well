@@ -29,11 +29,12 @@ import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CustomCalendar } from "@/components/custom-calendar"
+import { Badge } from "@/components/ui/badge"
 
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format, isSameDay } from "date-fns"
-import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon } from "lucide-react"
+import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -51,6 +52,7 @@ const formSchema = z.object({
   mood: z.enum(["ecstatic", "happy", "neutral", "sad", "angry"], {
     required_error: "You need to select a mood.",
   }),
+  tags: z.string().optional(),
 })
 
 export function PastEntries({ entries }: PastEntriesProps) {
@@ -104,10 +106,15 @@ export function PastEntries({ entries }: PastEntriesProps) {
   const handleUpdate = (entryId: string, values: z.infer<typeof formSchema>) => {
     if (!user || !firestore) return
 
+    const tagsArray = values.tags 
+    ? values.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
+    : [];
+
     const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', entryId)
     updateDocumentNonBlocking(entryRef, {
       content: values.content,
       mood: values.mood,
+      tags: tagsArray,
     })
 
     toast({
@@ -229,7 +236,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                       </div>
                   </div>
                   <AccordionContent className="text-base leading-relaxed whitespace-pre-wrap px-2">
-                     {entry.imageUrl && (
+                    {entry.imageUrl && (
                       <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
                         <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
                       </div>
@@ -241,7 +248,17 @@ export function PastEntries({ entries }: PastEntriesProps) {
                         onCancel={() => setEditingEntryId(null)}
                       />
                     ) : (
-                      entry.content
+                      <>
+                        <p>{entry.content}</p>
+                        {entry.tags && entry.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-4 items-center">
+                            <Tag className="h-4 w-4 text-muted-foreground" />
+                            {entry.tags.map(tag => (
+                              <Badge key={tag} variant="secondary">{tag}</Badge>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
                   </AccordionContent>
                 </AccordionItem>
@@ -294,6 +311,7 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
     defaultValues: {
       content: entry.content,
       mood: entry.mood,
+      tags: entry.tags ? entry.tags.join(', ') : '',
     },
   })
 

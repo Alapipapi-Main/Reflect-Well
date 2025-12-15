@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { MOODS } from "@/lib/constants"
 import type { Mood } from "@/lib/types"
 import { Button } from "./ui/button"
@@ -103,6 +104,26 @@ export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePro
             </FormControl>
             <FormDescription>
               This is your private space. Feel free to be open and honest.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+       <FormField
+        control={control}
+        name="tags"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tags</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="gratitude, work, personal-growth"
+                {...field}
+                disabled={isGenerating}
+              />
+            </FormControl>
+            <FormDescription>
+              Add comma-separated tags to organize your entries.
             </FormDescription>
             <FormMessage />
           </FormItem>

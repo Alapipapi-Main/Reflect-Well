@@ -31,6 +31,13 @@
           "type": "string",
           "description": "URL of an AI-generated image representing the entry.",
           "format": "uri"
+        },
+        "tags": {
+          "type": "array",
+          "description": "An array of tags or categories for the entry.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

@@ -9,4 +9,5 @@ export interface JournalEntry {
   mood: Mood;
   content: string;
   imageUrl?: string | null;
+  tags?: string[];
 }

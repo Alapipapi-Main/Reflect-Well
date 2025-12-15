@@ -47,6 +47,7 @@ const formSchema = z.object({
   mood: z.enum(["ecstatic", "happy", "neutral", "sad", "angry"], {
     required_error: "You need to select a mood.",
   }),
+  tags: z.string().optional(),
 })
 
 interface JournalFormProps {
@@ -71,6 +72,7 @@ export function JournalForm({ entries }: JournalFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       content: "",
+      tags: "",
     },
   })
 
@@ -227,6 +229,10 @@ Generate one new prompt for the user now.`;
     setIsSubmitting(true);
     resetDialogState();
 
+    const tagsArray = values.tags 
+      ? values.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
+      : [];
+
     // 1. Save the entry to Firestore
     const journalEntriesRef = collection(firestore, 'users', user.uid, 'journalEntries');
     const newDoc = await addDocumentNonBlocking(journalEntriesRef, {
@@ -235,6 +241,7 @@ Generate one new prompt for the user now.`;
       mood: values.mood,
       content: values.content,
       imageUrl: null,
+      tags: tagsArray,
     });
 
     if (newDoc) {
@@ -255,6 +262,7 @@ Generate one new prompt for the user now.`;
     form.reset({
       content: "",
       mood: undefined,
+      tags: "",
     });
     setFormKey(Date.now());
   }
