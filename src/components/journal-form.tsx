@@ -4,10 +4,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2 } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, StopCircle } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { JournalFormFields } from "./journal-form-fields"
 import Image from "next/image"
 
@@ -35,6 +35,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
 import type { JournalEntry, Mood } from "@/lib/types"
+import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
 
 declare const puter: any;
 
@@ -67,6 +68,14 @@ export function JournalForm({ entries }: JournalFormProps) {
   const [showReflectionDialog, setShowReflectionDialog] = useState(false)
   const [formKey, setFormKey] = useState(() => Date.now());
 
+  const {
+    startRecording,
+    stopRecording,
+    isRecording,
+    isTranscribing,
+    transcript,
+    error: recorderError,
+  } = useVoiceRecorder();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,6 +84,24 @@ export function JournalForm({ entries }: JournalFormProps) {
       tags: "",
     },
   })
+
+  useEffect(() => {
+    if (transcript) {
+      const currentContent = form.getValues("content");
+      const newContent = currentContent ? `${currentContent}\n${transcript}` : transcript;
+      form.setValue("content", newContent);
+    }
+  }, [transcript, form]);
+
+  useEffect(() => {
+    if (recorderError) {
+      toast({
+        variant: "destructive",
+        title: "Recording Error",
+        description: recorderError,
+      });
+    }
+  }, [recorderError, toast]);
 
   const resetDialogState = () => {
     setReflection(null);
@@ -266,6 +293,8 @@ Generate one new prompt for the user now.`;
     });
     setFormKey(Date.now());
   }
+  
+  const voiceButtonDisabled = isSubmitting || isGettingPrompt;
 
   return (
     <>
@@ -285,7 +314,7 @@ Generate one new prompt for the user now.`;
                 isEditing={false}
               />
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex justify-between items-center">
               <Button type="submit" disabled={isSubmitting || isGettingPrompt}>
                 {isSubmitting ? (
                   <>
@@ -296,6 +325,31 @@ Generate one new prompt for the user now.`;
                   <>
                     <Save className="mr-2 h-4 w-4" />
                     Save Entry
+                  </>
+                )}
+              </Button>
+              
+               <Button
+                type="button"
+                variant={isRecording ? "destructive" : "outline"}
+                onClick={isRecording ? stopRecording : startRecording}
+                disabled={voiceButtonDisabled}
+                className="w-[150px]"
+              >
+                {isRecording ? (
+                  <>
+                    <StopCircle className="mr-2 h-4 w-4 animate-pulse text-red-500" />
+                    Stop Recording
+                  </>
+                ) : isTranscribing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Transcribing...
+                  </>
+                ) : (
+                  <>
+                    <Mic className="mr-2 h-4 w-4" />
+                    Record Entry
                   </>
                 )}
               </Button>
