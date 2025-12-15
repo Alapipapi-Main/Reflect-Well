@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import {
   applyActionCode,
   confirmPasswordReset,
@@ -19,6 +20,7 @@ function AuthActionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const auth = useAuth();
+  const { user, isUserLoading } = useUser();
   
   const mode = searchParams.get('mode');
   const oobCode = searchParams.get('oobCode');
@@ -33,6 +35,13 @@ function AuthActionContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    // If the user is already logged in, they don't need to be here unless it's for email verification.
+    // Password resets can happen while logged in, so we allow that.
+    if (!isUserLoading && user && mode !== 'resetPassword') {
+      router.replace('/journal');
+      return;
+    }
+
     if (!mode || !oobCode) {
       setError('Invalid request. The link is missing required information.');
       setStatus('error');
@@ -68,8 +77,11 @@ function AuthActionContent() {
       }
     };
 
-    handleAction();
-  }, [mode, oobCode, auth, router]);
+    if (!user) {
+        handleAction();
+    }
+
+  }, [mode, oobCode, auth, router, user, isUserLoading]);
 
   const handlePasswordResetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,6 +135,14 @@ function AuthActionContent() {
       </div>
     );
   };
+  
+   if (isUserLoading || (user && mode !== 'resetPassword')) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const renderLoading = () => (
     <Card className="w-full max-w-md text-center">
@@ -244,3 +264,5 @@ export default function AuthActionPage() {
         </Suspense>
     )
 }
+
+    
