@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { BookHeart, Feather, TrendingUp, Lock } from 'lucide-react';
+import { BookHeart, Feather, TrendingUp, Lock, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useUser } from '@/firebase';
 
@@ -78,7 +78,7 @@ export default function LandingPage() {
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <h3 className="text-3xl font-bold text-center mb-12 font-headline">Why You'll Love ReflectWell</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
               <div className="flex flex-col items-center">
                 <div className="bg-primary/20 rounded-full p-4 mb-4">
                   <Feather className="h-8 w-8 text-primary" />
@@ -95,6 +95,15 @@ export default function LandingPage() {
                 <h4 className="text-xl font-semibold mb-2">Visualize Your Mood</h4>
                 <p className="text-muted-foreground">
                   Track your emotional trends over time with an insightful and beautiful chart.
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="bg-primary/20 rounded-full p-4 mb-4">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
+                <h4 className="text-xl font-semibold mb-2">AI-Powered Insights</h4>
+                <p className="text-muted-foreground">
+                  Ask questions, get weekly summaries, and receive gentle reflections from your personal AI companion.
                 </p>
               </div>
               <div className="flex flex-col items-center">
