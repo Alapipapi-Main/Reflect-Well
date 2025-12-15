@@ -117,7 +117,7 @@ export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePro
             <FormLabel>Tags</FormLabel>
             <FormControl>
               <Input
-                placeholder="gratitude, work, personal-growth"
+                placeholder="work, gratitude, fun"
                 {...field}
                 disabled={isGenerating}
               />

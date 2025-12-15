@@ -66,13 +66,15 @@ export function AskJournal({ entries }: AskJournalProps) {
       .map(entry => {
         const date = format((entry.date as any).toDate(), "EEEE, MMMM d, yyyy");
         const mood = MOODS[entry.mood].label;
-        return `Date: ${date}\nMood: ${mood}\nEntry: "${entry.content}"`;
+        const tags = entry.tags && entry.tags.length > 0 ? `Tags: ${entry.tags.join(', ')}\n` : '';
+        return `Date: ${date}\nMood: ${mood}\n${tags}Entry: "${entry.content}"`;
       }).join("\n\n---\n\n");
 
-    const prompt = `You are an AI assistant with access to a user's private journal. Your task is to answer the user's question based *only* on the content of their journal entries provided below.
+    const prompt = `You are an AI assistant with access to a user's private journal. Your task is to answer the user's question based *only* on the content and associated tags of their journal entries provided below.
 
 - Your tone should be helpful, private, and aligned with the reflective nature of a journal.
 - Synthesize information from multiple entries if necessary to form a comprehensive answer.
+- Pay close attention to the provided tags (e.g., 'work', 'gratitude') as they provide important context.
 - If the journal does not contain information to answer the question, you MUST explicitly state that. For example, say "I couldn't find any entries in your journal that mention that."
 - Do not make up information or answer questions that are not related to the journal's content.
 - Quote short, relevant snippets from the journal entries to support your answer where appropriate. Always cite the date of the entry you're quoting.
@@ -80,7 +82,7 @@ export function AskJournal({ entries }: AskJournalProps) {
 **User's Question:**
 "${question}"
 
-**User's Journal Entries:**
+**User's Journal Entries (including content and tags):**
 ${formattedEntries}
 `;
 
