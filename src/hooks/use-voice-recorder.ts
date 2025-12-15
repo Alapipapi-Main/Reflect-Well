@@ -49,8 +49,8 @@ export function useVoiceRecorder() {
         throw new Error("Puter.js is not loaded.");
       }
 
-      // Assume puter.ai.stt can handle a Blob directly
-      const transcriptionResult = await puter.ai.stt(blob);
+      // Use the correct speech2txt function as provided by the user.
+      const transcriptionResult = await puter.ai.speech2txt(blob);
 
       if (transcriptionResult?.text) {
         setTranscript(transcriptionResult.text);
