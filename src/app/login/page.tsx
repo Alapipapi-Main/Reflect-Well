@@ -1,17 +1,25 @@
 'use client';
 
 import { AuthForm } from '@/components/auth-form';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { BookHeart } from 'lucide-react';
+import { BookHeart, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 export default function LoginPage() {
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.replace('/journal');
+    }
+  }, [user, isUserLoading, router]);
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -36,6 +44,14 @@ export default function LoginPage() {
       });
     }
   };
+
+  if (isUserLoading || user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
