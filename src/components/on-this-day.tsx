@@ -3,6 +3,7 @@
 
 import { useMemo } from "react"
 import { format, subMonths } from "date-fns"
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import type { JournalEntry } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
@@ -28,7 +29,7 @@ export function OnThisDay({ entries }: OnThisDayProps) {
     const lastMonthYear = lastMonthDate.getFullYear();
 
     // The entries are now pre-sorted chronologically from the parent
-    return entries.filter(entry => {
+    const filtered = entries.filter(entry => {
       if (!entry.date) return false
       const entryDate = (entry.date as any).toDate()
       
@@ -48,6 +49,12 @@ export function OnThisDay({ entries }: OnThisDayProps) {
       const isPastMonthMemory = entryDay === lastMonthDay && entryMonth === lastMonth && entryYear === lastMonthYear;
 
       return isPastYearMemory || isPastMonthMemory;
+    });
+
+    return filtered.sort((a, b) => {
+        const dateA = a.date ? (a.date as any).toDate() : new Date(0);
+        const dateB = b.date ? (b.date as any).toDate() : new Date(0);
+        return dateA.getTime() - dateB.getTime();
     });
   }, [entries])
 
@@ -75,6 +82,11 @@ export function OnThisDay({ entries }: OnThisDayProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
+                    {entry.imageUrl && (
+                      <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
+                        <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
+                      </div>
+                    )}
                     <p className="whitespace-pre-wrap">{entry.content}</p>
                 </CardContent>
                 </Card>
