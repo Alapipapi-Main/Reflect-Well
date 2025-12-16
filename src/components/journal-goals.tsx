@@ -79,6 +79,7 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
   }, [weeklyProgress.count, goal]);
   
   const isGoalMet = weeklyProgress.count >= goal;
+  const displayCount = isGoalMet ? goal : weeklyProgress.count;
 
   if (isLoadingSettings) {
     return (
@@ -125,7 +126,7 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
             This Week's Progress
           </h3>
           <p className="text-sm text-muted-foreground">
-             You've written on {weeklyProgress.count} out of {goal} days this week.
+             You've written on {displayCount} out of {goal} {goal > 1 ? 'days' : 'day'} this week.
           </p>
           <Progress value={progressPercentage} className="w-full" />
            {isGoalMet && (
