@@ -74,7 +74,8 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
 
   const progressPercentage = useMemo(() => {
     if (goal === 0) return 0;
-    return (weeklyProgress.count / goal) * 100;
+    const percentage = (weeklyProgress.count / goal) * 100;
+    return Math.min(percentage, 100); // Cap the percentage at 100
   }, [weeklyProgress.count, goal]);
   
   const isGoalMet = weeklyProgress.count >= goal;
