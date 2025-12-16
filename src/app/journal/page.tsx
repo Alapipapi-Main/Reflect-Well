@@ -20,6 +20,7 @@ import { JournalStats } from '@/components/journal-stats';
 import { OnThisDay } from '@/components/on-this-day';
 import { AskJournal } from '@/components/ask-journal';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { JournalGoals } from '@/components/journal-goals';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -92,6 +93,7 @@ function JournalPageContent() {
               <TabsTrigger value="trends">Trends</TabsTrigger>
               <TabsTrigger value="insights">Insights</TabsTrigger>
               <TabsTrigger value="stats">Stats</TabsTrigger>
+              <TabsTrigger value="goals">Goals</TabsTrigger>
               <TabsTrigger value="yesterday">Yesterday</TabsTrigger>
               <TabsTrigger value="on-this-day">On This Day</TabsTrigger>
             </TabsList>
@@ -114,6 +116,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="stats" className="mt-6">
             <JournalStats entries={entries || []} />
+          </TabsContent>
+          <TabsContent value="goals" className="mt-6">
+            <JournalGoals entries={entries || []} />
           </TabsContent>
            <TabsContent value="yesterday" className="mt-6">
             <YesterdaysReflection entries={entries || []} />
