@@ -69,7 +69,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
   const sortedEntries = [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
     const dateB = b.date ? (b.date as any).toDate() : new Date(0)
-    return dateB.getTime() - a.getTime()
+    return dateB.getTime() - dateA.getTime()
   })
 
   const filteredEntries = sortedEntries.filter(entry => {
@@ -213,7 +213,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                       title={`Filter by ${mood.label}`}
                     >
                       {mood.emoji}
-                      <span className="sr-only">Filter by {mood.label}</span>
+                      <span className="sr-only">Filter by ${mood.label}</span>
                     </button>
                   )
                 })}
@@ -354,3 +354,4 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
     
 
     
+
