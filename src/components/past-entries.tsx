@@ -148,8 +148,8 @@ export function PastEntries({ entries }: PastEntriesProps) {
         </CardHeader>
         <CardContent>
            <div className="space-y-4 mb-6">
-            <div className="flex flex-col sm:flex-row items-center gap-2">
-              <div className="relative w-full">
+            <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2">
+              <div className="relative w-full sm:flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input 
                   placeholder="Search your entries..."
@@ -164,7 +164,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full sm:w-auto min-w-[200px] justify-start text-left font-normal",
+                      "w-full justify-start text-left font-normal",
                       !dateRange.from && "text-muted-foreground"
                     )}
                   >
@@ -354,4 +354,3 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
     
 
     
-
