@@ -13,6 +13,7 @@
  * Data Structure:
  * - /users/{userId}: Private user profile document.
  * - /users/{userId}/journalEntries/{journalEntryId}: Private journal entries owned by the user.
+ * - /users/{userId}/settings/main: A private document for user settings.
  * - /moods/{moodId}: A global, read-only collection of available moods.
  *
  * Key Security Decisions:
@@ -127,6 +128,17 @@ service cloud.firestore {
         allow create: if isCreatingOwnContent(userId);
         allow update: if isUpdatingOwnContent(userId);
         allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Controls access to a user's private settings document.
+       * @path /users/{userId}/settings/main
+       * @allow (read, write) A signed-in user can manage their own settings.
+       * @deny Any user attempting to access another user's settings.
+       * @principle Enforces strict ownership for user-specific configuration.
+       */
+      match /settings/main {
+        allow read, write: if isOwner(userId);
       }
     }
 

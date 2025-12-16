@@ -99,6 +99,18 @@
         "emoji",
         "description"
       ]
+    },
+    "UserSettings": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserSettings",
+      "type": "object",
+      "description": "Stores user-specific settings.",
+      "properties": {
+        "goal": {
+          "type": "number",
+          "description": "The user's weekly journaling goal."
+        }
+      }
     }
   },
   "auth": {
@@ -141,6 +153,22 @@
             {
               "name": "journalEntryId",
               "description": "The unique identifier of the journal entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/settings/main",
+        "definition": {
+          "entityName": "UserSettings",
+          "schema": {
+            "$ref": "#/backend/entities/UserSettings"
+          },
+          "description": "A singleton document storing settings for each user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
             }
           ]
         }

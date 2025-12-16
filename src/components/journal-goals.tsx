@@ -7,40 +7,48 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { JournalEntry } from '@/lib/types';
 import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
-import { Target, Trophy } from 'lucide-react';
-import { Button } from './ui/button';
+import { Target, Trophy, Loader2 } from 'lucide-react';
+import { useUser, useFirestore, useMemoFirebase, useDoc, setDocumentNonBlocking } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 interface JournalGoalsProps {
   entries: JournalEntry[];
 }
 
+interface UserSettings {
+  goal: number;
+}
+
 const GOAL_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
+const DEFAULT_GOAL = 3;
 
 export function JournalGoals({ entries }: JournalGoalsProps) {
-  const [goal, setGoal] = useState<number>(3);
-  const [isClient, setIsClient] = useState(false);
+  const { user } = useUser();
+  const firestore = useFirestore();
 
-  // Hydration safety: access localStorage only on the client
+  const settingsDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid, 'settings', 'main');
+  }, [user, firestore]);
+
+  const { data: settings, isLoading: isLoadingSettings } = useDoc<UserSettings>(settingsDocRef);
+
+  const [goal, setGoal] = useState<number>(DEFAULT_GOAL);
+
   useEffect(() => {
-    setIsClient(true);
-    try {
-      const savedGoal = localStorage.getItem('journalGoal');
-      if (savedGoal) {
-        setGoal(parseInt(savedGoal, 10));
-      }
-    } catch (error) {
-      console.error("Could not read goal from localStorage", error);
+    if (settings && typeof settings.goal === 'number') {
+      setGoal(settings.goal);
+    } else if (!isLoadingSettings && !settings) {
+      // If settings are loaded and don't exist, use default
+      setGoal(DEFAULT_GOAL);
     }
-  }, []);
+  }, [settings, isLoadingSettings]);
 
   const handleGoalChange = (value: string) => {
+    if (!settingsDocRef) return;
     const newGoal = parseInt(value, 10);
     setGoal(newGoal);
-    try {
-        localStorage.setItem('journalGoal', newGoal.toString());
-    } catch (error) {
-        console.error("Could not save goal to localStorage", error);
-    }
+    setDocumentNonBlocking(settingsDocRef, { goal: newGoal }, { merge: true });
   };
 
   const weeklyProgress = useMemo(() => {
@@ -71,18 +79,15 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
   
   const isGoalMet = weeklyProgress.count >= goal;
 
-  if (!isClient) {
-    // Render a skeleton or null during SSR to avoid hydration mismatch
+  if (isLoadingSettings) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Weekly Journaling Goal</CardTitle>
           <CardDescription>Set a goal to build your journaling habit.</CardDescription>
         </CardHeader>
-        <CardContent className="animate-pulse">
-            <div className="h-8 w-48 bg-muted rounded-md mb-6"></div>
-            <div className="h-4 w-full bg-muted rounded-full mb-2"></div>
-            <div className="h-6 w-24 bg-muted rounded-md"></div>
+        <CardContent className="flex items-center justify-center h-24">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </CardContent>
       </Card>
     );
@@ -98,7 +103,7 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <label htmlFor="goal-select" className="font-medium shrink-0">My goal is to write</label>
           <div className="flex items-center gap-2">
-            <Select onValueChange={handleGoalChange} defaultValue={goal.toString()} modal={false}>
+            <Select onValueChange={handleGoalChange} value={goal.toString()} modal={false}>
               <SelectTrigger id="goal-select" className="w-[180px]">
                 <SelectValue placeholder="Select a goal" />
               </SelectTrigger>
