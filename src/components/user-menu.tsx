@@ -8,16 +8,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 import type { User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { LogOut, Download } from 'lucide-react';
+import { LogOut, Download, FileJson, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from './theme-toggle';
 import type { JournalEntry } from '@/lib/types';
+import { MOODS } from '@/lib/constants';
 
 interface UserMenuProps {
   user: User;
@@ -48,7 +50,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
     }
   };
 
-  const handleExport = () => {
+  const handleExportJSON = () => {
     if (!entries || entries.length === 0) {
       toast({
         title: 'No Data to Export',
@@ -78,7 +80,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
 
       toast({
         title: 'Export Successful',
-        description: `Your ${entries.length} journal entries have been downloaded.`,
+        description: `Your ${entries.length} journal entries have been downloaded as JSON.`,
       });
     } catch (error) {
       console.error('Export Error:', error);
@@ -86,6 +88,70 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
         variant: 'destructive',
         title: 'Export Failed',
         description: 'Could not export your data. Please try again.',
+      });
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!entries || entries.length === 0) {
+      toast({
+        title: 'No Data to Export',
+        description: 'You have no journal entries to download.',
+      });
+      return;
+    }
+
+    try {
+      const headers = ['date', 'mood', 'content', 'tags', 'imageUrl'];
+      
+      // Helper to format a value for CSV, handling commas and quotes
+      const formatCsvField = (field: any): string => {
+        if (field === null || field === undefined) {
+          return '';
+        }
+        const str = String(field);
+        // If the string contains a comma, double quote, or newline, wrap it in double quotes
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          // Escape existing double quotes by doubling them
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const csvRows = [headers.join(',')]; // Header row
+
+      for (const entry of entries) {
+        const date = entry.date ? ((entry.date as any).toDate ? (entry.date as any).toDate().toISOString() : entry.date) : '';
+        const mood = MOODS[entry.mood]?.label || entry.mood;
+        const content = entry.content || '';
+        const tags = entry.tags?.join('; ') || ''; // Use semicolon to avoid comma conflicts
+        const imageUrl = entry.imageUrl || '';
+
+        const row = [date, mood, content, tags, imageUrl].map(formatCsvField).join(',');
+        csvRows.push(row);
+      }
+
+      const csvString = csvRows.join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'reflectwell_export.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Export Successful',
+        description: `Your ${entries.length} journal entries have been downloaded as CSV.`,
+      });
+    } catch (error) {
+      console.error('CSV Export Error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Export Failed',
+        description: 'Could not export your data to CSV. Please try again.',
       });
     }
   };
@@ -116,10 +182,17 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-           <DropdownMenuItem onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" />
-            <span>Export Data</span>
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+             <DropdownMenuLabel>Export Data</DropdownMenuLabel>
+             <DropdownMenuItem onClick={handleExportJSON}>
+              <FileJson className="mr-2 h-4 w-4" />
+              <span>Export to JSON</span>
+            </DropdownMenuItem>
+             <DropdownMenuItem onClick={handleExportCSV}>
+              <FileText className="mr-2 h-4 w-4" />
+              <span>Export to CSV</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
