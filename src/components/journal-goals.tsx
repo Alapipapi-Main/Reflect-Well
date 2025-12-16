@@ -98,7 +98,7 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <label htmlFor="goal-select" className="font-medium shrink-0">My goal is to write</label>
           <div className="flex items-center gap-2">
-            <Select onValueChange={handleGoalChange} defaultValue={goal.toString()}>
+            <Select onValueChange={handleGoalChange} defaultValue={goal.toString()} modal={false}>
               <SelectTrigger id="goal-select" className="w-[180px]">
                 <SelectValue placeholder="Select a goal" />
               </SelectTrigger>
