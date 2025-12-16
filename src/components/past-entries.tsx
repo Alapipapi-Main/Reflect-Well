@@ -28,12 +28,12 @@ import { useFirestore, useUser, updateDocumentNonBlocking, deleteDocumentNonBloc
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CustomCalendar } from "@/components/custom-calendar"
+import { CustomCalendar, type DateRange } from "@/components/custom-calendar"
 import { Badge } from "@/components/ui/badge"
 
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
-import { format, isSameDay } from "date-fns"
+import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns"
 import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
@@ -63,21 +63,25 @@ export function PastEntries({ entries }: PastEntriesProps) {
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [moodFilter, setMoodFilter] = useState<Mood | null>(null)
-  const [dateFilter, setDateFilter] = useState<Date | null>(null)
+  const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const sortedEntries = [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
     const dateB = b.date ? (b.date as any).toDate() : new Date(0)
-    return dateB.getTime() - dateA.getTime()
+    return dateB.getTime() - a.getTime()
   })
 
   const filteredEntries = sortedEntries.filter(entry => {
     const entryDate = entry.date ? (entry.date as any).toDate() : null
     const matchesSearchTerm = entry.content.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesMoodFilter = moodFilter ? entry.mood === moodFilter : true
-    const matchesDateFilter = dateFilter && entryDate ? isSameDay(entryDate, dateFilter) : true
-    return matchesSearchTerm && matchesMoodFilter && matchesDateFilter
+    const matchesDateFilter = () => {
+        if (!dateRange.from || !entryDate) return true;
+        const toDate = dateRange.to || dateRange.from;
+        return isWithinInterval(entryDate, { start: startOfDay(dateRange.from), end: endOfDay(toDate) });
+    };
+    return matchesSearchTerm && matchesMoodFilter && matchesDateFilter()
   });
 
   const handleEditClick = (event: React.MouseEvent, entryId: string) => {
@@ -123,6 +127,17 @@ export function PastEntries({ entries }: PastEntriesProps) {
     })
     setEditingEntryId(null)
   }
+  
+  const handleDateRangeSelect = (range: DateRange) => {
+      setDateRange(range);
+      if (range.from && range.to) {
+          setIsCalendarOpen(false);
+      }
+  }
+
+  const clearDateFilter = () => {
+    setDateRange({ from: null, to: null });
+  };
 
   return (
     <>
@@ -149,25 +164,33 @@ export function PastEntries({ entries }: PastEntriesProps) {
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full sm:w-[200px] justify-start text-left font-normal",
-                      !dateFilter && "text-muted-foreground"
+                      "w-full sm:w-auto min-w-[200px] justify-start text-left font-normal",
+                      !dateRange.from && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateFilter ? format(dateFilter, "PPP") : <span>Pick a date</span>}
+                    {dateRange.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, "LLL d, y")} - {format(dateRange.to, "LLL d, y")}
+                        </>
+                      ) : (
+                        format(dateRange.from, "LLL d, y")
+                      )
+                    ) : (
+                      <span>Pick a date range</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <CustomCalendar
-                    onDateSelect={(date) => {
-                      setDateFilter(date);
-                      setIsCalendarOpen(false);
-                    }}
+                    onDateRangeSelect={handleDateRangeSelect}
+                    selectedRange={dateRange}
                   />
                 </PopoverContent>
               </Popover>
-               {dateFilter && (
-                <Button variant="ghost" size="icon" onClick={() => setDateFilter(null)}>
+               {dateRange.from && (
+                <Button variant="ghost" size="icon" onClick={clearDateFilter}>
                   <XIcon className="h-5 w-5" />
                   <span className="sr-only">Clear date filter</span>
                 </Button>
