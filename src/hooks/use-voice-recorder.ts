@@ -49,8 +49,8 @@ export function useVoiceRecorder() {
         throw new Error("Puter.js is not loaded.");
       }
 
-      // Use the correct speech2txt function as provided by the user.
-      const transcriptionResult = await puter.ai.speech2txt(blob);
+      // Use the correct speechToText function
+      const transcriptionResult = await puter.ai.speechToText(blob);
 
       if (transcriptionResult?.text) {
         setTranscript(transcriptionResult.text);
@@ -75,3 +75,5 @@ export function useVoiceRecorder() {
     error,
   };
 }
+
+    

@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, StopCircle } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -36,6 +36,7 @@ import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
 import type { JournalEntry, Mood } from "@/lib/types"
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
+import { cn } from "@/lib/utils"
 
 declare const puter: any;
 
@@ -362,6 +363,16 @@ Generate one new prompt for the user now.`;
   }
   
   const voiceButtonDisabled = isSubmitting || isGettingPrompt;
+  const isRecordingOrTranscribing = isRecording || isTranscribing;
+
+
+  const handleVoiceButtonClick = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
 
   return (
     <>
@@ -385,7 +396,7 @@ Generate one new prompt for the user now.`;
               />
             </CardContent>
             <CardFooter className="flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-2">
-              <Button type="submit" disabled={isSubmitting || isGettingPrompt}>
+              <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecordingOrTranscribing}>
                 {isSubmitting ? (
                   <>
                     <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
@@ -402,13 +413,13 @@ Generate one new prompt for the user now.`;
                <Button
                 type="button"
                 variant={isRecording ? "destructive" : "outline"}
-                onClick={isRecording ? stopRecording : startRecording}
-                disabled={voiceButtonDisabled}
+                onClick={handleVoiceButtonClick}
+                disabled={voiceButtonDisabled || isTranscribing}
               >
                 {isRecording ? (
                   <>
-                    <StopCircle className="mr-2 h-4 w-4 animate-pulse text-red-500" />
-                    Stop Recording
+                    <Mic className="mr-2 h-4 w-4 animate-pulse" />
+                    Recording...
                   </>
                 ) : isTranscribing ? (
                   <>
@@ -473,3 +484,5 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
+
+    
