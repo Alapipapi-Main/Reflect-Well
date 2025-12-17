@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, StopCircle } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, X } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -27,6 +27,7 @@ import {
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -37,7 +38,6 @@ import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
 import type { JournalEntry, Mood } from "@/lib/types"
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
-import { cn } from "@/lib/utils"
 
 declare const puter: any;
 
@@ -69,6 +69,9 @@ export function JournalForm({ entries }: JournalFormProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [showReflectionDialog, setShowReflectionDialog] = useState(false)
   const [formKey, setFormKey] = useState(() => Date.now());
+
+  const [inspirationPrompt, setInspirationPrompt] = useState<string | null>(null)
+  const [showInspirationDialog, setShowInspirationDialog] = useState(false)
 
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [isSuggestingTags, setIsSuggestingTags] = useState(false);
@@ -301,11 +304,8 @@ Generate one new prompt for the user now.`;
     try {
       const aiResponse = await puter.ai.chat(prompt);
       const generatedPrompt = aiResponse.message.content;
-      form.setValue("content", generatedPrompt);
-      toast({
-        title: "Prompt Generated!",
-        description: "A new prompt has been added to your entry.",
-      });
+      setInspirationPrompt(generatedPrompt);
+      setShowInspirationDialog(true);
     } catch (error) {
       console.error("Error getting AI prompt from Puter.ai:", error);
       toast({
@@ -362,6 +362,7 @@ Generate one new prompt for the user now.`;
     // 3. Reset form and state
     setIsSubmitting(false);
     setSuggestedTags([]);
+    setInspirationPrompt(null);
     form.reset({
       content: "",
       mood: undefined,
@@ -377,6 +378,17 @@ Generate one new prompt for the user now.`;
         const newTags = [...tagsArray, tag].join(', ');
         form.setValue("tags", newTags);
     }
+  }
+
+  const handleUseInspiration = () => {
+    if (inspirationPrompt) {
+      const currentContent = form.getValues("content");
+      const newContent = currentContent 
+        ? `${currentContent}\n\n${inspirationPrompt}` 
+        : inspirationPrompt;
+      form.setValue("content", newContent);
+    }
+    setShowInspirationDialog(false);
   }
   
   const voiceButtonDisabled = isSubmitting || isGettingPrompt;
@@ -401,9 +413,27 @@ Generate one new prompt for the user now.`;
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
+               {inspirationPrompt && (
+                <div className="p-4 bg-secondary/30 border-l-4 border-primary rounded-r-lg space-y-2 relative">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <Wand className="h-4 w-4" />
+                    Your Inspired Prompt
+                  </h4>
+                  <p className="text-foreground/90 italic">"{inspirationPrompt}"</p>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute top-1 right-1 h-6 w-6"
+                    onClick={() => setInspirationPrompt(null)}
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Clear prompt</span>
+                  </Button>
+                </div>
+              )}
               <JournalFormFields
                 key={formKey} 
-                isGenerating={isSubmitting || isGettingPrompt} 
+                isGenerating={isSubmitting}
                 onGeneratePrompt={handleGeneratePrompt}
                 isGettingPrompt={isGettingPrompt}
                 isEditing={false}
@@ -455,6 +485,7 @@ Generate one new prompt for the user now.`;
         </Form>
       </Card>
       
+      {/* Reflection Dialog */}
       <AlertDialog open={showReflectionDialog} onOpenChange={(isOpen) => {
           if (!isOpen) {
             resetDialogState();
@@ -477,7 +508,7 @@ Generate one new prompt for the user now.`;
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-y-2">
-             <div className="flex w-full gap-2 sm:w-auto">
+             <div className="flex w-full gap-2 sm:w-auto sm:flex-1">
                <Button 
                   onClick={handleAiImage} 
                   disabled={isGeneratingImage || !reflection || !!imageUrl}
@@ -511,6 +542,29 @@ Generate one new prompt for the user now.`;
                 </Button>
             </div>
             <AlertDialogAction onClick={() => setShowReflectionDialog(false)} className="w-full sm:w-auto">Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Inspiration Prompt Dialog */}
+      <AlertDialog open={showInspirationDialog} onOpenChange={setShowInspirationDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Wand className="text-primary" />
+              Here's a little inspiration
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-foreground pt-4">
+              {isGettingPrompt ? (
+                <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+              ) : (
+                `"${inspirationPrompt}"`
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Close</AlertDialogCancel>
+            <AlertDialogAction onClick={handleUseInspiration}>Use this prompt</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
