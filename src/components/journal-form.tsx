@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2 } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
-import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking, useMemoFirebase } from "@/firebase"
+import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
 import { JournalFormFields } from "./journal-form-fields"
 import Image from "next/image"
@@ -183,7 +183,7 @@ Journal Entry:
     setIsGeneratingAudio(false);
   }
 
-  const handleAiReflection = async (entry: { content: string }) => {
+  const handleAiReflection = async (entry: { content: string, audioUrl?: string | null }) => {
     if (typeof puter === 'undefined') {
       console.error("Puter.js is not loaded.");
       toast({
@@ -197,8 +197,10 @@ Journal Entry:
     // Set audio loading state
     setIsGeneratingAudio(true);
 
-    const prompt = `You are a compassionate and insightful journaling companion. Your role is to provide a brief, gentle, and encouraging reflection on a user's journal entry.
+    const voiceMemoContext = entry.audioUrl ? "Note: The user has also attached a voice memo to this entry. You don't have access to the audio content, but you can acknowledge its presence if relevant. For example, if the text is short, you might gently suggest that more of their thoughts could be in the recording." : "";
 
+    const prompt = `You are a compassionate and insightful journaling companion. Your role is to provide a brief, gentle, and encouraging reflection on a user's journal entry.
+${voiceMemoContext}
 You can either provide a warm, affirming statement or ask a soft, open-ended question that encourages deeper thought. Your response should feel like a supportive friend listening without judgment.
 
 Keep your reflection to one or two sentences. Do not give advice.
@@ -364,7 +366,7 @@ Generate one new prompt for the user now.`;
     });
 
     // 2. Trigger the AI reflection and show dialog
-    await handleAiReflection(values);
+    await handleAiReflection({ content: values.content, audioUrl });
     setShowReflectionDialog(true);
     
     // 3. Reset form and state
@@ -568,3 +570,5 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
+
+    
