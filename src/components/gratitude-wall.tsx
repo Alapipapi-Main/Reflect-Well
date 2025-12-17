@@ -134,7 +134,7 @@ export function GratitudeWall() {
                         {posts.map(post => (
                             <Card key={post.id} className="bg-background/70 shadow-sm">
                                 <CardContent className="p-4">
-                                    <p className="text-foreground/90">{post.text}</p>
+                                    <p className="text-foreground/90 whitespace-pre-wrap">{post.text}</p>
                                     <p className="text-xs text-muted-foreground mt-2">
                                         Shared {post.createdAt ? formatDistanceToNow((post.createdAt as any).toDate(), { addSuffix: true }) : 'just now'}
                                     </p>
