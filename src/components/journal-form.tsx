@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2 } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
-import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking } from "@/firebase"
+import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking, useMemoFirebase } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
 import { JournalFormFields } from "./journal-form-fields"
 import Image from "next/image"
@@ -390,17 +390,6 @@ Generate one new prompt for the user now.`;
     }
   }
 
-  const handleUseInspiration = () => {
-    if (inspirationPrompt) {
-      const currentContent = form.getValues("content");
-      const newContent = currentContent 
-        ? `${currentContent}\n\n${inspirationPrompt}` 
-        : inspirationPrompt;
-      form.setValue("content", newContent);
-    }
-    setShowInspirationDialog(false);
-  }
-  
   const handleVoiceButtonClick = () => {
     if (isRecording) {
       stopRecording();
@@ -408,13 +397,6 @@ Generate one new prompt for the user now.`;
       startRecording();
     }
   };
-
-  const clearInspiration = () => {
-    if (settingsDocRef) {
-      setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
-    }
-    setInspirationPrompt(null);
-  }
 
   return (
     <>
@@ -579,7 +561,7 @@ Generate one new prompt for the user now.`;
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowInspirationDialog(false)}>Close</AlertDialogCancel>
+            <AlertDialogCancel>Close</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
