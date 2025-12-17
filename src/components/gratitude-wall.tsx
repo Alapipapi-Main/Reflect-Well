@@ -95,7 +95,7 @@ export function GratitudeWall() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-2">
             <Textarea
               placeholder="Today, I am grateful for..."
               value={postContent}
@@ -104,6 +104,9 @@ export function GratitudeWall() {
               disabled={isSubmitting}
               maxLength={280}
             />
+            <p className="text-xs text-muted-foreground text-right">
+                {postContent.length} / 280
+            </p>
             <div className="flex justify-end">
                  <Button onClick={handleSubmitPost} disabled={isSubmitting}>
                     {isSubmitting ? (
