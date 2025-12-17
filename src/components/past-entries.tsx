@@ -1,7 +1,8 @@
 
+
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import {
   Accordion,
   AccordionContent,
@@ -38,6 +39,8 @@ import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag } from "lu
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+
+declare const puter: any;
 
 interface PastEntriesProps {
   entries: JournalEntry[]
@@ -336,12 +339,81 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
       mood: entry.mood,
       tags: entry.tags ? entry.tags.join(', ') : '',
     },
-  })
+  });
+
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [isSuggestingTags, setIsSuggestingTags] = useState(false);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const entryContent = form.watch("content");
+
+  const handleGenerateTags = useCallback(async (content: string) => {
+    if (typeof puter === 'undefined' || content.length < 20) {
+      setSuggestedTags([]);
+      return;
+    }
+
+    setIsSuggestingTags(true);
+
+    const prompt = `You are an AI assistant that suggests relevant tags for a journal entry.
+Analyze the following journal entry and return a short, comma-separated list of 3-5 relevant, single-word tags in lowercase.
+Do not provide any explanation, only the tags.
+
+Example:
+Entry: "Had a great day at work, my presentation went really well. Feeling proud of myself. Then I went to the gym."
+Response: work, success, proud, fitness
+
+Journal Entry:
+"${content}"`;
+
+    try {
+      const aiResponse = await puter.ai.chat(prompt);
+      const tags = aiResponse.message.content
+        .split(',')
+        .map((tag: string) => tag.trim().toLowerCase())
+        .filter((tag: string) => tag);
+      setSuggestedTags(tags);
+    } catch (error) {
+      console.error("Error generating AI tags from Puter.ai:", error);
+    } finally {
+      setIsSuggestingTags(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    if (entryContent && entryContent.length > 20) {
+      debounceTimeoutRef.current = setTimeout(() => {
+        handleGenerateTags(entryContent);
+      }, 1500);
+    }
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [entryContent, handleGenerateTags]);
+
+  const handleAddTag = (tag: string) => {
+    const currentTags = form.getValues("tags") || "";
+    const tagsArray = currentTags.split(',').map(t => t.trim()).filter(t => t);
+    if (!tagsArray.includes(tag)) {
+        const newTags = [...tagsArray, tag].join(', ');
+        form.setValue("tags", newTags);
+    }
+  };
 
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSave)} className="space-y-6 pt-4">
-        <JournalFormFields isEditing={true} />
+        <JournalFormFields 
+          isEditing={true}
+          suggestedTags={suggestedTags}
+          isSuggestingTags={isSuggestingTags}
+          onAddTag={handleAddTag}
+        />
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
           <Button type="submit">Save Changes</Button>
