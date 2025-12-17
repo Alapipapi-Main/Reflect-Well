@@ -1,10 +1,11 @@
 
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, StopCircle } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -72,6 +73,9 @@ export function JournalForm({ entries }: JournalFormProps) {
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [isSuggestingTags, setIsSuggestingTags] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
 
   const {
     startRecording,
@@ -166,6 +170,8 @@ Journal Entry:
     setImageUrl(null);
     setActiveEntry(null);
     setIsGeneratingImage(false);
+    setAudioElement(null);
+    setIsGeneratingAudio(false);
   }
 
   const handleAiReflection = async (entry: { content: string }) => {
@@ -179,6 +185,9 @@ Journal Entry:
       return;
     }
 
+    // Set audio loading state
+    setIsGeneratingAudio(true);
+
     const prompt = `You are a compassionate and insightful journaling companion. Your role is to provide a brief, gentle, and encouraging reflection on a user's journal entry.
 
 You can either provide a warm, affirming statement or ask a soft, open-ended question that encourages deeper thought. Your response should feel like a supportive friend listening without judgment.
@@ -190,14 +199,22 @@ Journal Entry:
 
     try {
       const aiResponse = await puter.ai.chat(prompt);
-      setReflection(aiResponse.message.content);
+      const reflectionText = aiResponse.message.content;
+      setReflection(reflectionText);
+
+      // Generate audio from the reflection text
+      const audio = await puter.ai.txt2speech(reflectionText);
+      setAudioElement(audio);
+
     } catch (error) {
-      console.error("Error getting AI reflection from Puter.ai:", error);
+      console.error("Error getting AI reflection or audio from Puter.ai:", error);
       toast({
         variant: "destructive",
-        title: "AI Reflection Failed",
-        description: "Could not generate a reflection for this entry.",
+        title: "AI Feature Failed",
+        description: "Could not generate a reflection or audio for this entry.",
       });
+    } finally {
+      setIsGeneratingAudio(false);
     }
   }
 
@@ -459,24 +476,38 @@ Generate one new prompt for the user now.`;
               {reflection || <Loader2 className="h-5 w-5 animate-spin mx-auto" />}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-between gap-2">
-             <Button 
-                onClick={handleAiImage} 
-                disabled={isGeneratingImage || !reflection || !!imageUrl}
-                variant="outline"
-              >
-                {isGeneratingImage ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Visualizing...
-                  </>
-                ) : (
-                  <>
-                    <ImageIcon className="mr-2 h-4 w-4" />
-                    {imageUrl ? 'Image Generated' : 'Generate Image'}
-                  </>
-                )}
-              </Button>
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-2">
+            <div className="flex gap-2">
+               <Button 
+                  onClick={handleAiImage} 
+                  disabled={isGeneratingImage || !reflection || !!imageUrl}
+                  variant="outline"
+                >
+                  {isGeneratingImage ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Visualizing...
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="mr-2 h-4 w-4" />
+                      {imageUrl ? 'Image Added' : 'Add Image'}
+                    </>
+                  )}
+                </Button>
+                <Button 
+                    onClick={() => audioElement?.play()} 
+                    disabled={isGeneratingAudio || !audioElement}
+                    variant="outline"
+                >
+                    {isGeneratingAudio ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <PlayCircle className="h-4 w-4" />
+                    )}
+                    <span className="ml-2">Listen</span>
+                </Button>
+            </div>
             <AlertDialogAction onClick={() => setShowReflectionDialog(false)}>Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -484,5 +515,3 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
-
-    
