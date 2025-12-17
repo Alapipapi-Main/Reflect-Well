@@ -75,22 +75,24 @@ function JournalPageContent() {
   }
 
   const DropdownTabs = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 md:hidden">
-          More <ChevronDown className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem onSelect={() => setActiveTab('guided')}>Guided Journaling</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('gratitude')}>Gratitude Wall</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('insights')}>Weekly Insights</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('stats')}>Journal Stats</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('goals')}>Journal Goals</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('yesterday')}>Yesterday's Reflection</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('on-this-day')}>On This Day</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="ml-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+             <Button variant="ghost" className="h-10 px-3 py-2 flex items-center gap-1 rounded-md text-sm font-medium text-muted-foreground data-[state=open]:bg-muted/80">
+                More <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onSelect={() => setActiveTab('guided')}>Guided Journaling</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setActiveTab('gratitude')}>Gratitude Wall</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setActiveTab('insights')}>Weekly Insights</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setActiveTab('stats')}>Journal Stats</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setActiveTab('goals')}>Journal Goals</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setActiveTab('yesterday')}>Yesterday's Reflection</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setActiveTab('on-this-day')}>On This Day</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+    </div>
   );
 
   return (
@@ -112,17 +114,11 @@ function JournalPageContent() {
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
-                <TabsList className="p-2 h-auto bg-muted/50 flex-wrap justify-center">
+                <TabsList className="p-1.5 h-auto bg-muted/50 flex-wrap justify-center gap-1">
                   <TabsTrigger value="new-entry">New Entry</TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                   <TabsTrigger value="trends">Trends</TabsTrigger>
                   <TabsTrigger value="ask">Ask</TabsTrigger>
-                  <div className="hidden md:flex">
-                    <TabsTrigger value="guided">Guided Journaling</TabsTrigger>
-                    <TabsTrigger value="gratitude">Gratitude Wall</TabsTrigger>
-                    <TabsTrigger value="insights">Insights</TabsTrigger>
-                    <TabsTrigger value="stats">Stats</TabsTrigger>
-                  </div>
                   <DropdownTabs />
                 </TabsList>
             </div>
