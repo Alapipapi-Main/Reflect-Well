@@ -1,11 +1,10 @@
 
-
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2, X } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2, X, Film } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -20,7 +19,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -76,6 +74,8 @@ export function JournalForm({ entries, onSubmittingChange }: JournalFormProps) {
   const [activeEntry, setActiveEntry] = useState<{ id: string, content: string, mood: Mood } | null>(null)
   const [reflection, setReflection] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [showReflectionDialog, setShowReflectionDialog] = useState(false)
   const [formKey, setFormKey] = useState(() => Date.now());
 
@@ -186,6 +186,8 @@ Journal Entry:
     setIsGeneratingImage(false);
     setAudioReflection(null);
     setIsGeneratingAudio(false);
+    setVideoUrl(null);
+    setIsGeneratingVideo(false);
   }
 
   const handleAiReflection = async (entry: { content: string, audioUrl?: string | null }) => {
@@ -279,6 +281,47 @@ Journal Entry:
       setIsGeneratingImage(false);
     }
   };
+
+    const handleAnimateImage = async () => {
+    if (!activeEntry || !imageUrl) return;
+
+    if (typeof puter === 'undefined') {
+      toast({
+        variant: "destructive",
+        title: "AI Feature Not Available",
+        description: "The AI video service could not be loaded.",
+      });
+      return;
+    }
+
+    setIsGeneratingVideo(true);
+
+    const moodLabel = MOODS[activeEntry.mood].label;
+    const prompt = `Animate this image to bring it to life. The scene should be dynamic and reflect the journal entry's content and the mood of "${moodLabel}". Make the elements move subtly and artistically, creating a short, looping, cinematic video.`;
+
+    try {
+      const videoElement = await puter.ai.txt2vid(prompt, {
+        image_url: imageUrl,
+      });
+      
+      videoElement.addEventListener('loadeddata', () => {
+          videoElement.play().catch(() => {});
+      });
+
+      setVideoUrl(videoElement.src);
+
+    } catch (error) {
+      console.error("Error getting AI video from Puter.ai:", error);
+      toast({
+        variant: "destructive",
+        title: "AI Animation Failed",
+        description: "Could not animate the image for this entry.",
+      });
+    } finally {
+      setIsGeneratingVideo(false);
+    }
+  };
+
 
   const handleGeneratePrompt = async () => {
     if (typeof puter === 'undefined' || !settingsDocRef) {
@@ -510,11 +553,25 @@ Generate one new prompt for the user now.`;
               <Sparkles className="text-primary" />
               A Moment of Reflection
             </AlertDialogTitle>
-            {imageUrl && (
-              <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden">
-                <Image src={imageUrl} alt="AI-generated image representing the journal entry" layout="fill" objectFit="cover" />
-              </div>
-            )}
+            <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden bg-secondary">
+                {isGeneratingVideo && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
+                        <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                        <span>Animating...</span>
+                    </div>
+                )}
+                {videoUrl ? (
+                    <video src={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                ) : imageUrl ? (
+                    <Image src={imageUrl} alt="AI-generated image representing the journal entry" layout="fill" objectFit="cover" />
+                ) : null}
+                 {isGeneratingImage && !imageUrl && (
+                     <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
+                        <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                        <span>Creating image...</span>
+                    </div>
+                 )}
+            </div>
             <AlertDialogDescription className="text-base text-foreground pt-4">
               {reflection || <Loader2 className="h-5 w-5 animate-spin mx-auto" />}
             </AlertDialogDescription>
@@ -538,6 +595,19 @@ Generate one new prompt for the user now.`;
                       {imageUrl ? 'Image Added' : 'Add Image'}
                     </>
                   )}
+                </Button>
+                <Button
+                    onClick={handleAnimateImage}
+                    disabled={isGeneratingVideo || !imageUrl || !!videoUrl}
+                    variant="outline"
+                    className="flex-1"
+                >
+                    {isGeneratingVideo ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Film className="mr-2 h-4 w-4" />
+                    )}
+                    <span>{videoUrl ? 'Animated' : 'Animate'}</span>
                 </Button>
                 <Button 
                     onClick={() => audioReflection?.play()} 
@@ -582,3 +652,5 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
+
+    
