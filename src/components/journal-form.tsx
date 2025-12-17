@@ -437,7 +437,7 @@ Generate one new prompt for the user now.`;
                   <div className="flex items-center gap-2">
                     <audio src={audioUrl} controls className="w-full" />
                     <Button type="button" variant="ghost" size="icon" onClick={resetRecorder}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-4 w-4 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
                       <span className="sr-only">Delete recording</span>
                     </Button>
                   </div>
