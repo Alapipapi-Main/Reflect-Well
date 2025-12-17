@@ -262,11 +262,6 @@ export function PastEntries({ entries }: PastEntriesProps) {
                       </div>
                   </div>
                   <AccordionContent className="text-base leading-relaxed whitespace-pre-wrap px-2">
-                    {entry.imageUrl && (
-                      <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
-                        <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
-                      </div>
-                    )}
                     {editingEntryId === entry.id ? (
                       <EditJournalForm 
                         entry={entry} 
@@ -274,17 +269,25 @@ export function PastEntries({ entries }: PastEntriesProps) {
                         onCancel={() => setEditingEntryId(null)}
                       />
                     ) : (
-                      <>
+                      <div className="space-y-4">
+                        {entry.imageUrl && (
+                          <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+                            <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
+                          </div>
+                        )}
+                        {entry.audioUrl && (
+                          <audio src={entry.audioUrl} controls className="w-full" />
+                        )}
                         <p>{entry.content}</p>
                         {entry.tags && entry.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-4 items-center">
+                          <div className="flex flex-wrap gap-2 items-center">
                             <Tag className="h-4 w-4 text-muted-foreground" />
                             {entry.tags.map(tag => (
                               <Badge key={tag} variant="secondary">{tag}</Badge>
                             ))}
                           </div>
                         )}
-                      </>
+                      </div>
                     )}
                   </AccordionContent>
                 </AccordionItem>
@@ -422,7 +425,3 @@ Journal Entry:
     </FormProvider>
   )
 }
- 
-    
-
-    

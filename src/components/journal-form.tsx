@@ -5,9 +5,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2 } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
-import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking, useDoc, useMemoFirebase, setDocumentNonBlocking } from "@/firebase"
+import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
 import { JournalFormFields } from "./journal-form-fields"
 import Image from "next/image"
@@ -85,15 +85,16 @@ export function JournalForm({ entries }: JournalFormProps) {
   const [isSuggestingTags, setIsSuggestingTags] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [audioReflection, setAudioReflection] = useState<HTMLAudioElement | null>(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
 
   const {
     startRecording,
     stopRecording,
+    reset: resetRecorder,
     isRecording,
-    isTranscribing,
-    transcript,
+    isProcessing: isProcessingAudio,
+    audioUrl,
     error: recorderError,
   } = useVoiceRecorder();
 
@@ -106,10 +107,8 @@ export function JournalForm({ entries }: JournalFormProps) {
   })
   
   useEffect(() => {
-    if (settings && settings.inspirationPrompt) {
-        setInspirationPrompt(settings.inspirationPrompt);
-    } else {
-        setInspirationPrompt(null);
+    if (settings?.inspirationPrompt) {
+      setInspirationPrompt(settings.inspirationPrompt);
     }
   }, [settings]);
 
@@ -165,15 +164,6 @@ Journal Entry:
     };
   }, [entryContent, handleGenerateTags]);
 
-
-  useEffect(() => {
-    if (transcript) {
-      const currentContent = form.getValues("content");
-      const newContent = currentContent ? `${currentContent}\n${transcript}` : transcript;
-      form.setValue("content", newContent);
-    }
-  }, [transcript, form]);
-
   useEffect(() => {
     if (recorderError) {
       toast({
@@ -189,7 +179,7 @@ Journal Entry:
     setImageUrl(null);
     setActiveEntry(null);
     setIsGeneratingImage(false);
-    setAudioElement(null);
+    setAudioReflection(null);
     setIsGeneratingAudio(false);
   }
 
@@ -223,7 +213,7 @@ Journal Entry:
 
       // Generate audio from the reflection text with a male voice
       const audio = await puter.ai.txt2speech(reflectionText, { voice: 'Matthew', engine: 'neural', language: 'en-US' });
-      setAudioElement(audio);
+      setAudioReflection(audio);
 
     } catch (error) {
       console.error("Error getting AI reflection or audio from Puter.ai:", error);
@@ -321,6 +311,7 @@ Generate one new prompt for the user now.`;
       const aiResponse = await puter.ai.chat(prompt);
       const generatedPrompt = aiResponse.message.content;
       setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: generatedPrompt }, { merge: true });
+      setInspirationPrompt(generatedPrompt);
       setShowInspirationDialog(true);
     } catch (error) {
       console.error("Error getting AI prompt from Puter.ai:", error);
@@ -359,6 +350,7 @@ Generate one new prompt for the user now.`;
       mood: values.mood,
       content: values.content,
       imageUrl: null,
+      audioUrl: audioUrl,
       tags: tagsArray,
     });
 
@@ -377,8 +369,10 @@ Generate one new prompt for the user now.`;
     
     // 3. Reset form and state
     setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
+    setInspirationPrompt(null);
     setIsSubmitting(false);
     setSuggestedTags([]);
+    resetRecorder();
     form.reset({
       content: "",
       mood: undefined,
@@ -407,8 +401,6 @@ Generate one new prompt for the user now.`;
     setShowInspirationDialog(false);
   }
   
-  const isRecordingOrTranscribing = isRecording || isTranscribing;
-
   const handleVoiceButtonClick = () => {
     if (isRecording) {
       stopRecording();
@@ -416,6 +408,13 @@ Generate one new prompt for the user now.`;
       startRecording();
     }
   };
+
+  const clearInspiration = () => {
+    if (settingsDocRef) {
+      setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
+    }
+    setInspirationPrompt(null);
+  }
 
   return (
     <>
@@ -436,6 +435,18 @@ Generate one new prompt for the user now.`;
                   <p className="text-foreground/90 italic">"{inspirationPrompt}"</p>
                 </div>
               )}
+               {audioUrl && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-muted-foreground">Your Recorded Memo</h4>
+                  <div className="flex items-center gap-2">
+                    <audio src={audioUrl} controls className="w-full" />
+                    <Button type="button" variant="ghost" size="icon" onClick={resetRecorder}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <span className="sr-only">Delete recording</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
               <JournalFormFields
                 key={formKey} 
                 isGenerating={isSubmitting}
@@ -443,12 +454,12 @@ Generate one new prompt for the user now.`;
                 isGettingPrompt={isGettingPrompt}
                 isEditing={false}
                 suggestedTags={suggestedTags}
-                isSuggestingTags={isSuggestingTags}
+                isSuggestingTags={isSuggestingTags && !isSubmitting}
                 onAddTag={handleAddTag}
               />
             </CardContent>
             <CardFooter className="flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-2">
-              <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecordingOrTranscribing}>
+              <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecording || isProcessingAudio}>
                 {isSubmitting ? (
                   <>
                     <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
@@ -466,22 +477,22 @@ Generate one new prompt for the user now.`;
                 type="button"
                 variant={isRecording ? "destructive" : "outline"}
                 onClick={handleVoiceButtonClick}
-                disabled={isSubmitting || isGettingPrompt || isTranscribing}
+                disabled={isSubmitting || isGettingPrompt || isProcessingAudio}
               >
                 {isRecording ? (
                   <>
                     <Mic className="mr-2 h-4 w-4 animate-pulse" />
                     Recording...
                   </>
-                ) : isTranscribing ? (
+                ) : isProcessingAudio ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Transcribing...
+                    Processing...
                   </>
                 ) : (
                   <>
                     <Mic className="mr-2 h-4 w-4" />
-                    Record Entry
+                    Record Memo
                   </>
                 )}
               </Button>
@@ -513,7 +524,7 @@ Generate one new prompt for the user now.`;
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-y-2">
-             <div className="flex w-full gap-2 sm:w-auto sm:flex-1">
+             <div className="flex w-full gap-2 sm:w-auto">
                <Button 
                   onClick={handleAiImage} 
                   disabled={isGeneratingImage || !reflection || !!imageUrl}
@@ -533,8 +544,8 @@ Generate one new prompt for the user now.`;
                   )}
                 </Button>
                 <Button 
-                    onClick={() => audioElement?.play()} 
-                    disabled={isGeneratingAudio || !audioElement}
+                    onClick={() => audioReflection?.play()} 
+                    disabled={isGeneratingAudio || !audioReflection}
                     variant="outline"
                      className="flex-1"
                 >
@@ -568,12 +579,10 @@ Generate one new prompt for the user now.`;
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Close</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setShowInspirationDialog(false)}>Close</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
   )
 }
-
-    

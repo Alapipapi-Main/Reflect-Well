@@ -32,6 +32,11 @@
           "description": "URL of an AI-generated image representing the entry.",
           "format": "uri"
         },
+        "audioUrl": {
+          "type": "string",
+          "description": "Data URI of a recorded voice memo for the entry.",
+          "format": "uri"
+        },
         "tags": {
           "type": "array",
           "description": "An array of tags or categories for the entry.",

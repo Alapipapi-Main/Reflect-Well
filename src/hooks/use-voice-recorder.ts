@@ -4,13 +4,11 @@
 import { useState, useRef, useCallback } from 'react';
 import MicRecorder from 'mic-recorder-to-mp3';
 
-declare const puter: any;
-
 export function useVoiceRecorder() {
   const recorder = useRef<MicRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [transcript, setTranscript] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const initializeRecorder = useCallback(() => {
@@ -20,7 +18,7 @@ export function useVoiceRecorder() {
 
   const startRecording = useCallback(async () => {
     setError(null);
-    setTranscript(null);
+    setAudioUrl(null);
     initializeRecorder();
 
     try {
@@ -40,40 +38,41 @@ export function useVoiceRecorder() {
     if (!recorder.current) return;
 
     setIsRecording(false);
-    setIsTranscribing(true);
+    setIsProcessing(true);
 
     try {
       const [buffer, blob] = await recorder.current.stop().getMp3();
       
-      if (typeof puter === 'undefined') {
-        throw new Error("Puter.js is not loaded.");
-      }
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        setAudioUrl(base64data);
+      };
 
-      // Use the correct speech2txt function
-      const transcriptionResult = await puter.ai.speech2txt(blob);
-
-      if (transcriptionResult?.text) {
-        setTranscript(transcriptionResult.text);
-      } else {
-        throw new Error('Transcription did not return any text.');
-      }
     } catch (e: any) {
-      console.error('Error stopping recording or transcribing:', e);
-      setError('Failed to transcribe audio. Please try again.');
-      setTranscript(null);
+      console.error('Error stopping recording or processing audio:', e);
+      setError('Failed to process audio. Please try again.');
+      setAudioUrl(null);
     } finally {
-      setIsTranscribing(false);
+      setIsProcessing(false);
     }
   }, []);
+
+  const reset = () => {
+    setAudioUrl(null);
+    setError(null);
+    setIsRecording(false);
+    setIsProcessing(false);
+  };
 
   return {
     startRecording,
     stopRecording,
+    reset,
     isRecording,
-    isTranscribing,
-    transcript,
+    isProcessing,
+    audioUrl,
     error,
   };
 }
-
-    
