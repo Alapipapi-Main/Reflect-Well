@@ -57,6 +57,8 @@ interface JournalFormProps {
   entries: JournalEntry[];
 }
 
+const INSPIRATION_PROMPT_KEY = 'reflectwell-inspiration-prompt';
+
 export function JournalForm({ entries }: JournalFormProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
@@ -96,6 +98,24 @@ export function JournalForm({ entries }: JournalFormProps) {
       tags: "",
     },
   })
+  
+  // Restore prompt from sessionStorage on component mount
+  useEffect(() => {
+    const savedPrompt = sessionStorage.getItem(INSPIRATION_PROMPT_KEY);
+    if (savedPrompt) {
+      setInspirationPrompt(savedPrompt);
+    }
+  }, []);
+
+  // Save or remove prompt from sessionStorage when it changes
+  useEffect(() => {
+    if (inspirationPrompt) {
+      sessionStorage.setItem(INSPIRATION_PROMPT_KEY, inspirationPrompt);
+    } else {
+      sessionStorage.removeItem(INSPIRATION_PROMPT_KEY);
+    }
+  }, [inspirationPrompt]);
+
 
   const entryContent = form.watch("content");
 
@@ -402,6 +422,10 @@ Generate one new prompt for the user now.`;
       startRecording();
     }
   };
+  
+  const clearInspirationPrompt = () => {
+    setInspirationPrompt(null);
+  };
 
   return (
     <>
@@ -424,7 +448,7 @@ Generate one new prompt for the user now.`;
                     variant="ghost" 
                     size="icon" 
                     className="absolute top-1 right-1 h-6 w-6"
-                    onClick={() => setInspirationPrompt(null)}
+                    onClick={clearInspirationPrompt}
                   >
                     <X className="h-4 w-4" />
                     <span className="sr-only">Clear prompt</span>
