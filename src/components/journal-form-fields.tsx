@@ -142,7 +142,7 @@ export function JournalFormFields({
         )}
       />
       
-      {(isSuggestingTags || suggestedTags.length > 0) && (
+      {!isGenerating && (isSuggestingTags || suggestedTags.length > 0) && (
         <div className="space-y-3">
             <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
                 <Sparkles className="h-4 w-4 text-primary" />
