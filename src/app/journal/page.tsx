@@ -77,7 +77,7 @@ function JournalPageContent() {
   const DropdownTabs = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button variant="outline" className="flex items-center gap-2 md:hidden">
           More <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -112,12 +112,18 @@ function JournalPageContent() {
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
-                <TabsList className="p-2 h-auto bg-muted/50">
-                <TabsTrigger value="new-entry">New Entry</TabsTrigger>
-                <TabsTrigger value="history">History</TabsTrigger>
-                <TabsTrigger value="trends">Trends</TabsTrigger>
-                <TabsTrigger value="ask">Ask</TabsTrigger>
-                <DropdownTabs />
+                <TabsList className="p-2 h-auto bg-muted/50 flex-wrap justify-center">
+                  <TabsTrigger value="new-entry">New Entry</TabsTrigger>
+                  <TabsTrigger value="history">History</TabsTrigger>
+                  <TabsTrigger value="trends">Trends</TabsTrigger>
+                  <TabsTrigger value="ask">Ask</TabsTrigger>
+                  <div className="hidden md:flex">
+                    <TabsTrigger value="guided">Guided Journaling</TabsTrigger>
+                    <TabsTrigger value="gratitude">Gratitude Wall</TabsTrigger>
+                    <TabsTrigger value="insights">Insights</TabsTrigger>
+                    <TabsTrigger value="stats">Stats</TabsTrigger>
+                  </div>
+                  <DropdownTabs />
                 </TabsList>
             </div>
           
@@ -151,9 +157,9 @@ function JournalPageContent() {
            <TabsContent value="yesterday" className="mt-6">
             <YesterdaysReflection entries={entries || []} />
           </TabsContent>
-          <TabsContent value="on-this-day" className="mt-6">
-            <OnThisDay entries={entries || []} />
-          </TabsContent>
+           <TabsContent value="on-this-day" className="mt-6">
+             <OnThisDay entries={entries || []} />
+           </TabsContent>
         </Tabs>
       </main>
     </ThemeProvider>
