@@ -80,11 +80,21 @@ function JournalPageContent() {
 
   const DropdownTabs = () => (
     <DropdownMenu>
-        <TabsTrigger value="more" asChild className={cn('relative', isMoreTabActive ? 'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md' : '')}>
-            <DropdownMenuTrigger className='flex items-center gap-1 w-full h-full justify-center px-3 py-2'>
-                More <ChevronDown className="h-4 w-4" />
-            </DropdownMenuTrigger>
-        </TabsTrigger>
+      <DropdownMenuTrigger asChild>
+         <Button
+            variant="ghost"
+            className={cn(
+              // Base styles to mimic TabsTrigger
+              'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+              // Active/inactive state
+              isMoreTabActive
+                ? 'bg-background text-foreground shadow-md' // Active state
+                : 'text-muted-foreground' // Inactive state
+            )}
+          >
+            More <ChevronDown className="h-4 w-4 ml-1" />
+        </Button>
+      </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onSelect={() => setActiveTab('guided')}>Guided Journaling</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setActiveTab('gratitude')}>Gratitude Wall</DropdownMenuItem>
@@ -155,7 +165,7 @@ function JournalPageContent() {
           </TabsContent>
            <TabsContent value="yesterday" className="mt-6">
             <YesterdaysReflection entries={entries || []} />
-          </TabsContent>
+           </TabsContent>
            <TabsContent value="on-this-day" className="mt-6">
              <OnThisDay entries={entries || []} />
            </TabsContent>
