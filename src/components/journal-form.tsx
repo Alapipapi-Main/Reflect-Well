@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, X } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -444,15 +444,6 @@ Generate one new prompt for the user now.`;
                     Your Inspired Prompt
                   </h4>
                   <p className="text-foreground/90 italic">"{inspirationPrompt}"</p>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="absolute top-1 right-1 h-6 w-6"
-                    onClick={clearInspirationPrompt}
-                  >
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Clear prompt</span>
-                  </Button>
                 </div>
               )}
               <JournalFormFields
@@ -588,7 +579,6 @@ Generate one new prompt for the user now.`;
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Close</AlertDialogCancel>
-            <AlertDialogAction onClick={handleUseInspiration}>Use this prompt</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
