@@ -202,8 +202,8 @@ Journal Entry:
       const reflectionText = aiResponse.message.content;
       setReflection(reflectionText);
 
-      // Generate audio from the reflection text
-      const audio = await puter.ai.txt2speech(reflectionText);
+      // Generate audio from the reflection text with a male voice
+      const audio = await puter.ai.txt2speech(reflectionText, { voice: 'male-1' });
       setAudioElement(audio);
 
     } catch (error) {
@@ -476,12 +476,13 @@ Generate one new prompt for the user now.`;
               {reflection || <Loader2 className="h-5 w-5 animate-spin mx-auto" />}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-2">
-            <div className="flex gap-2">
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-y-2">
+             <div className="flex gap-2 w-full sm:w-auto">
                <Button 
                   onClick={handleAiImage} 
                   disabled={isGeneratingImage || !reflection || !!imageUrl}
                   variant="outline"
+                  className="flex-1"
                 >
                   {isGeneratingImage ? (
                     <>
@@ -499,6 +500,7 @@ Generate one new prompt for the user now.`;
                     onClick={() => audioElement?.play()} 
                     disabled={isGeneratingAudio || !audioElement}
                     variant="outline"
+                     className="flex-1"
                 >
                     {isGeneratingAudio ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -508,7 +510,7 @@ Generate one new prompt for the user now.`;
                     <span className="ml-2">Listen</span>
                 </Button>
             </div>
-            <AlertDialogAction onClick={() => setShowReflectionDialog(false)}>Close</AlertDialogAction>
+            <AlertDialogAction onClick={() => setShowReflectionDialog(false)} className="w-full sm:w-auto">Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
