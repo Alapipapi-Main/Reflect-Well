@@ -152,9 +152,25 @@ service cloud.firestore {
     match /moods/{moodId} {
       allow get: if true;
       allow list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow write: if false;
+    }
+
+    /**
+     * @description Defines access for the global 'gratitudeWall' collection.
+     * @path /gratitudeWall/{gratitudeId}
+     * @allow (read) Any user can read posts on the gratitude wall.
+     * @allow (create) Only signed-in users can create a new post.
+     * @deny (update, delete) No one can edit or delete a post once it's created.
+     * @principle Creates a public, immutable wall of gratitude.
+     */
+    match /gratitudeWall/{gratitudeId} {
+        allow read: if true;
+        allow create: if isSignedIn()
+            && request.resource.data.text is string
+            && request.resource.data.text.size() > 0
+            && request.resource.data.text.size() <= 280
+            && request.resource.data.authorId == request.auth.uid;
+        allow update, delete: if false;
     }
   }
 }

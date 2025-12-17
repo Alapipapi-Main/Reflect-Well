@@ -22,6 +22,7 @@ import { AskJournal } from '@/components/ask-journal';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { JournalGoals } from '@/components/journal-goals';
 import { GuidedJournaling } from '@/components/guided-journaling';
+import { GratitudeWall } from '@/components/gratitude-wall';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -91,6 +92,7 @@ function JournalPageContent() {
             <TabsList className="w-full justify-start sm:justify-center p-2 h-auto bg-muted/50">
               <TabsTrigger value="new-entry">New Entry</TabsTrigger>
               <TabsTrigger value="guided">Guided</TabsTrigger>
+              <TabsTrigger value="gratitude">Gratitude</TabsTrigger>
               <TabsTrigger value="ask">Ask</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="trends">Trends</TabsTrigger>
@@ -107,6 +109,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="guided" className="mt-6">
             <GuidedJournaling />
+          </TabsContent>
+          <TabsContent value="gratitude" className="mt-6">
+            <GratitudeWall />
           </TabsContent>
           <TabsContent value="ask" className="mt-6">
             <AskJournal entries={entries || []} />

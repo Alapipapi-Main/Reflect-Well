@@ -17,3 +17,10 @@ export interface UserSettings {
   goal: number;
   inspirationPrompt?: string | null;
 }
+
+export interface GratitudePost {
+  id: string;
+  text: string;
+  createdAt: Timestamp;
+  authorId: string;
+}

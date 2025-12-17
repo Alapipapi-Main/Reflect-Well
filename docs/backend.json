@@ -120,6 +120,37 @@
           "description": "A temporarily stored AI-generated prompt for the user."
         }
       }
+    },
+    "GratitudePost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GratitudePost",
+      "type": "object",
+      "description": "Represents an anonymous post on the social gratitude wall.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the gratitude post."
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the gratitude post."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The timestamp when the post was created.",
+          "format": "date-time"
+        },
+        "authorId": {
+          "type": "string",
+          "description": "The UID of the user who created the post."
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "createdAt",
+        "authorId"
+      ]
     }
   },
   "auth": {
@@ -194,6 +225,22 @@
             {
               "name": "moodId",
               "description": "The unique identifier of the mood."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/gratitudeWall/{gratitudeId}",
+        "definition": {
+          "entityName": "GratitudePost",
+          "schema": {
+            "$ref": "#/backend/entities/GratitudePost"
+          },
+          "description": "Stores anonymous posts for the social gratitude wall. This collection is globally readable but write access is restricted.",
+          "params": [
+            {
+              "name": "gratitudeId",
+              "description": "The unique identifier of the gratitude post."
             }
           ]
         }
