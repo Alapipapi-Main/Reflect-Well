@@ -35,10 +35,11 @@ import { Badge } from "@/components/ui/badge"
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns"
-import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag } from "lucide-react"
+import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2 } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
 
 declare const puter: any;
 
@@ -80,7 +81,8 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
     const entryDate = entry.date ? (entry.date as any).toDate() : null
     const content = entry.content || "";
     const tags = entry.tags || [];
-    const searchString = `${content} ${tags.join(' ')}`.toLowerCase();
+    const voiceMemoContext = entry.audioUrl ? "voice memo" : "";
+    const searchString = `${content} ${tags.join(' ')} ${voiceMemoContext}`.toLowerCase();
 
     const matchesSearchTerm = searchString.includes(searchTerm.toLowerCase());
     const matchesMoodFilter = moodFilter ? entry.mood === moodFilter : true
@@ -122,17 +124,14 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
     ? values.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
     : [];
 
-    const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', entryId)
     const dataToUpdate: Partial<JournalEntry> = {
       content: values.content,
       mood: values.mood,
       tags: tagsArray,
+      audioUrl: audioUrl, // Always update audioUrl, even if it's null
     };
 
-    if (audioUrl !== undefined) {
-      dataToUpdate.audioUrl = audioUrl;
-    }
-
+    const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', entryId)
     updateDocumentNonBlocking(entryRef, dataToUpdate)
 
     toast({
@@ -343,13 +342,24 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
 
 interface EditJournalFormProps {
   entry: JournalEntry
-  onSave: (values: z.infer<typeof formSchema>, audioUrl?: string | null) => void
+  onSave: (values: z.infer<typeof formSchema>, audioUrl: string | null) => void
   onCancel: () => void
 }
 
 function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
-  const [currentAudioUrl, setCurrentAudioUrl] = useState(entry.audioUrl);
+  const { toast } = useToast();
+  const [currentAudioUrl, setCurrentAudioUrl] = useState(entry.audioUrl || null);
   
+  const {
+    startRecording,
+    stopRecording,
+    reset: resetRecorder,
+    isRecording,
+    isProcessing: isProcessingAudio,
+    audioUrl: newAudioUrl,
+    error: recorderError,
+  } = useVoiceRecorder();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -364,6 +374,23 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const entryContent = form.watch("content");
+
+  useEffect(() => {
+    if (newAudioUrl) {
+      setCurrentAudioUrl(newAudioUrl);
+      resetRecorder(); // Clear the hook's state after we've captured the URL
+    }
+  }, [newAudioUrl, resetRecorder]);
+
+  useEffect(() => {
+    if (recorderError) {
+      toast({
+        variant: "destructive",
+        title: "Recording Error",
+        description: recorderError,
+      });
+    }
+  }, [recorderError, toast]);
 
   const handleGenerateTags = useCallback(async (content: string) => {
     if (typeof puter === 'undefined' || content.length < 20) {
@@ -431,6 +458,15 @@ Journal Entry:
     onSave(values, currentAudioUrl);
   };
 
+  const handleVoiceButtonClick = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6 pt-4">
@@ -440,7 +476,7 @@ Journal Entry:
             <div className="flex items-center gap-2">
               <audio src={currentAudioUrl} controls className="w-full" />
               <Button type="button" variant="ghost" size="icon" onClick={handleDeleteMemo}>
-                <Trash2 className="h-4 w-4 text-destructive" />
+                <Trash2 className="h-4 w-4 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
                 <span className="sr-only">Delete memo</span>
               </Button>
             </div>
@@ -452,9 +488,34 @@ Journal Entry:
           isSuggestingTags={isSuggestingTags}
           onAddTag={handleAddTag}
         />
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button type="submit">Save Changes</Button>
+        <div className="flex justify-between items-center gap-2">
+           <Button
+              type="button"
+              variant={isRecording ? "destructive" : "outline"}
+              onClick={handleVoiceButtonClick}
+              disabled={isProcessingAudio}
+            >
+              {isRecording ? (
+                <>
+                  <Mic className="mr-2 h-4 w-4 animate-pulse" />
+                  Recording...
+                </>
+              ) : isProcessingAudio ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Mic className="mr-2 h-4 w-4" />
+                  {currentAudioUrl ? 'Re-record' : 'Record Memo'}
+                </>
+              )}
+            </Button>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+            <Button type="submit">Save Changes</Button>
+          </div>
         </div>
       </form>
     </FormProvider>
