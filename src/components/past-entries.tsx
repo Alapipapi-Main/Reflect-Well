@@ -269,7 +269,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                           aria-label="Delete entry"
                           disabled={isFormSubmitting}
                         >
-                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
+                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-400 dark:hover:text-red-300" />
                         </Button>
                       </div>
                   </div>
@@ -476,7 +476,7 @@ Journal Entry:
             <div className="flex items-center gap-2">
               <audio src={currentAudioUrl} controls className="w-full" />
               <Button type="button" variant="ghost" size="icon" onClick={handleDeleteMemo}>
-                <Trash2 className="h-4 w-4 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
+                <Trash2 className="h-4 w-4 text-destructive/80 hover:text-destructive dark:text-red-400 dark:hover:text-red-300" />
                 <span className="sr-only">Delete memo</span>
               </Button>
             </div>
@@ -488,12 +488,13 @@ Journal Entry:
           isSuggestingTags={isSuggestingTags}
           onAddTag={handleAddTag}
         />
-        <div className="flex justify-between items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-4">
            <Button
               type="button"
               variant={isRecording ? "destructive" : "outline"}
               onClick={handleVoiceButtonClick}
               disabled={isProcessingAudio}
+              className="w-full sm:w-auto"
             >
               {isRecording ? (
                 <>
@@ -512,7 +513,7 @@ Journal Entry:
                 </>
               )}
             </Button>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 w-full sm:w-auto">
             <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
             <Button type="submit">Save Changes</Button>
           </div>
