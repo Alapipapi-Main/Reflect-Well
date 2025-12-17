@@ -7,7 +7,7 @@ import * as z from "zod"
 import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, StopCircle } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { JournalFormFields } from "./journal-form-fields"
 import Image from "next/image"
 
@@ -68,6 +68,10 @@ export function JournalForm({ entries }: JournalFormProps) {
   const [showReflectionDialog, setShowReflectionDialog] = useState(false)
   const [formKey, setFormKey] = useState(() => Date.now());
 
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [isSuggestingTags, setIsSuggestingTags] = useState(false);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const {
     startRecording,
     stopRecording,
@@ -84,6 +88,59 @@ export function JournalForm({ entries }: JournalFormProps) {
       tags: "",
     },
   })
+
+  const entryContent = form.watch("content");
+
+  const handleGenerateTags = useCallback(async (content: string) => {
+    if (typeof puter === 'undefined' || content.length < 20) {
+      setSuggestedTags([]);
+      return;
+    }
+
+    setIsSuggestingTags(true);
+
+    const prompt = `You are an AI assistant that suggests relevant tags for a journal entry.
+Analyze the following journal entry and return a short, comma-separated list of 3-5 relevant, single-word tags in lowercase.
+Do not provide any explanation, only the tags.
+
+Example:
+Entry: "Had a great day at work, my presentation went really well. Feeling proud of myself. Then I went to the gym."
+Response: work, success, proud, fitness
+
+Journal Entry:
+"${content}"`;
+
+    try {
+      const aiResponse = await puter.ai.chat(prompt);
+      const tags = aiResponse.message.content
+        .split(',')
+        .map((tag: string) => tag.trim().toLowerCase())
+        .filter((tag: string) => tag);
+      setSuggestedTags(tags);
+    } catch (error) {
+      console.error("Error generating AI tags from Puter.ai:", error);
+      // Fail silently, don't bother the user with a toast for this
+    } finally {
+      setIsSuggestingTags(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    if (entryContent && entryContent.length > 20) {
+      debounceTimeoutRef.current = setTimeout(() => {
+        handleGenerateTags(entryContent);
+      }, 1500); // 1.5-second debounce
+    }
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [entryContent, handleGenerateTags]);
+
 
   useEffect(() => {
     if (transcript) {
@@ -286,12 +343,22 @@ Generate one new prompt for the user now.`;
     
     // 3. Reset form and state
     setIsSubmitting(false);
+    setSuggestedTags([]);
     form.reset({
       content: "",
       mood: undefined,
       tags: "",
     });
     setFormKey(Date.now());
+  }
+
+  const handleAddTag = (tag: string) => {
+    const currentTags = form.getValues("tags") || "";
+    const tagsArray = currentTags.split(',').map(t => t.trim()).filter(t => t);
+    if (!tagsArray.includes(tag)) {
+        const newTags = [...tagsArray, tag].join(', ');
+        form.setValue("tags", newTags);
+    }
   }
   
   const voiceButtonDisabled = isSubmitting || isGettingPrompt;
@@ -312,6 +379,9 @@ Generate one new prompt for the user now.`;
                 onGeneratePrompt={handleGeneratePrompt}
                 isGettingPrompt={isGettingPrompt}
                 isEditing={false}
+                suggestedTags={suggestedTags}
+                isSuggestingTags={isSuggestingTags}
+                onAddTag={handleAddTag}
               />
             </CardContent>
             <CardFooter className="flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-2">

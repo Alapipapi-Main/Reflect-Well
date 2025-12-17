@@ -16,16 +16,28 @@ import { Input } from "@/components/ui/input"
 import { MOODS } from "@/lib/constants"
 import type { Mood } from "@/lib/types"
 import { Button } from "./ui/button"
-import { Wand, Loader2 } from "lucide-react"
+import { Wand, Loader2, Sparkles } from "lucide-react"
+import { Badge } from "./ui/badge"
 
 interface JournalFormFieldsProps {
   isGenerating?: boolean
   isGettingPrompt?: boolean
   onGeneratePrompt?: () => void
   isEditing?: boolean
+  suggestedTags?: string[]
+  isSuggestingTags?: boolean
+  onAddTag?: (tag: string) => void
 }
 
-export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePrompt, isEditing = false }: JournalFormFieldsProps) {
+export function JournalFormFields({ 
+  isGenerating, 
+  isGettingPrompt, 
+  onGeneratePrompt, 
+  isEditing = false,
+  suggestedTags = [],
+  isSuggestingTags = false,
+  onAddTag
+}: JournalFormFieldsProps) {
   const { control, watch } = useFormContext()
   const moodValue = watch("mood")
 
@@ -129,6 +141,35 @@ export function JournalFormFields({ isGenerating, isGettingPrompt, onGeneratePro
           </FormItem>
         )}
       />
+      
+      {(isSuggestingTags || suggestedTags.length > 0) && (
+        <div className="space-y-3">
+            <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+                <Sparkles className="h-4 w-4 text-primary" />
+                AI Suggestions
+            </h4>
+            <div className="flex flex-wrap gap-2 items-center">
+                {isSuggestingTags && <Loader2 className="h-4 w-4 animate-spin" />}
+                {suggestedTags.map((tag) => (
+                    <Badge 
+                        key={tag} 
+                        variant="secondary" 
+                        className="cursor-pointer hover:bg-primary/20"
+                        onClick={() => onAddTag && onAddTag(tag)}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                onAddTag && onAddTag(tag);
+                            }
+                        }}
+                    >
+                        {tag}
+                    </Badge>
+                ))}
+            </div>
+        </div>
+      )}
     </>
   )
 }
