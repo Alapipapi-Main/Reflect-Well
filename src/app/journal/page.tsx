@@ -78,7 +78,7 @@ function JournalPageContent() {
     <div className="ml-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-             <Button variant="ghost" className="h-10 px-3 py-2 flex items-center gap-1 rounded-md text-sm font-medium text-muted-foreground data-[state=open]:bg-muted/80">
+             <Button variant="ghost" className="h-10 px-3 py-2 flex items-center gap-1 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
                 More <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
