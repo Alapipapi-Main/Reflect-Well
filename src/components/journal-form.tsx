@@ -203,7 +203,7 @@ Journal Entry:
       setReflection(reflectionText);
 
       // Generate audio from the reflection text with a male voice
-      const audio = await puter.ai.txt2speech(reflectionText, { voice: 'male-1' });
+      const audio = await puter.ai.txt2speech(reflectionText, { voice: 'Matthew', engine: 'neural', language: 'en-US' });
       setAudioElement(audio);
 
     } catch (error) {
@@ -477,7 +477,7 @@ Generate one new prompt for the user now.`;
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-y-2">
-             <div className="flex gap-2 w-full sm:w-auto">
+             <div className="flex w-full gap-2 sm:w-auto">
                <Button 
                   onClick={handleAiImage} 
                   disabled={isGeneratingImage || !reflection || !!imageUrl}
