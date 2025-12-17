@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2 } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2, X } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -55,9 +55,10 @@ const formSchema = z.object({
 
 interface JournalFormProps {
   entries: JournalEntry[];
+  onSubmittingChange: (isSubmitting: boolean) => void;
 }
 
-export function JournalForm({ entries }: JournalFormProps) {
+export function JournalForm({ entries, onSubmittingChange }: JournalFormProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
   const { user } = useUser()
@@ -111,6 +112,10 @@ export function JournalForm({ entries }: JournalFormProps) {
       setInspirationPrompt(settings.inspirationPrompt);
     }
   }, [settings]);
+
+  useEffect(() => {
+    onSubmittingChange(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   const entryContent = form.watch("content");
 
@@ -327,6 +332,14 @@ Generate one new prompt for the user now.`;
     }
   };
 
+  const clearInspirationPrompt = () => {
+    if (settingsDocRef) {
+        setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
+    }
+    setInspirationPrompt(null);
+  };
+
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user || !firestore || !settingsDocRef) {
       toast({
@@ -370,8 +383,7 @@ Generate one new prompt for the user now.`;
     setShowReflectionDialog(true);
     
     // 3. Reset form and state
-    setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
-    setInspirationPrompt(null);
+    clearInspirationPrompt();
     setIsSubmitting(false);
     setSuggestedTags([]);
     resetRecorder();
@@ -570,5 +582,3 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
-
-    

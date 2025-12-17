@@ -43,7 +43,8 @@ import { cn } from "@/lib/utils"
 declare const puter: any;
 
 interface PastEntriesProps {
-  entries: JournalEntry[]
+  entries: JournalEntry[];
+  isFormSubmitting: boolean;
 }
 
 const formSchema = z.object({
@@ -58,7 +59,7 @@ const formSchema = z.object({
   tags: z.string().optional(),
 })
 
-export function PastEntries({ entries }: PastEntriesProps) {
+export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
   const { user } = useUser()
@@ -114,7 +115,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
     setDeleteCandidateId(null)
   }
 
-  const handleUpdate = (entryId: string, values: z.infer<typeof formSchema>) => {
+  const handleUpdate = (entryId: string, values: z.infer<typeof formSchema>, audioUrl?: string | null) => {
     if (!user || !firestore) return
 
     const tagsArray = values.tags 
@@ -122,11 +123,17 @@ export function PastEntries({ entries }: PastEntriesProps) {
     : [];
 
     const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', entryId)
-    updateDocumentNonBlocking(entryRef, {
+    const dataToUpdate: Partial<JournalEntry> = {
       content: values.content,
       mood: values.mood,
       tags: tagsArray,
-    })
+    };
+
+    if (audioUrl !== undefined) {
+      dataToUpdate.audioUrl = audioUrl;
+    }
+
+    updateDocumentNonBlocking(entryRef, dataToUpdate)
 
     toast({
       title: "Entry Updated",
@@ -252,6 +259,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                           size="icon"
                           onClick={(e) => handleEditClick(e, entry.id)}
                           aria-label="Edit entry"
+                          disabled={isFormSubmitting}
                         >
                           <Edit className={`h-5 w-5 ${editingEntryId === entry.id ? 'text-primary' : ''}`} />
                         </Button>
@@ -260,8 +268,9 @@ export function PastEntries({ entries }: PastEntriesProps) {
                           size="icon"
                           onClick={(e) => handleDeleteClick(e, entry.id)}
                           aria-label="Delete entry"
+                          disabled={isFormSubmitting}
                         >
-                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-400 dark:hover:text-red-300" />
+                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
                         </Button>
                       </div>
                   </div>
@@ -269,7 +278,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                     {editingEntryId === entry.id ? (
                       <EditJournalForm 
                         entry={entry} 
-                        onSave={(values) => handleUpdate(entry.id, values)} 
+                        onSave={(values, audioUrl) => handleUpdate(entry.id, values, audioUrl)} 
                         onCancel={() => setEditingEntryId(null)}
                       />
                     ) : (
@@ -324,7 +333,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteCandidateId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-700 dark:hover:bg-red-600">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -334,11 +343,13 @@ export function PastEntries({ entries }: PastEntriesProps) {
 
 interface EditJournalFormProps {
   entry: JournalEntry
-  onSave: (values: z.infer<typeof formSchema>) => void
+  onSave: (values: z.infer<typeof formSchema>, audioUrl?: string | null) => void
   onCancel: () => void
 }
 
 function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
+  const [currentAudioUrl, setCurrentAudioUrl] = useState(entry.audioUrl);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -412,9 +423,29 @@ Journal Entry:
     }
   };
 
+  const handleDeleteMemo = () => {
+    setCurrentAudioUrl(null);
+  };
+
+  const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+    onSave(values, currentAudioUrl);
+  };
+
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSave)} className="space-y-6 pt-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6 pt-4">
+        {currentAudioUrl && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">Voice Memo</h4>
+            <div className="flex items-center gap-2">
+              <audio src={currentAudioUrl} controls className="w-full" />
+              <Button type="button" variant="ghost" size="icon" onClick={handleDeleteMemo}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+                <span className="sr-only">Delete memo</span>
+              </Button>
+            </div>
+          </div>
+        )}
         <JournalFormFields 
           isEditing={true}
           suggestedTags={suggestedTags}
@@ -429,5 +460,3 @@ Journal Entry:
     </FormProvider>
   )
 }
-
-    

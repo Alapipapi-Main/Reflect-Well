@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
@@ -27,6 +27,7 @@ function JournalPageContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
+  const [isSubmittingNewEntry, setIsSubmittingNewEntry] = useState(false);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -102,7 +103,7 @@ function JournalPageContent() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
           <TabsContent value="new-entry" className="mt-6 space-y-6">
-            <JournalForm entries={entries || []} />
+            <JournalForm entries={entries || []} onSubmittingChange={setIsSubmittingNewEntry} />
           </TabsContent>
           <TabsContent value="guided" className="mt-6">
             <GuidedJournaling />
@@ -111,7 +112,7 @@ function JournalPageContent() {
             <AskJournal entries={entries || []} />
           </TabsContent>
           <TabsContent value="history" className="mt-6">
-            <PastEntries entries={entries || []} />
+            <PastEntries entries={entries || []} isFormSubmitting={isSubmittingNewEntry} />
           </TabsContent>
           <TabsContent value="trends" className="mt-6">
             <MoodChart entries={entries || []} />
