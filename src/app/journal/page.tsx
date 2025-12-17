@@ -21,6 +21,7 @@ import { OnThisDay } from '@/components/on-this-day';
 import { AskJournal } from '@/components/ask-journal';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { JournalGoals } from '@/components/journal-goals';
+import { GuidedJournaling } from '@/components/guided-journaling';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -88,6 +89,7 @@ function JournalPageContent() {
            <ScrollArea className="w-full whitespace-nowrap">
             <TabsList className="w-full justify-start sm:justify-center p-2 h-auto bg-muted/50">
               <TabsTrigger value="new-entry">New Entry</TabsTrigger>
+              <TabsTrigger value="guided">Guided</TabsTrigger>
               <TabsTrigger value="ask">Ask</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="trends">Trends</TabsTrigger>
@@ -101,6 +103,9 @@ function JournalPageContent() {
           </ScrollArea>
           <TabsContent value="new-entry" className="mt-6 space-y-6">
             <JournalForm entries={entries || []} />
+          </TabsContent>
+          <TabsContent value="guided" className="mt-6">
+            <GuidedJournaling />
           </TabsContent>
           <TabsContent value="ask" className="mt-6">
             <AskJournal entries={entries || []} />
