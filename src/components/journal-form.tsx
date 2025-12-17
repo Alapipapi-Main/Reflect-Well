@@ -407,21 +407,13 @@ Generate one new prompt for the user now.`;
     setShowInspirationDialog(false);
   }
   
-  const voiceButtonDisabled = isSubmitting || isGettingPrompt;
   const isRecordingOrTranscribing = isRecording || isTranscribing;
-
 
   const handleVoiceButtonClick = () => {
     if (isRecording) {
       stopRecording();
     } else {
       startRecording();
-    }
-  };
-  
-  const clearInspirationPrompt = () => {
-    if (settingsDocRef) {
-        setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
     }
   };
 
@@ -474,7 +466,7 @@ Generate one new prompt for the user now.`;
                 type="button"
                 variant={isRecording ? "destructive" : "outline"}
                 onClick={handleVoiceButtonClick}
-                disabled={voiceButtonDisabled || isTranscribing}
+                disabled={isSubmitting || isGettingPrompt || isTranscribing}
               >
                 {isRecording ? (
                   <>
@@ -583,3 +575,5 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
+
+    

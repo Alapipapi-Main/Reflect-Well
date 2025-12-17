@@ -91,7 +91,7 @@ export function JournalFormFields({
             <div className="flex justify-between items-center mb-2">
               <FormLabel>Your journal entry</FormLabel>
               {!isEditing && onGeneratePrompt && (
-                <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt || !moodValue}>
+                <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt || isGenerating || !moodValue}>
                   {isGettingPrompt ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -173,3 +173,5 @@ export function JournalFormFields({
     </>
   )
 }
+
+    
