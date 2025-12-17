@@ -77,7 +77,11 @@ export function PastEntries({ entries }: PastEntriesProps) {
 
   const filteredEntries = sortedEntries.filter(entry => {
     const entryDate = entry.date ? (entry.date as any).toDate() : null
-    const matchesSearchTerm = entry.content.toLowerCase().includes(searchTerm.toLowerCase())
+    const content = entry.content || "";
+    const tags = entry.tags || [];
+    const searchString = `${content} ${tags.join(' ')}`.toLowerCase();
+
+    const matchesSearchTerm = searchString.includes(searchTerm.toLowerCase());
     const matchesMoodFilter = moodFilter ? entry.mood === moodFilter : true
     const matchesDateFilter = () => {
         if (!dateRange.from || !entryDate) return true;
@@ -278,7 +282,7 @@ export function PastEntries({ entries }: PastEntriesProps) {
                         {entry.audioUrl && (
                           <audio src={entry.audioUrl} controls className="w-full" />
                         )}
-                        <p>{entry.content}</p>
+                        <p>{entry.content || <span className="text-muted-foreground italic">No text content for this entry.</span>}</p>
                         {entry.tags && entry.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2 items-center">
                             <Tag className="h-4 w-4 text-muted-foreground" />
@@ -338,7 +342,7 @@ function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      content: entry.content,
+      content: entry.content || '',
       mood: entry.mood,
       tags: entry.tags ? entry.tags.join(', ') : '',
     },

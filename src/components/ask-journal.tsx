@@ -67,7 +67,9 @@ export function AskJournal({ entries }: AskJournalProps) {
         const date = format((entry.date as any).toDate(), "EEEE, MMMM d, yyyy");
         const mood = MOODS[entry.mood].label;
         const tags = entry.tags && entry.tags.length > 0 ? `Tags: ${entry.tags.join(', ')}\n` : '';
-        return `Date: ${date}\nMood: ${mood}\n${tags}Entry: "${entry.content}"`;
+        const voiceMemo = entry.audioUrl ? `(Voice memo attached)\n` : '';
+        const content = entry.content || '(No text content)';
+        return `Date: ${date}\nMood: ${mood}\n${tags}${voiceMemo}Entry: "${content}"`;
       }).join("\n\n---\n\n");
 
     const prompt = `You are an AI assistant with access to a user's private journal. Your task is to answer the user's question based *only* on the content and associated tags of their journal entries provided below.
@@ -75,6 +77,7 @@ export function AskJournal({ entries }: AskJournalProps) {
 - Your tone should be helpful, private, and aligned with the reflective nature of a journal.
 - Synthesize information from multiple entries if necessary to form a comprehensive answer.
 - Pay close attention to the provided tags (e.g., 'work', 'gratitude') as they provide important context.
+- Some entries may have a "(Voice memo attached)" note. If the text does not contain the answer, but the entry seems relevant, you should mention that the answer might be in the voice memo. For example: "On May 5th, you wrote about your project, and a voice memo was attached. The details might be in there."
 - If the journal does not contain information to answer the question, you MUST explicitly state that. For example, say "I couldn't find any entries in your journal that mention that."
 - Do not make up information or answer questions that are not related to the journal's content.
 - Quote short, relevant snippets from the journal entries to support your answer where appropriate. Always cite the date of the entry you're quoting.

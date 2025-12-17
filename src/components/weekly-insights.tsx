@@ -106,8 +106,10 @@ export function WeeklyInsights({ entries }: WeeklyInsightsProps) {
       .map(entry => {
         const date = format((entry.date as any).toDate(), "EEEE, MMMM d");
         const mood = MOODS[entry.mood].label;
-        const tags = entry.tags && entry.tags.length > 0 ? `Tags: ${entry.tags.join(', ')}` : '';
-        return `Date: ${date}\nMood: ${mood}\n${tags}Entry: "${entry.content}"`;
+        const tags = entry.tags && entry.tags.length > 0 ? `Tags: ${entry.tags.join(', ')}\n` : '';
+        const voiceMemo = entry.audioUrl ? `(Voice memo attached)\n` : '';
+        const content = entry.content || '(No text content)';
+        return `Date: ${date}\nMood: ${mood}\n${tags}${voiceMemo}Entry: "${content}"`;
       }).join("\n\n---\n\n");
     
     const statsContext = `
@@ -120,6 +122,7 @@ The most common themes (tags) were: ${stats.topTags.length > 0 ? stats.topTags.j
 - Your tone should be warm, encouraging, and empathetic.
 - Look for recurring moods, topics, or shifts in feeling.
 - Use the provided weekly stats to inform your summary. For example, if the primary mood was "Sad" and a common tag was "work", you could gently connect these themes.
+- If an entry has a voice memo but little text, acknowledge that there might be more to their thoughts in the audio.
 - Synthesize the user's feelings and experiences into a short, cohesive narrative (2-4 sentences).
 - Do NOT give advice, pass judgment, or use clinical language.
 - Frame your observations gently, using phrases like "It seems like..." or "I notice that...".
