@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, History } from "lucide-react"
+import { BookHeart, Loader, ChevronDown } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry } from "@/lib/types"
@@ -19,16 +19,23 @@ import { YesterdaysReflection } from '@/components/yesterdays-reflection';
 import { JournalStats } from '@/components/journal-stats';
 import { OnThisDay } from '@/components/on-this-day';
 import { AskJournal } from '@/components/ask-journal';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { JournalGoals } from '@/components/journal-goals';
 import { GuidedJournaling } from '@/components/guided-journaling';
 import { GratitudeWall } from '@/components/gratitude-wall';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from '@/components/ui/button';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
   const [isSubmittingNewEntry, setIsSubmittingNewEntry] = useState(false);
+  const [activeTab, setActiveTab] = useState("new-entry");
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -38,8 +45,6 @@ function JournalPageContent() {
 
   const journalEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    // We can keep the 'desc' order here as it's often efficient for 'latest' queries,
-    // and we will reverse it client-side for chronological display.
     return query(
       collection(firestore, 'users', user.uid, 'journalEntries'),
       orderBy('date', 'desc')
@@ -50,7 +55,6 @@ function JournalPageContent() {
 
   const entries = useMemo(() => {
     if (!rawEntries) return [];
-    // Sort once here to ensure chronological order (oldest first)
     return [...rawEntries].sort((a, b) => {
       const dateA = a.date ? (a.date as any).toDate() : new Date(0);
       const dateB = b.date ? (b.date as any).toDate() : new Date(0);
@@ -70,6 +74,25 @@ function JournalPageContent() {
     return <EmailVerificationGate user={user} />;
   }
 
+  const DropdownTabs = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="flex items-center gap-2">
+          More <ChevronDown className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onSelect={() => setActiveTab('guided')}>Guided Journaling</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setActiveTab('gratitude')}>Gratitude Wall</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setActiveTab('insights')}>Weekly Insights</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setActiveTab('stats')}>Journal Stats</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setActiveTab('goals')}>Journal Goals</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setActiveTab('yesterday')}>Yesterday's Reflection</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setActiveTab('on-this-day')}>On This Day</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <ThemeProvider
       attribute="class"
@@ -87,23 +110,17 @@ function JournalPageContent() {
         </header>
         <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
         
-        <Tabs defaultValue="new-entry" className="w-full">
-           <ScrollArea className="w-full whitespace-nowrap">
-            <TabsList className="w-full justify-start sm:justify-center p-2 h-auto bg-muted/50">
-              <TabsTrigger value="new-entry">New Entry</TabsTrigger>
-              <TabsTrigger value="guided">Guided</TabsTrigger>
-              <TabsTrigger value="gratitude">Gratitude</TabsTrigger>
-              <TabsTrigger value="ask">Ask</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-              <TabsTrigger value="trends">Trends</TabsTrigger>
-              <TabsTrigger value="insights">Insights</TabsTrigger>
-              <TabsTrigger value="stats">Stats</TabsTrigger>
-              <TabsTrigger value="goals">Goals</TabsTrigger>
-              <TabsTrigger value="yesterday">Yesterday</TabsTrigger>
-              <TabsTrigger value="on-this-day">On This Day</TabsTrigger>
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="flex justify-center">
+                <TabsList className="p-2 h-auto bg-muted/50">
+                <TabsTrigger value="new-entry">New Entry</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
+                <TabsTrigger value="trends">Trends</TabsTrigger>
+                <TabsTrigger value="ask">Ask</TabsTrigger>
+                <DropdownTabs />
+                </TabsList>
+            </div>
+          
           <TabsContent value="new-entry" className="mt-6 space-y-6">
             <JournalForm entries={entries || []} onSubmittingChange={setIsSubmittingNewEntry} />
           </TabsContent>
