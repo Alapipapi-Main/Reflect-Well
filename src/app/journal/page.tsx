@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -79,8 +80,8 @@ function JournalPageContent() {
 
   const DropdownTabs = () => (
     <DropdownMenu>
-        <TabsTrigger value="more" asChild className={isMoreTabActive ? 'bg-background text-foreground shadow-md' : ''}>
-            <DropdownMenuTrigger className='flex items-center gap-1'>
+        <TabsTrigger value="more" asChild className={cn('relative', isMoreTabActive ? 'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md' : '')}>
+            <DropdownMenuTrigger className='flex items-center gap-1 w-full h-full justify-center px-3 py-2'>
                 More <ChevronDown className="h-4 w-4" />
             </DropdownMenuTrigger>
         </TabsTrigger>
