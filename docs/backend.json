@@ -109,6 +109,10 @@
         "goal": {
           "type": "number",
           "description": "The user's weekly journaling goal."
+        },
+        "inspirationPrompt": {
+          "type": "string",
+          "description": "A temporarily stored AI-generated prompt for the user."
         }
       }
     }

@@ -11,3 +11,8 @@ export interface JournalEntry {
   imageUrl?: string | null;
   tags?: string[];
 }
+
+export interface UserSettings {
+  goal: number;
+  inspirationPrompt?: string | null;
+}

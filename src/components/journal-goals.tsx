@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { JournalEntry } from '@/lib/types';
+import type { JournalEntry, UserSettings } from '@/lib/types';
 import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
 import { Target, Trophy, Loader2 } from 'lucide-react';
 import { useUser, useFirestore, useMemoFirebase, useDoc, setDocumentNonBlocking } from '@/firebase';
@@ -13,10 +13,6 @@ import { doc } from 'firebase/firestore';
 
 interface JournalGoalsProps {
   entries: JournalEntry[];
-}
-
-interface UserSettings {
-  goal: number;
 }
 
 const GOAL_OPTIONS = [1, 2, 3, 4, 5, 6, 7];

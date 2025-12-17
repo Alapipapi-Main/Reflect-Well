@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
-import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase"
+import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking, useDoc, useMemoFirebase, setDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
 import { JournalFormFields } from "./journal-form-fields"
 import Image from "next/image"
@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
-import type { JournalEntry, Mood } from "@/lib/types"
+import type { JournalEntry, Mood, UserSettings } from "@/lib/types"
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
 
 declare const puter: any;
@@ -57,12 +57,18 @@ interface JournalFormProps {
   entries: JournalEntry[];
 }
 
-const INSPIRATION_PROMPT_KEY = 'reflectwell-inspiration-prompt';
-
 export function JournalForm({ entries }: JournalFormProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
   const { user } = useUser()
+
+  const settingsDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid, 'settings', 'main');
+  }, [user, firestore]);
+
+  const { data: settings } = useDoc<UserSettings>(settingsDocRef);
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGettingPrompt, setIsGettingPrompt] = useState(false)
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
@@ -72,7 +78,7 @@ export function JournalForm({ entries }: JournalFormProps) {
   const [showReflectionDialog, setShowReflectionDialog] = useState(false)
   const [formKey, setFormKey] = useState(() => Date.now());
 
-  const [inspirationPrompt, setInspirationPrompt] = useState<string | null>(null)
+  const [inspirationPrompt, setInspirationPrompt] = useState<string | null>(null);
   const [showInspirationDialog, setShowInspirationDialog] = useState(false)
 
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
@@ -99,23 +105,13 @@ export function JournalForm({ entries }: JournalFormProps) {
     },
   })
   
-  // Restore prompt from sessionStorage on component mount
   useEffect(() => {
-    const savedPrompt = sessionStorage.getItem(INSPIRATION_PROMPT_KEY);
-    if (savedPrompt) {
-      setInspirationPrompt(savedPrompt);
-    }
-  }, []);
-
-  // Save or remove prompt from sessionStorage when it changes
-  useEffect(() => {
-    if (inspirationPrompt) {
-      sessionStorage.setItem(INSPIRATION_PROMPT_KEY, inspirationPrompt);
+    if (settings && settings.inspirationPrompt) {
+        setInspirationPrompt(settings.inspirationPrompt);
     } else {
-      sessionStorage.removeItem(INSPIRATION_PROMPT_KEY);
+        setInspirationPrompt(null);
     }
-  }, [inspirationPrompt]);
-
+  }, [settings]);
 
   const entryContent = form.watch("content");
 
@@ -288,7 +284,7 @@ Journal Entry:
   };
 
   const handleGeneratePrompt = async () => {
-    if (typeof puter === 'undefined') {
+    if (typeof puter === 'undefined' || !settingsDocRef) {
       toast({
         variant: "destructive",
         title: "AI Feature Not Available",
@@ -324,7 +320,7 @@ Generate one new prompt for the user now.`;
     try {
       const aiResponse = await puter.ai.chat(prompt);
       const generatedPrompt = aiResponse.message.content;
-      setInspirationPrompt(generatedPrompt);
+      setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: generatedPrompt }, { merge: true });
       setShowInspirationDialog(true);
     } catch (error) {
       console.error("Error getting AI prompt from Puter.ai:", error);
@@ -339,7 +335,7 @@ Generate one new prompt for the user now.`;
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user || !firestore) {
+    if (!user || !firestore || !settingsDocRef) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
@@ -380,9 +376,9 @@ Generate one new prompt for the user now.`;
     setShowReflectionDialog(true);
     
     // 3. Reset form and state
+    setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
     setIsSubmitting(false);
     setSuggestedTags([]);
-    setInspirationPrompt(null);
     form.reset({
       content: "",
       mood: undefined,
@@ -424,7 +420,9 @@ Generate one new prompt for the user now.`;
   };
   
   const clearInspirationPrompt = () => {
-    setInspirationPrompt(null);
+    if (settingsDocRef) {
+        setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
+    }
   };
 
   return (
