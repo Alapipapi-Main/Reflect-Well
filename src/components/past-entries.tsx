@@ -35,7 +35,7 @@ import { Badge } from "@/components/ui/badge"
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns"
-import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2 } from "lucide-react"
+import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2, MessageSquareQuote } from "lucide-react"
 import { JournalFormFields } from "@/components/journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -281,16 +281,16 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                         onCancel={() => setEditingEntryId(null)}
                       />
                     ) : (
-                      <div className="space-y-4">
+                       <div className="space-y-4">
                         {entry.imageUrl && (
                           <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-                            <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
+                            <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
                           </div>
                         )}
                         {entry.audioUrl && (
                           <audio src={entry.audioUrl} controls className="w-full" />
                         )}
-                        <p>{entry.content || <span className="text-muted-foreground italic">No text content for this entry.</span>}</p>
+                        <p className="whitespace-pre-wrap">{entry.content || <span className="text-muted-foreground italic">No text content for this entry.</span>}</p>
                         {entry.tags && entry.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2 items-center">
                             <Tag className="h-4 w-4 text-muted-foreground" />
@@ -348,7 +348,9 @@ interface EditJournalFormProps {
 
 function EditJournalForm({ entry, onSave, onCancel }: EditJournalFormProps) {
   const { toast } = useToast();
+  const { user, firestore } = useUserAndFirestore();
   const [currentAudioUrl, setCurrentAudioUrl] = useState(entry.audioUrl || null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   
   const {
     startRecording,
@@ -450,6 +452,35 @@ Journal Entry:
     }
   };
 
+  const handleTranscribe = async () => {
+    if (!currentAudioUrl) {
+      toast({ variant: 'destructive', title: 'No audio memo to transcribe.' });
+      return;
+    }
+    if (typeof puter === 'undefined') {
+        toast({ variant: 'destructive', title: 'AI not available' });
+        return;
+    }
+
+    setIsTranscribing(true);
+    try {
+      const transcriptionResult = await puter.ai.speech2text(currentAudioUrl);
+      const transcriptionText = transcriptionResult.text;
+      
+      const currentContent = form.getValues("content");
+      const newContent = `${currentContent}\n\n---\n\n**Voice Memo Transcription:**\n*${transcriptionText}*`;
+      form.setValue("content", newContent);
+
+      toast({ title: 'Transcription Added', description: 'The voice memo transcription has been added to your entry content.' });
+    } catch (err) {
+      console.error("Transcription failed:", err);
+      toast({ variant: 'destructive', title: 'Transcription Failed', description: 'Could not transcribe the voice memo at this time.' });
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+
   const handleDeleteMemo = () => {
     setCurrentAudioUrl(null);
   };
@@ -466,6 +497,10 @@ Journal Entry:
     }
   };
 
+  const hasTranscription = useMemo(() => {
+      return entry.content?.includes('**Voice Memo Transcription:**');
+  }, [entry.content]);
+
 
   return (
     <FormProvider {...form}>
@@ -480,6 +515,18 @@ Journal Entry:
                 <span className="sr-only">Delete memo</span>
               </Button>
             </div>
+             {!hasTranscription && (
+                 <Button 
+                    type="button" 
+                    variant="outline"
+                    size="sm"
+                    onClick={handleTranscribe}
+                    disabled={isTranscribing}
+                 >
+                    {isTranscribing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquareQuote className="mr-2 h-4 w-4" />}
+                     Transcribe Memo
+                 </Button>
+            )}
           </div>
         )}
         <JournalFormFields 
@@ -522,3 +569,11 @@ Journal Entry:
     </FormProvider>
   )
 }
+
+function useUserAndFirestore() {
+    const { user } = useUser();
+    const firestore = useFirestore();
+    return { user, firestore };
+}
+
+    

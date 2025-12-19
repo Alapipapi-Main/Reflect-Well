@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -401,20 +402,35 @@ Generate one new prompt for the user now.`;
       ? values.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
       : [];
 
+    let finalContent = values.content;
+
+    // Transcribe audio if present
+    if (audioUrl) {
+        try {
+            const transcriptionResult = await puter.ai.speech2text(audioUrl);
+            const transcriptionText = transcriptionResult.text;
+            finalContent += `\n\n---\n\n**Voice Memo Transcription:**\n*${transcriptionText}*`;
+            toast({ title: "Memo Transcribed!", description: "Your voice memo has been transcribed and added to the entry." });
+        } catch(err) {
+            console.error("Transcription failed:", err);
+            toast({ variant: 'destructive', title: 'Transcription Failed', description: 'Could not transcribe the voice memo. The audio is still saved.' });
+        }
+    }
+
     // 1. Save the entry to Firestore
     const journalEntriesRef = collection(firestore, 'users', user.uid, 'journalEntries');
     const newDoc = await addDocumentNonBlocking(journalEntriesRef, {
       userId: user.uid,
       date: serverTimestamp(),
       mood: values.mood,
-      content: values.content,
+      content: finalContent,
       imageUrl: null,
       audioUrl: audioUrl,
       tags: tagsArray,
     });
 
     if (newDoc) {
-      setActiveEntry({ id: newDoc.id, content: values.content, mood: values.mood });
+      setActiveEntry({ id: newDoc.id, content: finalContent, mood: values.mood });
     }
     
     toast({
@@ -423,7 +439,7 @@ Generate one new prompt for the user now.`;
     });
 
     // 2. Trigger the AI reflection and show dialog
-    await handleAiReflection({ content: values.content, audioUrl });
+    await handleAiReflection({ content: finalContent, audioUrl });
     setShowReflectionDialog(true);
     
     // 3. Reset form and state
@@ -565,7 +581,7 @@ Generate one new prompt for the user now.`;
                   {videoUrl ? (
                       <video src={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                   ) : imageUrl ? (
-                      <Image src={imageUrl} alt="AI-generated image representing the journal entry" layout="fill" objectFit="cover" />
+                      <Image src={imageUrl} alt="AI-generated image representing the journal entry" fill objectFit="cover" />
                   ) : null}
                   {isGeneratingImage && !imageUrl && !videoUrl && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
@@ -579,8 +595,8 @@ Generate one new prompt for the user now.`;
               {reflection || <Loader2 className="h-5 w-5 animate-spin mx-auto" />}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between items-stretch gap-2">
-              <div className="flex flex-wrap items-center gap-2">
+           <AlertDialogFooter className="flex-col sm:flex-row gap-2 items-stretch">
+             <div className="flex flex-wrap items-center gap-2 sm:flex-1">
                   <Button 
                       onClick={handleAiImage} 
                       disabled={isGeneratingImage || !reflection || !!imageUrl}
@@ -609,7 +625,7 @@ Generate one new prompt for the user now.`;
                       <span className="ml-2">Listen</span>
                   </Button>
               </div>
-              <AlertDialogAction onClick={() => setShowReflectionDialog(false)} className="w-full sm:w-auto">Close</AlertDialogAction>
+              <AlertDialogAction onClick={() => setShowReflectionDialog(false)} className="w-full sm:w-auto mt-2 sm:mt-0">Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -638,3 +654,5 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
+
+    
