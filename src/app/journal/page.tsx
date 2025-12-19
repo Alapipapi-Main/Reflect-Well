@@ -109,12 +109,6 @@ function JournalPageContent() {
 
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
       <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-2">
@@ -171,12 +165,18 @@ function JournalPageContent() {
            </TabsContent>
         </Tabs>
       </main>
-    </ThemeProvider>
   );
 }
 
 export default function JournalPage() {
   return (
-      <JournalPageContent />
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <JournalPageContent />
+      </ThemeProvider>
   )
 }
