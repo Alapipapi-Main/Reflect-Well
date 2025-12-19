@@ -13,7 +13,6 @@ import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
-import { ThemeProvider } from '@/components/theme-provider';
 import { WeeklyInsights } from '@/components/weekly-insights';
 import { YesterdaysReflection } from '@/components/yesterdays-reflection';
 import { JournalStats } from '@/components/journal-stats';
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ThemeProvider } from '@/components/theme-provider';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -121,7 +121,7 @@ function JournalPageContent() {
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
-                <TabsList className="p-1.5 h-auto bg-muted/50 flex-wrap justify-center gap-1.5">
+                <TabsList className="p-1.5 h-auto flex-wrap justify-center gap-1.5">
                   <TabsTrigger value="new-entry">New Entry</TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                   <TabsTrigger value="trends">Trends</TabsTrigger>
