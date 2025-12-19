@@ -81,11 +81,14 @@ export function OnThisDay({ entries }: OnThisDayProps) {
                     <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                     {entry.imageUrl && (
                       <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
                         <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
                       </div>
+                    )}
+                    {entry.audioUrl && (
+                        <audio src={entry.audioUrl} controls className="w-full" />
                     )}
                     <p className="whitespace-pre-wrap">{entry.content}</p>
                 </CardContent>
