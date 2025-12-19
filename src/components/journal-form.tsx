@@ -19,7 +19,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -480,7 +479,7 @@ Generate one new prompt for the user now.`;
                   <h4 className="text-sm font-medium text-muted-foreground">Your Recorded Memo</h4>
                   <div className="flex items-center gap-2">
                     <audio src={audioUrl} controls className="w-full" />
-                    <Button type="button" variant="ghost" size="icon" onClick={resetRecorder}>
+                    <Button type="button" variant="ghost" size="icon" onClick={resetRecorder} disabled={isSubmitting}>
                       <Trash2 className="h-4 w-4 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
                       <span className="sr-only">Delete recording</span>
                     </Button>
@@ -554,7 +553,7 @@ Generate one new prompt for the user now.`;
               <Sparkles className="text-primary" />
               A Moment of Reflection
             </AlertDialogTitle>
-            {(isGeneratingImage || imageUrl || isGeneratingVideo || videoUrl) && (
+             {(isGeneratingImage || imageUrl || isGeneratingVideo || videoUrl) && (
               <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden bg-secondary">
                   {isGeneratingVideo && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
@@ -567,7 +566,7 @@ Generate one new prompt for the user now.`;
                   ) : imageUrl ? (
                       <Image src={imageUrl} alt="AI-generated image representing the journal entry" layout="fill" objectFit="cover" />
                   ) : null}
-                  {isGeneratingImage && !imageUrl && (
+                  {isGeneratingImage && !imageUrl && !videoUrl && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
                           <Loader2 className="h-8 w-8 animate-spin mb-2" />
                           <span>Creating image...</span>
@@ -579,54 +578,37 @@ Generate one new prompt for the user now.`;
               {reflection || <Loader2 className="h-5 w-5 animate-spin mx-auto" />}
             </AlertDialogDescription>
           </AlertDialogHeader>
-           <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between items-stretch gap-2">
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-               <Button 
-                  onClick={handleAiImage} 
-                  disabled={isGeneratingImage || !reflection || !!imageUrl}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  {isGeneratingImage ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Visualizing...
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className="mr-2 h-4 w-4" />
-                      {imageUrl ? 'Image Added' : 'Add Image'}
-                    </>
-                  )}
-                </Button>
-                <Button
-                    onClick={handleAnimateImage}
-                    disabled={isGeneratingVideo || !imageUrl || !!videoUrl}
-                    variant="outline"
-                    className="flex-1"
-                >
-                    {isGeneratingVideo ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                        <Film className="mr-2 h-4 w-4" />
-                    )}
-                    <span>{videoUrl ? 'Animated' : 'Animate'}</span>
-                </Button>
-                <Button 
-                    onClick={() => audioReflection?.play()} 
-                    disabled={isGeneratingAudio || !audioReflection}
-                    variant="outline"
-                     className="flex-1"
-                >
-                    {isGeneratingAudio ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                        <PlayCircle className="h-4 w-4" />
-                    )}
-                    <span className="ml-2">Listen</span>
-                </Button>
-            </div>
-            <AlertDialogAction onClick={() => setShowReflectionDialog(false)} className="w-full sm:w-auto">Close</AlertDialogAction>
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between items-stretch gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                  <Button 
+                      onClick={handleAiImage} 
+                      disabled={isGeneratingImage || !reflection || !!imageUrl}
+                      variant="outline"
+                      className="flex-1"
+                  >
+                      {isGeneratingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImageIcon className="mr-2 h-4 w-4" />}
+                      <span>{imageUrl ? 'Image Added' : 'Add Image'}</span>
+                  </Button>
+                  <Button
+                      onClick={handleAnimateImage}
+                      disabled={isGeneratingVideo || !imageUrl || !!videoUrl}
+                      variant="outline"
+                      className="flex-1"
+                  >
+                      {isGeneratingVideo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Film className="mr-2 h-4 w-4" />}
+                      <span>{videoUrl ? 'Animated' : 'Animate'}</span>
+                  </Button>
+                  <Button 
+                      onClick={() => audioReflection?.play()} 
+                      disabled={isGeneratingAudio || !audioReflection}
+                      variant="outline"
+                      className="flex-1"
+                  >
+                      {isGeneratingAudio ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
+                      <span className="ml-2">Listen</span>
+                  </Button>
+              </div>
+              <AlertDialogAction onClick={() => setShowReflectionDialog(false)} className="w-full sm:w-auto">Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -655,3 +637,5 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
+
+    
