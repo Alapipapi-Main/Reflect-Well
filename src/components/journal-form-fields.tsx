@@ -54,6 +54,7 @@ export function JournalFormFields({
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 className="flex flex-wrap gap-4"
+                disabled={isGenerating}
               >
                 {Object.keys(MOODS).map((moodKey) => {
                   const mood = MOODS[moodKey as Mood]
@@ -173,5 +174,3 @@ export function JournalFormFields({
     </>
   )
 }
-
-    
