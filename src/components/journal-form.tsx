@@ -319,8 +319,10 @@ Journal Entry:
         description: "A short video clip has been saved. Now generating a cover image...",
       });
       
-      // Chain the image generation
-      await handleAiImage();
+      // Chain the image generation only if an image doesn't already exist
+      if (!imageUrl) {
+        await handleAiImage();
+      }
 
     } catch (error) {
       console.error("Error getting AI video from Puter.ai:", error);
