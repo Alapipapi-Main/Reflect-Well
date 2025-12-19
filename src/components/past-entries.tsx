@@ -282,7 +282,12 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                       />
                     ) : (
                        <div className="space-y-4">
-                        {entry.imageUrl && (
+                        {entry.videoUrl && (
+                          <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
+                              <video src={entry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        {entry.imageUrl && !entry.videoUrl && (
                           <div className="relative aspect-video w-full rounded-lg overflow-hidden">
                             <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
                           </div>

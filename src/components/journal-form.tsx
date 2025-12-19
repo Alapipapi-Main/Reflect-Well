@@ -284,8 +284,8 @@ Journal Entry:
     }
   };
 
-    const handleAnimateImage = async () => {
-    if (!activeEntry || !imageUrl) return;
+    const handleAiVideo = async () => {
+    if (!activeEntry || !user || !firestore) return;
 
     if (typeof puter === 'undefined') {
       toast({
@@ -299,25 +299,34 @@ Journal Entry:
     setIsGeneratingVideo(true);
 
     const moodLabel = MOODS[activeEntry.mood].label;
-    const prompt = `Animate this image to bring it to life. The scene should be dynamic and reflect the journal entry's content and the mood of "${moodLabel}". Make the elements move subtly and artistically, creating a short, looping, cinematic video.`;
+    const prompt = `Create a short, looping, cinematic video that visually represents the mood and themes of the following journal entry. The dominant mood is "${moodLabel}". The style should be ethereal, painterly, and evocative, not literal.
+
+Journal Entry:
+"${activeEntry.content}"`;
 
     try {
-      const videoElement = await puter.ai.txt2vid(prompt, {
-        image_url: imageUrl,
-      });
+      const videoElement = await puter.ai.txt2vid(prompt, { model: "Wan-AI/Wan2.2-T2V-A14B" });
+      const generatedVideoUrl = videoElement.src;
+      setVideoUrl(generatedVideoUrl);
       
-      videoElement.addEventListener('loadeddata', () => {
-          videoElement.play().catch(() => {});
-      });
+      // Play the video
+      videoElement.addEventListener('loadeddata', () => videoElement.play().catch(() => {}));
 
-      setVideoUrl(videoElement.src);
+      // Save the video URL to the Firestore entry
+      const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', activeEntry.id);
+      updateDocumentNonBlocking(entryRef, { videoUrl: generatedVideoUrl });
+
+      toast({
+        title: "Video Generated!",
+        description: "A short video clip has been created and saved with your entry.",
+      });
 
     } catch (error) {
       console.error("Error getting AI video from Puter.ai:", error);
       toast({
         variant: "destructive",
-        title: "AI Animation Failed",
-        description: "Could not animate the image for this entry.",
+        title: "AI Video Failed",
+        description: "Could not generate a video for this entry.",
       });
     } finally {
       setIsGeneratingVideo(false);
@@ -572,10 +581,10 @@ Generate one new prompt for the user now.`;
             </AlertDialogTitle>
              {(isGeneratingImage || imageUrl || isGeneratingVideo || videoUrl) && (
               <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden bg-secondary">
-                  {isGeneratingVideo && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
+                  {(isGeneratingImage || isGeneratingVideo) && !videoUrl && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10 bg-black/20">
                           <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                          <span>Animating...</span>
+                          <span>{isGeneratingVideo ? 'Creating video...' : 'Creating image...'}</span>
                       </div>
                   )}
                   {videoUrl ? (
@@ -583,12 +592,6 @@ Generate one new prompt for the user now.`;
                   ) : imageUrl ? (
                       <Image src={imageUrl} alt="AI-generated image representing the journal entry" fill objectFit="cover" />
                   ) : null}
-                  {(isGeneratingImage && !imageUrl && !videoUrl) && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
-                          <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                          <span>Creating image...</span>
-                      </div>
-                  )}
               </div>
             )}
             <AlertDialogDescription className="text-base text-foreground pt-4">
@@ -599,7 +602,7 @@ Generate one new prompt for the user now.`;
              <div className="flex flex-wrap items-center gap-2 sm:flex-1">
                   <Button 
                       onClick={handleAiImage} 
-                      disabled={isGeneratingImage || !reflection || !!imageUrl}
+                      disabled={isGeneratingImage || !reflection || !!imageUrl || !!videoUrl}
                       variant="outline"
                       className="flex-1"
                   >
@@ -607,13 +610,13 @@ Generate one new prompt for the user now.`;
                       <span>{imageUrl ? 'Image Added' : 'Add Image'}</span>
                   </Button>
                   <Button
-                      onClick={handleAnimateImage}
-                      disabled={isGeneratingVideo || !imageUrl || !!videoUrl}
+                      onClick={handleAiVideo}
+                      disabled={isGeneratingVideo || !reflection || !!videoUrl}
                       variant="outline"
                       className="flex-1"
                   >
                       {isGeneratingVideo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Film className="mr-2 h-4 w-4" />}
-                      <span>{videoUrl ? 'Animated' : 'Animate'}</span>
+                      <span>{videoUrl ? 'Video Added' : 'Create Video'}</span>
                   </Button>
                   <Button 
                       onClick={() => audioReflection?.play()} 

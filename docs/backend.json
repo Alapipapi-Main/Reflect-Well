@@ -37,6 +37,11 @@
           "description": "Data URI of a recorded voice memo for the entry.",
           "format": "uri"
         },
+        "videoUrl": {
+          "type": "string",
+          "description": "URL of an AI-generated video representing the entry.",
+          "format": "uri"
+        },
         "tags": {
           "type": "array",
           "description": "An array of tags or categories for the entry.",

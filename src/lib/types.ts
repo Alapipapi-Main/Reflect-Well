@@ -10,6 +10,7 @@ export interface JournalEntry {
   content: string;
   imageUrl?: string | null;
   audioUrl?: string | null;
+  videoUrl?: string | null;
   tags?: string[];
 }
 
