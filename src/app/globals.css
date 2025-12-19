@@ -7,7 +7,7 @@ body {
 }
 
 @layer base {
-  :root {
+  :root, .theme-default {
     --background: 60 56% 91%; /* Pale Cream */
     --foreground: 240 10% 20%;
     --card: 60 56% 94%;
@@ -56,6 +56,126 @@ body {
     --ring: 351 90% 75%;
     --chart-1: 351 90% 75%;
     --chart-2: 240 20% 50%;
+  }
+
+  .theme-forest {
+    --background: 120 15% 95%;
+    --foreground: 120 20% 15%;
+    --card: 120 15% 98%;
+    --card-foreground: 120 20% 15%;
+    --popover: 120 15% 98%;
+    --popover-foreground: 120 20% 15%;
+    --primary: 140 60% 75%;
+    --primary-foreground: 140 60% 20%;
+    --secondary: 110 20% 90%;
+    --secondary-foreground: 110 20% 25%;
+    --muted: 110 20% 94%;
+    --muted-foreground: 110 15% 40%;
+    --accent: 110 20% 90%;
+    --accent-foreground: 110 20% 25%;
+    --border: 120 10% 80%;
+    --input: 120 10% 85%;
+    --ring: 140 60% 65%;
+  }
+
+  .dark.theme-forest {
+    --background: 120 15% 8%;
+    --foreground: 120 10% 95%;
+    --card: 120 15% 10%;
+    --card-foreground: 120 10% 95%;
+    --popover: 120 15% 8%;
+    --popover-foreground: 120 10% 95%;
+    --primary: 140 50% 60%;
+    --primary-foreground: 140 50% 95%;
+    --secondary: 110 10% 18%;
+    --secondary-foreground: 110 10% 85%;
+    --muted: 110 10% 15%;
+    --muted-foreground: 110 10% 60%;
+    --accent: 110 10% 15%;
+    --accent-foreground: 110 10% 85%;
+    --border: 120 10% 20%;
+    --input: 120 10% 22%;
+    --ring: 140 50% 50%;
+  }
+  
+  .theme-ocean {
+    --background: 210 30% 96%;
+    --foreground: 210 25% 20%;
+    --card: 210 30% 99%;
+    --card-foreground: 210 25% 20%;
+    --popover: 210 30% 99%;
+    --popover-foreground: 210 25% 20%;
+    --primary: 220 70% 80%;
+    --primary-foreground: 220 70% 25%;
+    --secondary: 200 50% 92%;
+    --secondary-foreground: 200 40% 30%;
+    --muted: 200 50% 95%;
+    --muted-foreground: 200 20% 45%;
+    --accent: 200 50% 92%;
+    --accent-foreground: 200 40% 30%;
+    --border: 210 20% 85%;
+    --input: 210 20% 90%;
+    --ring: 220 70% 70%;
+  }
+
+  .dark.theme-ocean {
+    --background: 220 20% 10%;
+    --foreground: 210 20% 96%;
+    --card: 220 20% 12%;
+    --card-foreground: 210 20% 96%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 210 60% 70%;
+    --primary-foreground: 210 60% 10%;
+    --secondary: 200 15% 20%;
+    --secondary-foreground: 200 15% 90%;
+    --muted: 200 15% 15%;
+    --muted-foreground: 200 10% 60%;
+    --accent: 200 15% 15%;
+    --accent-foreground: 200 15% 90%;
+    --border: 200 15% 22%;
+    --input: 200 15% 24%;
+    --ring: 210 60% 60%;
+  }
+
+  .theme-rose {
+    --background: 350 40% 96%;
+    --foreground: 350 20% 20%;
+    --card: 350 40% 99%;
+    --card-foreground: 350 20% 20%;
+    --popover: 350 40% 99%;
+    --popover-foreground: 350 20% 20%;
+    --primary: 340 80% 80%;
+    --primary-foreground: 340 80% 20%;
+    --secondary: 355 50% 93%;
+    --secondary-foreground: 355 30% 30%;
+    --muted: 355 50% 96%;
+    --muted-foreground: 355 15% 45%;
+    --accent: 355 50% 93%;
+    --accent-foreground: 355 30% 30%;
+    --border: 350 25% 88%;
+    --input: 350 25% 92%;
+    --ring: 340 80% 70%;
+  }
+  
+  .dark.theme-rose {
+    --background: 350 15% 10%;
+    --foreground: 350 10% 96%;
+    --card: 350 15% 12%;
+    --card-foreground: 350 10% 96%;
+    --popover: 350 15% 10%;
+    --popover-foreground: 350 10% 96%;
+    --primary: 340 70% 75%;
+    --primary-foreground: 340 70% 10%;
+    --secondary: 355 10% 20%;
+    --secondary-foreground: 355 10% 90%;
+    --muted: 355 10% 15%;
+    --muted-foreground: 355 10% 60%;
+    --accent: 355 10% 15%;
+    --accent-foreground: 355 10% 90%;
+    --border: 355 10% 22%;
+    --input: 355 10% 24%;
+    --ring: 340 70% 65%;
   }
 }
 
