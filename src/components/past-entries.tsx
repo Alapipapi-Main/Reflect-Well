@@ -464,7 +464,7 @@ Journal Entry:
 
     setIsTranscribing(true);
     try {
-      const transcriptionResult = await puter.ai.speech2text(currentAudioUrl);
+      const transcriptionResult = await puter.ai.speech2txt(currentAudioUrl);
       const transcriptionText = transcriptionResult.text;
       
       const currentContent = form.getValues("content");
@@ -575,5 +575,3 @@ function useUserAndFirestore() {
     const firestore = useFirestore();
     return { user, firestore };
 }
-
-    

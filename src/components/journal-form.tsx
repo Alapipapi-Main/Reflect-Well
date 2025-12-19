@@ -405,9 +405,9 @@ Generate one new prompt for the user now.`;
     let finalContent = values.content;
 
     // Transcribe audio if present
-    if (audioUrl) {
+    if (audioUrl && typeof puter !== 'undefined') {
         try {
-            const transcriptionResult = await puter.ai.speech2text(audioUrl);
+            const transcriptionResult = await puter.ai.speech2txt(audioUrl);
             const transcriptionText = transcriptionResult.text;
             finalContent += `\n\n---\n\n**Voice Memo Transcription:**\n*${transcriptionText}*`;
             toast({ title: "Memo Transcribed!", description: "Your voice memo has been transcribed and added to the entry." });
@@ -583,7 +583,7 @@ Generate one new prompt for the user now.`;
                   ) : imageUrl ? (
                       <Image src={imageUrl} alt="AI-generated image representing the journal entry" fill objectFit="cover" />
                   ) : null}
-                  {isGeneratingImage && !imageUrl && !videoUrl && (
+                  {(isGeneratingImage && !imageUrl && !videoUrl) && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
                           <Loader2 className="h-8 w-8 animate-spin mb-2" />
                           <span>Creating image...</span>
@@ -654,5 +654,3 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
-
-    
