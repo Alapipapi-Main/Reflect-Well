@@ -28,7 +28,7 @@ This project was built using Firebase Studio.
 -   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 -   **UI Components**: [ShadCN UI](https://ui.shadcn.com/)
 -   **Backend & Database**: [Firebase](https://firebase.google.com/) (Authentication & Firestore)
--   **AI Features**: [Puter.ai](https://puter.com/) for generative text and images.
+-   **AI Features**: [Puter.ai](https://developer.puter.com/) for generative text and images.
 -   **Charts**: [Recharts](https://recharts.org/)
 -   **Forms**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
 
