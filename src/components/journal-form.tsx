@@ -19,6 +19,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -637,5 +638,3 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
-
-    
