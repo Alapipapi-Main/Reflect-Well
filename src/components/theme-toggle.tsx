@@ -3,20 +3,24 @@
 
 import * as React from "react"
 import { Moon, Sun, Palette } from "lucide-react"
-import { useTheme } from "next-themes"
+import { useTheme as useNextTheme } from "next-themes"
+import { useTheme } from "@/hooks/use-theme"
 
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
 export function ThemeToggle() {
-  const { setTheme } = useTheme()
+  // `next-themes` is now only for light/dark mode
+  const { setTheme: setMode } = useNextTheme()
+  // Our new hook manages the color theme class
+  const { setTheme: setColorTheme } = useTheme()
 
   return (
     <DropdownMenu>
@@ -29,13 +33,13 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => setMode("light")}>
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => setMode("dark")}>
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem onClick={() => setMode("system")}>
           System
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -45,16 +49,16 @@ export function ThemeToggle() {
             <span>Color Theme</span>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => setTheme("theme-default")}>
+        <DropdownMenuItem onClick={() => setColorTheme("theme-default")}>
           Default (Rose)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("theme-forest")}>
+        <DropdownMenuItem onClick={() => setColorTheme("theme-forest")}>
           Forest
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("theme-ocean")}>
+        <DropdownMenuItem onClick={() => setColorTheme("theme-ocean")}>
           Ocean
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("theme-rose")}>
+        <DropdownMenuItem onClick={() => setColorTheme("theme-rose")}>
           Sakura
         </DropdownMenuItem>
       </DropdownMenuContent>
