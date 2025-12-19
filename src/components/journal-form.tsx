@@ -554,31 +554,33 @@ Generate one new prompt for the user now.`;
               <Sparkles className="text-primary" />
               A Moment of Reflection
             </AlertDialogTitle>
-            <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden bg-secondary">
-                {isGeneratingVideo && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
-                        <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                        <span>Animating...</span>
-                    </div>
-                )}
-                {videoUrl ? (
-                    <video src={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-                ) : imageUrl ? (
-                    <Image src={imageUrl} alt="AI-generated image representing the journal entry" layout="fill" objectFit="cover" />
-                ) : null}
-                 {isGeneratingImage && !imageUrl && (
-                     <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
-                        <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                        <span>Creating image...</span>
-                    </div>
-                 )}
-            </div>
+            {(isGeneratingImage || imageUrl || isGeneratingVideo || videoUrl) && (
+              <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden bg-secondary">
+                  {isGeneratingVideo && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
+                          <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                          <span>Animating...</span>
+                      </div>
+                  )}
+                  {videoUrl ? (
+                      <video src={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                  ) : imageUrl ? (
+                      <Image src={imageUrl} alt="AI-generated image representing the journal entry" layout="fill" objectFit="cover" />
+                  ) : null}
+                  {isGeneratingImage && !imageUrl && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10">
+                          <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                          <span>Creating image...</span>
+                      </div>
+                  )}
+              </div>
+            )}
             <AlertDialogDescription className="text-base text-foreground pt-4">
               {reflection || <Loader2 className="h-5 w-5 animate-spin mx-auto" />}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-y-2">
-             <div className="flex w-full gap-2 sm:w-auto">
+           <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-between items-stretch gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                <Button 
                   onClick={handleAiImage} 
                   disabled={isGeneratingImage || !reflection || !!imageUrl}
@@ -653,5 +655,3 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
-
-    
