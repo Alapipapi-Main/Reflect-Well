@@ -309,17 +309,18 @@ Journal Entry:
       const generatedVideoUrl = videoElement.src;
       setVideoUrl(generatedVideoUrl);
       
-      // Play the video
       videoElement.addEventListener('loadeddata', () => videoElement.play().catch(() => {}));
 
-      // Save the video URL to the Firestore entry
       const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', activeEntry.id);
-      updateDocumentNonBlocking(entryRef, { videoUrl: generatedVideoUrl });
+      await updateDocumentNonBlocking(entryRef, { videoUrl: generatedVideoUrl });
 
       toast({
         title: "Video Generated!",
-        description: "A short video clip has been created and saved with your entry.",
+        description: "A short video clip has been saved. Now generating a cover image...",
       });
+      
+      // Chain the image generation
+      await handleAiImage();
 
     } catch (error) {
       console.error("Error getting AI video from Puter.ai:", error);
@@ -480,6 +481,8 @@ Generate one new prompt for the user now.`;
       startRecording();
     }
   };
+  
+  const isGenerating = isGeneratingVideo || isGeneratingImage;
 
   return (
     <>
@@ -579,17 +582,17 @@ Generate one new prompt for the user now.`;
               <Sparkles className="text-primary" />
               A Moment of Reflection
             </AlertDialogTitle>
-             {(isGeneratingImage || imageUrl || isGeneratingVideo || videoUrl) && (
+             {(isGenerating || videoUrl || imageUrl) && (
               <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden bg-secondary">
-                  {(isGeneratingImage || isGeneratingVideo) && !videoUrl && (
+                  {isGenerating && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10 bg-black/20">
                           <Loader2 className="h-8 w-8 animate-spin mb-2" />
                           <span>{isGeneratingVideo ? 'Creating video...' : 'Creating image...'}</span>
                       </div>
                   )}
-                  {videoUrl ? (
+                  {videoUrl && !isGeneratingVideo ? (
                       <video src={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-                  ) : imageUrl ? (
+                  ) : imageUrl && !isGeneratingVideo ? (
                       <Image src={imageUrl} alt="AI-generated image representing the journal entry" fill objectFit="cover" />
                   ) : null}
               </div>
@@ -602,7 +605,7 @@ Generate one new prompt for the user now.`;
              <div className="flex flex-wrap items-center gap-2 sm:flex-1">
                   <Button 
                       onClick={handleAiImage} 
-                      disabled={isGeneratingImage || !reflection || !!imageUrl || !!videoUrl}
+                      disabled={isGenerating || !!imageUrl}
                       variant="outline"
                       className="flex-1"
                   >
@@ -611,7 +614,7 @@ Generate one new prompt for the user now.`;
                   </Button>
                   <Button
                       onClick={handleAiVideo}
-                      disabled={isGeneratingVideo || !reflection || !!videoUrl}
+                      disabled={isGenerating || !!videoUrl}
                       variant="outline"
                       className="flex-1"
                   >
