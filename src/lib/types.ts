@@ -16,6 +16,8 @@ export interface JournalEntry {
 export interface UserSettings {
   goal: number;
   inspirationPrompt?: string | null;
+  theme?: string;
+  appearance?: 'light' | 'dark' | 'system';
 }
 
 export interface GratitudePost {

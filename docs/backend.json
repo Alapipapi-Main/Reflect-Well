@@ -109,7 +109,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "UserSettings",
       "type": "object",
-      "description": "Stores user-specific settings.",
+      "description": "Stores user-specific settings, including appearance and goals.",
       "properties": {
         "goal": {
           "type": "number",
@@ -118,6 +118,14 @@
         "inspirationPrompt": {
           "type": "string",
           "description": "A temporarily stored AI-generated prompt for the user."
+        },
+        "theme": {
+          "type": "string",
+          "description": "The user's selected color theme (e.g., 'theme-default', 'theme-forest')."
+        },
+        "appearance": {
+          "type": "string",
+          "description": "The user's selected appearance mode (e.g., 'light', 'dark', 'system')."
         }
       }
     },

@@ -2,39 +2,64 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react';
+import { useUser, useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import type { UserSettings } from '@/lib/types';
 
 const COLOR_THEMES = ['theme-default', 'theme-forest', 'theme-ocean', 'theme-rose'];
 const THEME_STORAGE_KEY = 'color-theme';
+const DEFAULT_THEME = 'theme-default';
 
 export function useTheme() {
-  // State to hold the current theme, initialized from localStorage or default.
-  const [theme, setThemeState] = useState<string>(() => {
-    if (typeof window === 'undefined') {
-      return 'theme-default';
-    }
-    return localStorage.getItem(THEME_STORAGE_KEY) || 'theme-default';
-  });
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const [theme, setThemeState] = useState<string>(DEFAULT_THEME);
 
-  // Effect to apply the theme class to the HTML element whenever the theme changes.
+  const settingsDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid, 'settings', 'main');
+  }, [user, firestore]);
+
+  const { data: settings } = useDoc<UserSettings>(settingsDocRef);
+
+  // Effect 1: Initialize theme from localStorage or Firestore
+  useEffect(() => {
+    let initialTheme: string | null = null;
+    if (settings?.theme) {
+      initialTheme = settings.theme; // Firestore is the source of truth
+    } else {
+      initialTheme = localStorage.getItem(THEME_STORAGE_KEY); // Fallback to localStorage
+    }
+    
+    if (initialTheme && COLOR_THEMES.includes(initialTheme)) {
+      setThemeState(initialTheme);
+    } else {
+      setThemeState(DEFAULT_THEME);
+    }
+  }, [settings]);
+
+  // Effect 2: Apply theme class to HTML element
   useEffect(() => {
     const root = window.document.documentElement;
-
-    // Remove any existing color theme classes.
     root.classList.remove(...COLOR_THEMES);
-
-    // Add the new theme class if it's a valid one.
     if (theme && COLOR_THEMES.includes(theme)) {
       root.classList.add(theme);
     }
-  }, [theme]); // Rerun this effect if `theme` state changes.
+  }, [theme]);
 
-  // Callback to set the theme, which updates both state and localStorage.
+  // Callback to set the theme, which updates state, localStorage, and Firestore
   const setTheme = useCallback((newTheme: string) => {
     if (COLOR_THEMES.includes(newTheme)) {
-      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+      // Optimistic updates
       setThemeState(newTheme);
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+      
+      // Save to Firestore non-blockingly
+      if (settingsDocRef) {
+        setDocumentNonBlocking(settingsDocRef, { theme: newTheme }, { merge: true });
+      }
     }
-  }, []);
+  }, [settingsDocRef]);
 
   return { theme, setTheme };
 }
