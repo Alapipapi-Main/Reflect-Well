@@ -100,7 +100,25 @@ Do not include any other text or explanation in your response.`;
 
     try {
       const aiResponse = await puter.ai.chat(prompt);
-      const parsedQuestions = JSON.parse(aiResponse.message.content);
+      const content = aiResponse.message.content;
+      
+      if (!content) {
+          throw new Error("AI returned an empty response.");
+      }
+
+      let parsedQuestions;
+      try {
+        parsedQuestions = JSON.parse(content);
+      } catch (e) {
+        // If parsing fails, try to extract the JSON array from the string
+        const jsonMatch = content.match(/\[.*\]/);
+        if (jsonMatch) {
+          parsedQuestions = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error("Could not find valid JSON in the AI response.");
+        }
+      }
+
       if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0) {
         setQuestions(parsedQuestions);
         setCurrentQuestionIndex(0);
@@ -110,7 +128,7 @@ Do not include any other text or explanation in your response.`;
       }
     } catch (error) {
       console.error('Error starting session:', error);
-      toast({ variant: 'destructive', title: 'Could Not Start Session' });
+      toast({ variant: 'destructive', title: 'Could Not Start Session', description: 'The AI failed to generate questions. Please try again.' });
       setSessionState('idle');
     }
   };
