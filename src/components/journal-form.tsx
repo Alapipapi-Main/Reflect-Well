@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -20,7 +19,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -73,7 +71,7 @@ export function JournalForm({ entries, onSubmittingChange }: JournalFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGettingPrompt, setIsGettingPrompt] = useState(false)
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
-  const [activeEntry, setActiveEntry] = useState<{ id: string, content: string, mood: Mood } | null>(null)
+  const [activeEntry, setActiveEntry] = useState<{ id: string; content: string; mood: Mood, imageUrl: string | null } | null>(null)
   const [reflection, setReflection] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -181,6 +179,8 @@ Journal Entry:
       });
     }
   }, [recorderError, toast]);
+  
+  const isGenerating = isGeneratingVideo || isGeneratingAudio;
 
   const resetDialogState = () => {
     setReflection(null);
@@ -438,7 +438,7 @@ Generate one new prompt for the user now.`;
     });
 
     if (newDoc) {
-      setActiveEntry({ id: newDoc.id, content: finalContent, mood: values.mood });
+      setActiveEntry({ id: newDoc.id, content: finalContent, mood: values.mood, imageUrl: imageUrl });
     }
     
     toast({
@@ -480,8 +480,6 @@ Generate one new prompt for the user now.`;
       startRecording();
     }
   };
-  
-  const isGenerating = isGeneratingVideo || isGeneratingImage;
 
   return (
     <>
@@ -614,6 +612,7 @@ Generate one new prompt for the user now.`;
       
       {/* Reflection Dialog */}
       <AlertDialog open={showReflectionDialog} onOpenChange={(isOpen) => {
+          if (isGenerating) return; // Prevent closing while generating
           if (!isOpen) {
             resetDialogState();
           }
@@ -625,16 +624,18 @@ Generate one new prompt for the user now.`;
               <Sparkles className="text-primary" />
               A Moment of Reflection
             </AlertDialogTitle>
-             {(isGenerating || videoUrl) && (
+             {(activeEntry?.imageUrl || isGeneratingVideo || videoUrl) && (
               <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden bg-secondary">
-                  {isGenerating && (
+                  {isGeneratingVideo && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10 bg-black/20">
                           <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                          <span>{isGeneratingVideo ? 'Creating video...' : 'Creating image...'}</span>
+                          <span>Creating video...</span>
                       </div>
                   )}
                   {videoUrl && !isGeneratingVideo ? (
                       <video src={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                  ) : activeEntry?.imageUrl && !videoUrl ? (
+                     <Image src={activeEntry.imageUrl} alt="AI-generated art for the entry" layout="fill" objectFit="cover" />
                   ) : null}
               </div>
             )}
@@ -644,18 +645,6 @@ Generate one new prompt for the user now.`;
           </AlertDialogHeader>
            <AlertDialogFooter className="flex-col sm:flex-row gap-2 items-stretch">
              <div className="flex flex-wrap items-center gap-2 sm:flex-1">
-                  <Button 
-                      onClick={() => {
-                        // This would need to be re-wired to use the new form-based image generation
-                        toast({title: "Feature moved", description: "You can now generate cover art right from the journal form!"})
-                      }} 
-                      disabled={isGenerating}
-                      variant="outline"
-                      className="flex-1"
-                  >
-                      <Eye className="mr-2 h-4 w-4" />
-                      <span>View Art</span>
-                  </Button>
                   <Button
                       onClick={handleAiVideo}
                       disabled={isGenerating || !!videoUrl}
@@ -675,7 +664,9 @@ Generate one new prompt for the user now.`;
                       <span className="ml-2">Listen</span>
                   </Button>
               </div>
-              <AlertDialogAction onClick={() => setShowReflectionDialog(false)} className="w-full sm:w-auto mt-2 sm:mt-0">Close</AlertDialogAction>
+              <AlertDialogAction onClick={() => setShowReflectionDialog(false)} className="w-full sm:w-auto mt-2 sm:mt-0" disabled={isGenerating}>
+                {isGenerating ? 'Please wait...' : 'Close'}
+              </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -704,3 +695,5 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
+
+    
