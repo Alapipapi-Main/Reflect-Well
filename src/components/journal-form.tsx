@@ -53,11 +53,20 @@ const formSchema = z.object({
 })
 
 interface JournalFormProps {
-  entries: JournalEntry[];
+  entries?: JournalEntry[]; // Make entries optional
   onSubmittingChange: (isSubmitting: boolean) => void;
+  externalImageUrl?: string | null;
+  formContext?: {
+    title: string;
+    description: string;
+  };
 }
 
-export function JournalForm({ entries, onSubmittingChange }: JournalFormProps) {
+export function JournalForm({ 
+    onSubmittingChange,
+    externalImageUrl,
+    formContext,
+ }: JournalFormProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
   const { user } = useUser()
@@ -107,6 +116,13 @@ export function JournalForm({ entries, onSubmittingChange }: JournalFormProps) {
       tags: "",
     },
   })
+
+  // Effect to handle external image URL
+  useEffect(() => {
+    if (externalImageUrl) {
+        setImageUrl(externalImageUrl);
+    }
+  }, [externalImageUrl]);
   
   useEffect(() => {
     if (settings?.inspirationPrompt) {
@@ -476,17 +492,20 @@ Generate one new prompt for the user now.`;
     }
   };
 
+  const defaultTitle = "Today's Reflection";
+  const defaultDescription = "What's on your mind today? Let it all out.";
+
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Today's Reflection</CardTitle>
-          <CardDescription>What's on your mind today? Let it all out.</CardDescription>
+          <CardTitle>{formContext?.title || defaultTitle}</CardTitle>
+          <CardDescription>{formContext?.description || defaultDescription}</CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
-               {inspirationPrompt && (
+               {inspirationPrompt && !externalImageUrl && (
                 <div className="p-4 bg-secondary/30 border-l-4 border-primary rounded-r-lg space-y-2 relative">
                   <h4 className="font-semibold text-foreground flex items-center gap-2">
                     <Wand className="h-4 w-4" />
@@ -510,7 +529,7 @@ Generate one new prompt for the user now.`;
               <JournalFormFields
                 key={formKey} 
                 isGenerating={isSubmitting}
-                onGeneratePrompt={handleGeneratePrompt}
+                onGeneratePrompt={!externalImageUrl ? handleGeneratePrompt : undefined}
                 isGettingPrompt={isGettingPrompt}
                 isEditing={false}
                 suggestedTags={suggestedTags}
@@ -518,50 +537,52 @@ Generate one new prompt for the user now.`;
                 onAddTag={handleAddTag}
               />
               {/* AI Cover Art Section */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">AI Cover Art</h3>
-                <div className="p-4 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-4 text-center min-h-[180px]">
-                  {isGeneratingImage ? (
-                    <>
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                      <p className="text-muted-foreground">Generating your cover art...</p>
-                    </>
-                  ) : imageUrl ? (
-                     <div className="relative w-full aspect-video rounded-md overflow-hidden">
-                       <Image src={imageUrl} alt="AI-generated cover art for the journal entry" layout="fill" objectFit="cover" />
-                       <Button 
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 h-7 w-7"
-                        onClick={() => setImageUrl(null)}
-                        disabled={isSubmitting}
-                       >
-                         <X className="h-4 w-4" />
-                         <span className="sr-only">Remove image</span>
-                       </Button>
-                     </div>
-                  ) : (
-                    <>
-                      <div className="bg-secondary p-3 rounded-full">
-                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <p className="text-muted-foreground max-w-xs">
-                        Create a unique image for your entry based on its content and mood.
-                      </p>
-                      <Button 
-                        type="button"
-                        variant="secondary"
-                        onClick={handleAiImage}
-                        disabled={isSubmitting || !entryContent || !mood}
-                      >
-                         <Sparkles className="mr-2 h-4 w-4" />
-                         Generate Image
-                      </Button>
-                    </>
-                  )}
+              {!externalImageUrl && (
+                <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-muted-foreground">AI Cover Art</h3>
+                    <div className="p-4 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-4 text-center min-h-[180px]">
+                    {isGeneratingImage ? (
+                        <>
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p className="text-muted-foreground">Generating your cover art...</p>
+                        </>
+                    ) : imageUrl ? (
+                        <div className="relative w-full aspect-video rounded-md overflow-hidden">
+                        <Image src={imageUrl} alt="AI-generated cover art for the journal entry" layout="fill" objectFit="cover" />
+                        <Button 
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 right-2 h-7 w-7"
+                            onClick={() => setImageUrl(null)}
+                            disabled={isSubmitting}
+                        >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove image</span>
+                        </Button>
+                        </div>
+                    ) : (
+                        <>
+                        <div className="bg-secondary p-3 rounded-full">
+                            <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-muted-foreground max-w-xs">
+                            Create a unique image for your entry based on its content and mood.
+                        </p>
+                        <Button 
+                            type="button"
+                            variant="secondary"
+                            onClick={handleAiImage}
+                            disabled={isSubmitting || !entryContent || !mood}
+                        >
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Generate Image
+                        </Button>
+                        </>
+                    )}
+                    </div>
                 </div>
-              </div>
+              )}
             </CardContent>
             <CardFooter className="flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-2">
               <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecording || isProcessingAudio || isGeneratingImage}>

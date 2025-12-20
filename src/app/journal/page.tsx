@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, ChevronDown } from "lucide-react"
+import { BookHeart, Loader, ChevronDown, Image } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry } from "@/lib/types"
@@ -30,6 +30,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
+import { VisualPrompt } from '@/components/visual-prompt';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -123,6 +124,10 @@ function JournalPageContent() {
             <div className="flex justify-center">
                 <TabsList className="p-1.5 h-auto flex-wrap justify-center gap-1.5">
                   <TabsTrigger value="new-entry">New Entry</TabsTrigger>
+                  <TabsTrigger value="visual-prompt">
+                    <Image className="mr-2 h-4 w-4" />
+                    Visual Prompt
+                  </TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                   <TabsTrigger value="trends">Trends</TabsTrigger>
                   <TabsTrigger value="ask">Ask</TabsTrigger>
@@ -132,6 +137,9 @@ function JournalPageContent() {
           
           <TabsContent value="new-entry" className="mt-6 space-y-6">
             <JournalForm entries={entries || []} onSubmittingChange={setIsSubmittingNewEntry} />
+          </TabsContent>
+          <TabsContent value="visual-prompt" className="mt-6">
+            <VisualPrompt onSubmittingChange={setIsSubmittingNewEntry} />
           </TabsContent>
           <TabsContent value="guided" className="mt-6">
             <GuidedJournaling />
