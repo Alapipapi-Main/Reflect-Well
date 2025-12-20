@@ -172,6 +172,7 @@ ${formattedEntries}
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
+                    disabled={isLoading}
                     className={cn(
                       "w-full sm:w-[280px] justify-start text-left font-normal",
                       !dateRange.from && "text-muted-foreground"
@@ -199,7 +200,7 @@ ${formattedEntries}
                 </PopoverContent>
               </Popover>
                {dateRange.from && (
-                <Button variant="ghost" size="icon" onClick={clearDateFilter}>
+                <Button variant="ghost" size="icon" onClick={clearDateFilter} disabled={isLoading}>
                   <XIcon className="h-5 w-5" />
                   <span className="sr-only">Clear date filter</span>
                 </Button>
