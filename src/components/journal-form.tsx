@@ -19,6 +19,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -280,9 +281,9 @@ Journal Entry:
     }
   };
 
-    const handleAiVideo = async () => {
+  const handleAiVideo = async () => {
     if (!activeEntry || !user || !firestore) return;
-
+  
     if (typeof puter === 'undefined') {
       toast({
         variant: "destructive",
@@ -291,25 +292,25 @@ Journal Entry:
       });
       return;
     }
-
+  
     setIsGeneratingVideo(true);
-
+  
     const moodLabel = MOODS[activeEntry.mood].label;
     const prompt = `Create a short, looping, cinematic video that visually represents the mood and themes of the following journal entry. The dominant mood is "${moodLabel}". The style should be ethereal, painterly, and evocative, not literal. The source of inspiration is the text, not any associated image.
-
-Journal Entry:
-"${activeEntry.content}"`;
-
+  
+  Journal Entry:
+  "${activeEntry.content}"`;
+  
     try {
       const videoElement = await puter.ai.txt2vid(prompt, { model: "Wan-AI/Wan2.2-T2V-A14B" });
       const generatedVideoUrl = videoElement.src;
       setVideoUrl(generatedVideoUrl);
       
       videoElement.addEventListener('loadeddata', () => videoElement.play().catch(() => {}));
-
+  
       const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', activeEntry.id);
       await updateDocumentNonBlocking(entryRef, { videoUrl: generatedVideoUrl });
-
+  
       toast({
         title: "Video Generated!",
         description: "A short video clip has been added to your entry.",
@@ -690,5 +691,3 @@ Generate one new prompt for the user now.`;
     </>
   )
 }
-
-    
