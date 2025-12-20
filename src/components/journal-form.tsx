@@ -475,11 +475,6 @@ Generate one new prompt for the user now.`;
       tags: "",
     });
     setFormKey(Date.now());
-    
-    // 4. Call the onSave callback if it exists
-    if (onSave) {
-        onSave();
-    }
   }
 
   const handleAddTag = (tag: string) => {
@@ -636,9 +631,13 @@ Generate one new prompt for the user now.`;
       
       {/* Reflection Dialog */}
       <AlertDialog open={showReflectionDialog} onOpenChange={(isOpen) => {
-          if (isGenerating) return; // Prevent closing while generating
+          if (isGenerating) return;
           if (!isOpen) {
             resetDialogState();
+            // Call onSave when the dialog closes
+            if (onSave) {
+              onSave();
+            }
           }
           setShowReflectionDialog(isOpen);
       }}>
