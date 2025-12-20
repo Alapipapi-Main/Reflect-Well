@@ -295,7 +295,7 @@ Journal Entry:
     setIsGeneratingVideo(true);
 
     const moodLabel = MOODS[activeEntry.mood].label;
-    const prompt = `Create a short, looping, cinematic video that visually represents the mood and themes of the following journal entry. The dominant mood is "${moodLabel}". The style should be ethereal, painterly, and evocative, not literal.
+    const prompt = `Create a short, looping, cinematic video that visually represents the mood and themes of the following journal entry. The dominant mood is "${moodLabel}". The style should be ethereal, painterly, and evocative, not literal. The source of inspiration is the text, not any associated image.
 
 Journal Entry:
 "${activeEntry.content}"`;
@@ -312,14 +312,8 @@ Journal Entry:
 
       toast({
         title: "Video Generated!",
-        description: "A short video clip has been saved. Now generating a cover image...",
+        description: "A short video clip has been added to your entry.",
       });
-      
-      // Chain the image generation only if an image doesn't already exist
-      if (!imageUrl) {
-        // Find a way to get the active entry's image url or refetch to do this
-      }
-
     } catch (error) {
       console.error("Error getting AI video from Puter.ai:", error);
       toast({
@@ -540,6 +534,7 @@ Generate one new prompt for the user now.`;
                         size="icon"
                         className="absolute top-2 right-2 h-7 w-7"
                         onClick={() => setImageUrl(null)}
+                        disabled={isSubmitting}
                        >
                          <X className="h-4 w-4" />
                          <span className="sr-only">Remove image</span>
@@ -557,7 +552,7 @@ Generate one new prompt for the user now.`;
                         type="button"
                         variant="secondary"
                         onClick={handleAiImage}
-                        disabled={!entryContent || !mood}
+                        disabled={isSubmitting || !entryContent || !mood}
                       >
                          <Sparkles className="mr-2 h-4 w-4" />
                          Generate Image
