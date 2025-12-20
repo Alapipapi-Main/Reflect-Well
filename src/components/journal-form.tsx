@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2, X, Film } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2, X, Film, Eye } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -120,6 +120,7 @@ export function JournalForm({ entries, onSubmittingChange }: JournalFormProps) {
   }, [isSubmitting, onSubmittingChange]);
 
   const entryContent = form.watch("content");
+  const mood = form.watch("mood");
 
   const handleGenerateTags = useCallback(async (content: string) => {
     if (typeof puter === 'undefined' || content.length < 20) {
@@ -183,11 +184,7 @@ Journal Entry:
 
   const resetDialogState = () => {
     setReflection(null);
-    setImageUrl(null);
     setActiveEntry(null);
-    setIsGeneratingImage(false);
-    setAudioReflection(null);
-    setIsGeneratingAudio(false);
     setVideoUrl(null);
     setIsGeneratingVideo(false);
   }
@@ -239,8 +236,6 @@ Journal Entry:
   }
 
   const handleAiImage = async () => {
-    if (!activeEntry || !user || !firestore) return;
-
     if (typeof puter === 'undefined') {
       toast({
         variant: "destructive",
@@ -250,28 +245,29 @@ Journal Entry:
       return;
     }
 
+    const content = form.getValues('content');
+    const moodValue = form.getValues('mood');
+
+    if (!content || !moodValue) {
+      toast({
+        variant: "destructive",
+        title: "Content & Mood Required",
+        description: "Please write an entry and select a mood before generating art.",
+      });
+      return;
+    }
+
     setIsGeneratingImage(true);
 
-    const moodLabel = MOODS[activeEntry.mood].label;
+    const moodLabel = MOODS[moodValue as Mood].label;
     const prompt = `Create a beautiful, abstract, and artistic image that visually represents the mood and themes of the following journal entry. The dominant mood is "${moodLabel}". The style should be ethereal, painterly, and evocative, not literal. Use a soft color palette that matches the mood.
 
 Journal Entry:
-"${activeEntry.content}"`;
+"${content}"`;
 
     try {
       const imageElement = await puter.ai.txt2img(prompt, {});
-      const generatedImageUrl = imageElement.src;
-      setImageUrl(generatedImageUrl);
-
-      // Save the image URL to the Firestore entry
-      const entryRef = doc(firestore, 'users', user.uid, 'journalEntries', activeEntry.id);
-      updateDocumentNonBlocking(entryRef, { imageUrl: generatedImageUrl });
-
-      toast({
-        title: "Image Generated!",
-        description: "A cover image has been created and saved with your entry.",
-      });
-
+      setImageUrl(imageElement.src);
     } catch (error) {
       console.error("Error getting AI image from Puter.ai:", error);
       toast({
@@ -321,7 +317,7 @@ Journal Entry:
       
       // Chain the image generation only if an image doesn't already exist
       if (!imageUrl) {
-        await handleAiImage();
+        // Find a way to get the active entry's image url or refetch to do this
       }
 
     } catch (error) {
@@ -436,7 +432,7 @@ Generate one new prompt for the user now.`;
       date: serverTimestamp(),
       mood: values.mood,
       content: finalContent,
-      imageUrl: null,
+      imageUrl: imageUrl, // Save the generated image URL
       audioUrl: audioUrl,
       tags: tagsArray,
     });
@@ -459,6 +455,7 @@ Generate one new prompt for the user now.`;
     setIsSubmitting(false);
     setSuggestedTags([]);
     resetRecorder();
+    setImageUrl(null); // Clear the image after saving
     form.reset({
       content: "",
       mood: undefined,
@@ -527,9 +524,53 @@ Generate one new prompt for the user now.`;
                 isSuggestingTags={isSuggestingTags && !isSubmitting}
                 onAddTag={handleAddTag}
               />
+              {/* AI Cover Art Section */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-muted-foreground">AI Cover Art</h3>
+                <div className="p-4 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-4 text-center min-h-[180px]">
+                  {isGeneratingImage ? (
+                    <>
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="text-muted-foreground">Generating your cover art...</p>
+                    </>
+                  ) : imageUrl ? (
+                     <div className="relative w-full aspect-video rounded-md overflow-hidden">
+                       <Image src={imageUrl} alt="AI-generated cover art for the journal entry" layout="fill" objectFit="cover" />
+                       <Button 
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-7 w-7"
+                        onClick={() => setImageUrl(null)}
+                       >
+                         <X className="h-4 w-4" />
+                         <span className="sr-only">Remove image</span>
+                       </Button>
+                     </div>
+                  ) : (
+                    <>
+                      <div className="bg-secondary p-3 rounded-full">
+                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground max-w-xs">
+                        Create a unique image for your entry based on its content and mood.
+                      </p>
+                      <Button 
+                        type="button"
+                        variant="secondary"
+                        onClick={handleAiImage}
+                        disabled={!entryContent || !mood}
+                      >
+                         <Sparkles className="mr-2 h-4 w-4" />
+                         Generate Image
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
             </CardContent>
             <CardFooter className="flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-2">
-              <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecording || isProcessingAudio}>
+              <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecording || isProcessingAudio || isGeneratingImage}>
                 {isSubmitting ? (
                   <>
                     <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
@@ -584,7 +625,7 @@ Generate one new prompt for the user now.`;
               <Sparkles className="text-primary" />
               A Moment of Reflection
             </AlertDialogTitle>
-             {(isGenerating || videoUrl || imageUrl) && (
+             {(isGenerating || videoUrl) && (
               <div className="relative aspect-video w-full mt-4 rounded-lg overflow-hidden bg-secondary">
                   {isGenerating && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground z-10 bg-black/20">
@@ -594,8 +635,6 @@ Generate one new prompt for the user now.`;
                   )}
                   {videoUrl && !isGeneratingVideo ? (
                       <video src={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-                  ) : imageUrl && !isGeneratingVideo ? (
-                      <Image src={imageUrl} alt="AI-generated image representing the journal entry" fill objectFit="cover" />
                   ) : null}
               </div>
             )}
@@ -606,13 +645,16 @@ Generate one new prompt for the user now.`;
            <AlertDialogFooter className="flex-col sm:flex-row gap-2 items-stretch">
              <div className="flex flex-wrap items-center gap-2 sm:flex-1">
                   <Button 
-                      onClick={handleAiImage} 
-                      disabled={isGenerating || !!imageUrl}
+                      onClick={() => {
+                        // This would need to be re-wired to use the new form-based image generation
+                        toast({title: "Feature moved", description: "You can now generate cover art right from the journal form!"})
+                      }} 
+                      disabled={isGenerating}
                       variant="outline"
                       className="flex-1"
                   >
-                      {isGeneratingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImageIcon className="mr-2 h-4 w-4" />}
-                      <span>{imageUrl ? 'Image Added' : 'Add Image'}</span>
+                      <Eye className="mr-2 h-4 w-4" />
+                      <span>View Art</span>
                   </Button>
                   <Button
                       onClick={handleAiVideo}
