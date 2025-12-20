@@ -60,6 +60,11 @@ export function VisualPrompt({ onSubmittingChange }: VisualPromptProps) {
             setIsLoading(false);
         }
     }, [toast]);
+    
+    const handleSave = () => {
+        // Reset the component state by clearing the image URL
+        setImageUrl(null);
+    }
 
     if (imageUrl) {
         return (
@@ -82,6 +87,7 @@ export function VisualPrompt({ onSubmittingChange }: VisualPromptProps) {
                         title: "What does this image bring up for you?",
                         description: "Let your thoughts flow freely as you reflect on the visual prompt."
                     }}
+                    onSave={handleSave}
                 />
             </div>
         );

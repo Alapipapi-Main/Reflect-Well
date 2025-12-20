@@ -60,12 +60,14 @@ interface JournalFormProps {
     title: string;
     description: string;
   };
+  onSave?: () => void;
 }
 
 export function JournalForm({ 
     onSubmittingChange,
     externalImageUrl,
     formContext,
+    onSave,
  }: JournalFormProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
@@ -473,6 +475,11 @@ Generate one new prompt for the user now.`;
       tags: "",
     });
     setFormKey(Date.now());
+    
+    // 4. Call the onSave callback if it exists
+    if (onSave) {
+        onSave();
+    }
   }
 
   const handleAddTag = (tag: string) => {
