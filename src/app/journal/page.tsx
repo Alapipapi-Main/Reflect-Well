@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, ChevronDown, Image, FileText, Clock, Moon, HelpCircle, Bot, Heart, BarChart, Trophy, Calendar, Clock2, Sun, Star, PlusCircle, BookOpen, TrendingUp } from "lucide-react"
+import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry, JournalTemplate, TimeCapsuleEntry } from "@/lib/types"
@@ -121,7 +121,8 @@ function JournalPageContent() {
                               'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground'
                             )}
                           >
-                            More <ChevronDown className="h-4 w-4 ml-1" />
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className='ml-2'>More</span>
                         </Button>
                     </SheetTrigger>
                     <SheetContent>
