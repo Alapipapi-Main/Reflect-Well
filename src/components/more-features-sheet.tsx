@@ -56,7 +56,7 @@ export function MoreFeaturesSheet({ setActiveTab }: MoreFeaturesSheetProps) {
         <SheetHeader>
           <SheetTitle>More Features</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100%-4rem)]">
+        <ScrollArea className="h-full">
             <div className="py-4 flex flex-col gap-1">
                 {features.map((group, index) => (
                     <div key={group.label}>
