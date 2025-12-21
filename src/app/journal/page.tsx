@@ -102,7 +102,7 @@ function JournalPageContent() {
         </header>
         <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
         
-        <Tabs value={isMoreTabActive ? 'more' : activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
                 <TabsList className="p-1.5 h-auto flex flex-wrap justify-center gap-2">
                   <TabsTrigger value="new-entry" >
@@ -117,13 +117,19 @@ function JournalPageContent() {
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
                   </TabsTrigger>
+
+                  {/* Dummy trigger for state management, visually hidden */}
+                  <TabsTrigger value="more" className="hidden">More</TabsTrigger>
+                  
                   <Sheet onOpenChange={setIsSheetOpen}>
                     <SheetTrigger asChild>
                         <div
                             role="button"
+                            // Manually set data-state for visual consistency
                             data-state={isMoreTabActive ? 'active' : 'inactive'}
                             className={cn(
                               'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+                              // These classes mimic the TabsTrigger styles
                               'data-[state=inactive]:bg-transparent data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground',
                               'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md'
                             )}
@@ -146,6 +152,17 @@ function JournalPageContent() {
               templates={templates || []}
             />
           </TabsContent>
+          <TabsContent value="history" className="mt-6">
+            <PastEntries entries={entries || []} isFormSubmitting={isSubmittingNewEntry} />
+          </TabsContent>
+          <TabsContent value="trends" className="mt-6">
+            <MoodChart entries={entries || []} />
+          </TabsContent>
+
+          {/* Dummy content for the 'more' tab to prevent breaking the component */}
+          <TabsContent value="more" className="mt-6" />
+
+          {/* Real content for features under 'more' */}
           <TabsContent value="visual-prompt" className="mt-6">
             <VisualPrompt onSubmittingChange={setIsSubmittingNewEntry} />
           </TabsContent>
@@ -166,12 +183,6 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="ask" className="mt-6">
             <AskJournal entries={entries || []} />
-          </TabsContent>
-          <TabsContent value="history" className="mt-6">
-            <PastEntries entries={entries || []} isFormSubmitting={isSubmittingNewEntry} />
-          </TabsContent>
-          <TabsContent value="trends" className="mt-6">
-            <MoodChart entries={entries || []} />
           </TabsContent>
           <TabsContent value="insights" className="mt-6">
             <WeeklyInsights entries={entries || []} />
