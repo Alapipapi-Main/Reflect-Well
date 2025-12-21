@@ -7,14 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, ChevronDown, Image, FileText, Clock, Moon } from "lucide-react"
+import { BookHeart, Loader, ChevronDown, Image, FileText, Clock, Moon, HelpCircle, Bot, Heart, BarChart, Trophy, Calendar, Clock2, Sun, Star } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry, JournalTemplate, TimeCapsuleEntry } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
 import { WeeklyInsights } from '@/components/weekly-insights';
-import { YesterdaysReflection } from '@/components/yesterdays-reflection';
+import { YesterdaysReflection } from '@/components/yesterdays_reflection';
 import { JournalStats } from '@/components/journal-stats';
 import { OnThisDay } from '@/components/on-this-day';
 import { AskJournal } from '@/components/ask-journal';
@@ -91,8 +91,21 @@ function JournalPageContent() {
     return <EmailVerificationGate user={user} />;
   }
   
-  const moreTabs = ["guided", "gratitude", "insights", "stats", "goals", "yesterday", "on-this-day"];
-  const isMoreTabActive = moreTabs.includes(activeTab);
+  const secondaryTabs = [
+    { value: 'visual-prompt', label: 'Visual Prompt', icon: Image },
+    { value: 'templates', label: 'Templates', icon: FileText },
+    { value: 'time-capsule', label: 'Time Capsule', icon: Clock },
+    { value: 'ask', label: 'Ask Journal', icon: HelpCircle },
+    { value: 'dream-interpreter', label: 'Dreams', icon: Moon },
+    { value: 'guided', label: 'Guided Session', icon: Bot },
+    { value: 'gratitude', label: 'Gratitude Wall', icon: Heart },
+    { value: 'insights', label: 'Weekly Insights', icon: BarChart },
+    { value: 'stats', label: 'Stats', icon: Trophy },
+    { value: 'goals', label: 'Goals', icon: Trophy },
+    { value: 'yesterday', label: 'Yesterday', icon: Calendar },
+    { value: 'on-this-day', label: 'On This Day', icon: Clock2 },
+  ];
+  const isMoreTabActive = secondaryTabs.map(t => t.value).includes(activeTab);
 
   const DropdownTabs = () => (
     <DropdownMenu>
@@ -100,25 +113,22 @@ function JournalPageContent() {
          <Button
             variant="ghost"
             className={cn(
-              // Base styles to mimic TabsTrigger
               'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-              // Active/inactive state
               isMoreTabActive
-                ? 'bg-background text-foreground shadow-md' // Active state
-                : 'text-muted-foreground' // Inactive state
+                ? 'bg-background text-foreground shadow-md'
+                : 'text-muted-foreground'
             )}
           >
             More <ChevronDown className="h-4 w-4 ml-1" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem onSelect={() => setActiveTab('guided')}>Guided Journaling</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('gratitude')}>Gratitude Wall</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('insights')}>Weekly Insights</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('stats')}>Journal Stats</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('goals')}>Journal Goals</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('yesterday')}>Yesterday's Reflection</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setActiveTab('on-this-day')}>On This Day</DropdownMenuItem>
+      <DropdownMenuContent align="end">
+        {secondaryTabs.map(tab => (
+           <DropdownMenuItem key={tab.value} onSelect={() => setActiveTab(tab.value)}>
+             <tab.icon className="mr-2 h-4 w-4" />
+             {tab.label}
+           </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -139,26 +149,21 @@ function JournalPageContent() {
             <div className="flex justify-center">
                 <TabsList className="p-1.5 h-auto flex-wrap justify-center gap-1.5">
                   <TabsTrigger value="new-entry">New Entry</TabsTrigger>
-                  <TabsTrigger value="visual-prompt">
-                    <Image className="mr-2 h-4 w-4" />
-                    Visual Prompt
-                  </TabsTrigger>
-                   <TabsTrigger value="templates">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Templates
-                  </TabsTrigger>
-                   <TabsTrigger value="time-capsule">
-                    <Clock className="mr-2 h-4 w-4" />
-                    Time Capsule
-                  </TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                   <TabsTrigger value="trends">Trends</TabsTrigger>
-                  <TabsTrigger value="ask">Ask</TabsTrigger>
-                  <TabsTrigger value="dream-interpreter">
-                    <Moon className="mr-2 h-4 w-4" />
-                    Dreams
-                  </TabsTrigger>
-                  <DropdownTabs />
+                  
+                  {/* These tabs are hidden on small screens and shown on medium and larger screens */}
+                  {secondaryTabs.map(tab => (
+                    <TabsTrigger key={tab.value} value={tab.value} className="hidden md:flex">
+                        <tab.icon className="mr-2 h-4 w-4" />
+                        {tab.label}
+                    </TabsTrigger>
+                  ))}
+
+                  {/* The dropdown is shown only on small screens */}
+                  <div className="md:hidden">
+                    <DropdownTabs />
+                  </div>
                 </TabsList>
             </div>
           
@@ -228,3 +233,5 @@ export default function JournalPage() {
       </ThemeProvider>
   )
 }
+
+    
