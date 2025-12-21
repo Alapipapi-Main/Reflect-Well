@@ -599,13 +599,13 @@ Generate one new prompt for the user now.`;
                 </div>
               )}
             </CardContent>
-            <CardFooter className="flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-2">
-               <div className="flex gap-2">
-                 <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecording || isProcessingAudio || isGeneratingImage}>
+            <CardFooter className="flex-col items-stretch gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                 <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecording || isProcessingAudio || isGeneratingImage} className="w-full sm:w-auto flex-1">
                   {isSubmitting ? (
                     <>
                       <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
-                      Saving & Reflecting...
+                      Saving...
                     </>
                   ) : (
                     <>
@@ -617,7 +617,7 @@ Generate one new prompt for the user now.`;
                 {templates.length > 0 && !formContext && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button type="button" variant="outline">
+                        <Button type="button" variant="outline" className="w-full sm:w-auto flex-1">
                           <FileText className="mr-2 h-4 w-4" />
                           Use Template
                         </Button>
@@ -631,13 +631,13 @@ Generate one new prompt for the user now.`;
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
-               </div>
-              
-               <Button
+              </div>
+              <Button
                 type="button"
                 variant={isRecording ? "destructive" : "outline"}
                 onClick={handleVoiceButtonClick}
                 disabled={isSubmitting || isGettingPrompt || isProcessingAudio}
+                className="w-full"
               >
                 {isRecording ? (
                   <>
