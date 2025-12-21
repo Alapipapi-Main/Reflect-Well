@@ -14,7 +14,7 @@ import type { JournalEntry, JournalTemplate, TimeCapsuleEntry } from "@/lib/type
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
 import { WeeklyInsights } from '@/components/weekly-insights';
-import { YesterdaysReflection } from '@/components/yesterdays_reflection';
+import { YesterdaysReflection } from '@/components/yesterdays-reflection';
 import { JournalStats } from '@/components/journal-stats';
 import { OnThisDay } from '@/components/on-this-day';
 import { AskJournal } from '@/components/ask-journal';
@@ -233,5 +233,3 @@ export default function JournalPage() {
       </ThemeProvider>
   )
 }
-
-    
