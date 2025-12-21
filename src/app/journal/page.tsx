@@ -37,6 +37,7 @@ function JournalPageContent() {
   const firestore = useFirestore();
   const [isSubmittingNewEntry, setIsSubmittingNewEntry] = useState(false);
   const [activeTab, setActiveTab] = useState("new-entry");
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -113,17 +114,18 @@ function JournalPageContent() {
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
                   </TabsTrigger>
-                  <Sheet>
+                  <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetTrigger asChild>
-                        <Button
-                            variant="ghost"
+                        <button
+                            data-state={isSheetOpen ? 'active' : 'inactive'}
                             className={cn(
-                              'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground'
+                              'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md',
+                              !isSheetOpen && 'text-muted-foreground'
                             )}
                           >
                             <MoreHorizontal className="h-4 w-4" />
                             <span className='ml-2'>More</span>
-                        </Button>
+                        </button>
                     </SheetTrigger>
                     <SheetContent>
                         <MoreFeaturesSheet setActiveTab={setActiveTab} />
