@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, ChevronDown, Image, FileText, Clock } from "lucide-react"
+import { BookHeart, Loader, ChevronDown, Image, FileText, Clock, Moon } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry, JournalTemplate, TimeCapsuleEntry } from "@/lib/types"
@@ -33,6 +33,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { VisualPrompt } from '@/components/visual-prompt';
 import { TemplateManager } from '@/components/template-manager';
 import { TimeCapsuleManager } from '@/components/time-capsule-manager';
+import { DreamInterpreter } from '@/components/dream-interpreter';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -153,6 +154,10 @@ function JournalPageContent() {
                   <TabsTrigger value="history">History</TabsTrigger>
                   <TabsTrigger value="trends">Trends</TabsTrigger>
                   <TabsTrigger value="ask">Ask</TabsTrigger>
+                  <TabsTrigger value="dream-interpreter">
+                    <Moon className="mr-2 h-4 w-4" />
+                    Dreams
+                  </TabsTrigger>
                   <DropdownTabs />
                 </TabsList>
             </div>
@@ -172,6 +177,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="time-capsule" className="mt-6">
             <TimeCapsuleManager timeCapsules={timeCapsules || []} />
+          </TabsContent>
+          <TabsContent value="dream-interpreter" className="mt-6">
+            <DreamInterpreter />
           </TabsContent>
           <TabsContent value="guided" className="mt-6">
             <GuidedJournaling />
@@ -220,5 +228,3 @@ export default function JournalPage() {
       </ThemeProvider>
   )
 }
-
-    
