@@ -81,7 +81,7 @@ export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode
   const isRangeEnd = (day: Date) => selectedRange.to && isSameDay(day, selectedRange.to);
 
   return (
-    <div className="p-0">
+    <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">
           {format(currentMonth, "MMMM yyyy")}
