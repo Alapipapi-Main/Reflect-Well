@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Trash2, Loader2, Calendar as CalendarIcon, Lock, Unlock, Mail, Clock } from 'lucide-react';
-import { format, isFuture, startOfTomorrow } from 'date-fns';
+import { format, isFuture, startOfTomorrow, isPast } from 'date-fns';
 import { cn } from '@/lib/utils';
 import Balancer from 'react-wrap-balancer';
 
@@ -62,7 +62,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
   
   const handleDateSelect = (range: DateRange) => {
     if (range.from) {
-      form.setValue('lockUntil', range.from);
+      form.setValue('lockUntil', range.from, { shouldValidate: true });
       // Automatically close the calendar after a single date is selected
       setIsCalendarOpen(false);
     }
@@ -142,11 +142,12 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                         {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-3">
+                    <PopoverContent className="p-0">
                        <CustomCalendar
                          selectionMode="single"
                          selectedRange={{ from: selectedDate, to: null }}
                          onDateRangeSelect={handleDateSelect}
+                         disabled={(date) => isPast(date) && !isToday(date)}
                        />
                     </PopoverContent>
                   </Popover>

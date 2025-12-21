@@ -16,14 +16,19 @@ interface CustomCalendarProps {
   onDateRangeSelect: (range: DateRange) => void;
   selectedRange: DateRange;
   selectionMode?: 'single' | 'range';
+  disabled?: (date: Date) => boolean;
 }
 
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
-export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode = 'range' }: CustomCalendarProps) {
+export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode = 'range', disabled }: CustomCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedRange?.from || new Date());
 
   const handleDateClick = (day: Date) => {
+    if (disabled && disabled(day)) {
+      return;
+    }
+    
     if (selectionMode === 'single') {
         onDateRangeSelect({ from: startOfDay(day), to: null });
         return;
@@ -104,6 +109,7 @@ export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode
             const isStart = isRangeStart(day);
             const isEnd = isRangeEnd(day);
             const isSingleSelection = isStart && (!selectedRange.to || isSameDay(selectedRange.from, selectedRange.to));
+            const isDisabled = disabled ? disabled(day) : false;
 
             return (
                 <Button
@@ -117,9 +123,11 @@ export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode
                     isEnd && !isSingleSelection && "bg-primary text-primary-foreground rounded-full",
                     isSelected && !isStart && !isEnd && "rounded-none",
                     isStart && !isSingleSelection && "rounded-r-none",
-                    isEnd && !isSingleSelection && "rounded-l-none"
+                    isEnd && !isSingleSelection && "rounded-l-none",
+                    isDisabled && "text-muted-foreground/50 cursor-not-allowed"
                     )}
                     onClick={() => handleDateClick(day)}
+                    disabled={isDisabled}
                 >
                     {format(day, "d")}
                      {isToday(day) && (
