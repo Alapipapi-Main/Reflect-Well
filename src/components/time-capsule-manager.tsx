@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { CustomCalendar, type DateRange } from './custom-calendar';
 import {
   Accordion,
   AccordionContent,
@@ -53,10 +53,22 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
 
   const form = useForm<z.infer<typeof timeCapsuleSchema>>({
     resolver: zodResolver(timeCapsuleSchema),
   });
+  
+  const handleDateSelect = (range: DateRange) => {
+    if (range.from) {
+      form.setValue('lockUntil', range.from);
+      // Automatically close the calendar after a single date is selected
+      if (!range.to) {
+        setIsCalendarOpen(false);
+      }
+    }
+  };
 
   const onSubmit = async (values: z.infer<typeof timeCapsuleSchema>) => {
     if (!user || !firestore) return;
@@ -95,6 +107,8 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
     updateDocumentNonBlocking(capsuleRef, { openedAt: serverTimestamp() });
   };
 
+  const selectedDate = form.watch('lockUntil');
+
   return (
     <>
       <div className="space-y-8">
@@ -117,27 +131,24 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Unlock On</label>
-                 <Popover>
+                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-full sm:w-[240px] justify-start text-left font-normal",
-                          !form.watch('lockUntil') && "text-muted-foreground"
+                          !selectedDate && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.watch('lockUntil') ? format(form.watch('lockUntil'), "PPP") : <span>Pick a date</span>}
+                        {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={form.watch('lockUntil')}
-                        onSelect={(date) => form.setValue('lockUntil', date as Date)}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                      />
+                       <CustomCalendar
+                         selectedRange={{ from: selectedDate, to: null }}
+                         onDateRangeSelect={handleDateSelect}
+                       />
                     </PopoverContent>
                   </Popover>
                   {form.formState.errors.lockUntil && <p className="text-sm font-medium text-destructive">{form.formState.errors.lockUntil.message}</p>}
