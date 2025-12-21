@@ -121,12 +121,11 @@ function JournalPageContent() {
                     <SheetTrigger asChild>
                         <div
                             role="button"
-                            data-state={isSheetOpen || isMoreTabActive ? 'active' : 'inactive'}
+                            data-state={isMoreTabActive ? 'active' : 'inactive'}
                             className={cn(
-                              'inline-flex items-center justify-center rounded-md px-3 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
-                              'border text-foreground bg-background shadow-md',
-                              'data-[state=inactive]:hover:bg-accent/80 data-[state=inactive]:hover:text-accent-foreground',
-                               isSheetOpen || isMoreTabActive ? 'bg-background text-foreground shadow-md' : 'data-[state=inactive]:hover:bg-accent/80 data-[state=inactive]:hover:text-accent-foreground'
+                              'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+                              'data-[state=inactive]:bg-transparent data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground',
+                              'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md'
                             )}
                           >
                             <MoreHorizontal className="h-4 w-4" />
