@@ -21,12 +21,6 @@ import { AskJournal } from '@/components/ask-journal';
 import { JournalGoals } from '@/components/journal-goals';
 import { GuidedJournaling } from '@/components/guided-journaling';
 import { GratitudeWall } from '@/components/gratitude-wall';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -34,6 +28,8 @@ import { VisualPrompt } from '@/components/visual-prompt';
 import { TemplateManager } from '@/components/template-manager';
 import { TimeCapsuleManager } from '@/components/time-capsule-manager';
 import { DreamInterpreter } from '@/components/dream-interpreter';
+import { MoreFeaturesSheet } from '@/components/more-features-sheet';
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -90,50 +86,6 @@ function JournalPageContent() {
   if (!user.emailVerified) {
     return <EmailVerificationGate user={user} />;
   }
-  
-  const secondaryTabs = [
-    { value: 'visual-prompt', label: 'Visual Prompt', icon: Image },
-    { value: 'templates', label: 'Templates', icon: FileText },
-    { value: 'time-capsule', label: 'Time Capsule', icon: Clock },
-    { value: 'dream-interpreter', label: 'Dreams', icon: Moon },
-    { value: 'ask', label: 'Ask Journal', icon: HelpCircle },
-    { value: 'guided', label: 'Guided Session', icon: Bot },
-    { value: 'gratitude', label: 'Gratitude Wall', icon: Heart },
-    { value: 'insights', label: 'Weekly Insights', icon: BarChart },
-    { value: 'stats', label: 'Stats', icon: Trophy },
-    { value: 'goals', label: 'Goals', icon: Trophy },
-    { value: 'yesterday', label: 'Yesterday', icon: Calendar },
-    { value: 'on-this-day', label: 'On This Day', icon: Clock2 },
-  ];
-
-  const isSecondaryTabActive = secondaryTabs.map(t => t.value).includes(activeTab);
-
-  const DropdownTabs = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-         <Button
-            variant="ghost"
-            className={cn(
-              'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-              isSecondaryTabActive
-                ? 'bg-background text-foreground shadow-md'
-                : 'text-muted-foreground'
-            )}
-          >
-            More <ChevronDown className="h-4 w-4 ml-1" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {secondaryTabs.map(tab => (
-           <DropdownMenuItem key={tab.value} onSelect={() => setActiveTab(tab.value)}>
-             <tab.icon className="mr-2 h-4 w-4" />
-             {tab.label}
-           </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-
 
   return (
       <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
@@ -161,7 +113,21 @@ function JournalPageContent() {
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
                   </TabsTrigger>
-                  <DropdownTabs />
+                  <Sheet>
+                    <SheetTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                              'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground'
+                            )}
+                          >
+                            More <ChevronDown className="h-4 w-4 ml-1" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                        <MoreFeaturesSheet setActiveTab={setActiveTab} />
+                    </SheetContent>
+                  </Sheet>
                 </TabsList>
             </div>
           
