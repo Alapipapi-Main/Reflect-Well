@@ -1,13 +1,9 @@
 
 'use client';
 
-import {
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-  } from '@/components/ui/dropdown-menu';
 import { SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { BarChart, BookCopy, Bot, Clock, Gift, Heart, HelpCircle, Image, Moon, Star, Sun, Trophy } from 'lucide-react';
   
 interface MoreFeaturesSheetProps {
@@ -59,20 +55,26 @@ export function MoreFeaturesSheet({ setActiveTab }: MoreFeaturesSheetProps) {
         <SheetHeader>
           <SheetTitle>More Features</SheetTitle>
         </SheetHeader>
-        <div className="py-4">
+        <div className="py-4 flex flex-col gap-1">
             {features.map((group, index) => (
-                <DropdownMenuGroup key={group.label}>
-                    {index > 0 && <DropdownMenuSeparator />}
-                    <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
-                    {group.items.map(tab => (
-                         <SheetClose asChild key={tab.value}>
-                            <DropdownMenuItem onSelect={() => handleSelect(tab.value)}>
-                                <tab.icon className="mr-2 h-4 w-4" />
-                                {tab.label}
-                            </DropdownMenuItem>
-                        </SheetClose>
-                    ))}
-                </DropdownMenuGroup>
+                <div key={group.label}>
+                    {index > 0 && <Separator className="my-2" />}
+                    <h3 className="px-3 py-2 text-sm font-semibold text-muted-foreground">{group.label}</h3>
+                    <div className='flex flex-col'>
+                        {group.items.map(tab => (
+                            <SheetClose asChild key={tab.value}>
+                                <Button
+                                    variant="ghost"
+                                    className="w-full justify-start"
+                                    onClick={() => handleSelect(tab.value)}
+                                >
+                                    <tab.icon className="mr-2 h-4 w-4" />
+                                    {tab.label}
+                                </Button>
+                            </SheetClose>
+                        ))}
+                    </div>
+                </div>
             ))}
         </div>
       </>
