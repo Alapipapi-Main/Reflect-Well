@@ -192,7 +192,7 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
                 <AccordionItem value={template.id} key={template.id}>
                    <div className="flex items-center w-full">
                     <AccordionTrigger>
-                      <span className="font-medium">{template.title}</span>
+                      <span className="font-medium text-left break-all">{template.title}</span>
                     </AccordionTrigger>
                      <div className="flex items-center gap-2 pr-4 pl-2">
                         <Button
@@ -239,7 +239,7 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteCandidateId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-900 dark:text-red-50 dark:hover:bg-red-800">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-800 dark:text-red-50 dark:hover:bg-red-700">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
