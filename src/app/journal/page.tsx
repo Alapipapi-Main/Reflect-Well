@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, ChevronDown, Image, FileText, Clock, Moon, HelpCircle, Bot, Heart, BarChart, Trophy, Calendar, Clock2, Sun, Star } from "lucide-react"
+import { BookHeart, Loader, ChevronDown, Image, FileText, Clock, Moon, HelpCircle, Bot, Heart, BarChart, Trophy, Calendar, Clock2, Sun, Star, PlusCircle, BookOpen, TrendingUp } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry, JournalTemplate, TimeCapsuleEntry } from "@/lib/types"
@@ -95,8 +95,8 @@ function JournalPageContent() {
     { value: 'visual-prompt', label: 'Visual Prompt', icon: Image },
     { value: 'templates', label: 'Templates', icon: FileText },
     { value: 'time-capsule', label: 'Time Capsule', icon: Clock },
-    { value: 'ask', label: 'Ask Journal', icon: HelpCircle },
     { value: 'dream-interpreter', label: 'Dreams', icon: Moon },
+    { value: 'ask', label: 'Ask Journal', icon: HelpCircle },
     { value: 'guided', label: 'Guided Session', icon: Bot },
     { value: 'gratitude', label: 'Gratitude Wall', icon: Heart },
     { value: 'insights', label: 'Weekly Insights', icon: BarChart },
@@ -105,7 +105,8 @@ function JournalPageContent() {
     { value: 'yesterday', label: 'Yesterday', icon: Calendar },
     { value: 'on-this-day', label: 'On This Day', icon: Clock2 },
   ];
-  const isMoreTabActive = secondaryTabs.map(t => t.value).includes(activeTab);
+
+  const isSecondaryTabActive = secondaryTabs.map(t => t.value).includes(activeTab);
 
   const DropdownTabs = () => (
     <DropdownMenu>
@@ -114,7 +115,7 @@ function JournalPageContent() {
             variant="ghost"
             className={cn(
               'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-              isMoreTabActive
+              isSecondaryTabActive
                 ? 'bg-background text-foreground shadow-md'
                 : 'text-muted-foreground'
             )}
@@ -148,22 +149,19 @@ function JournalPageContent() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
                 <TabsList className="p-1.5 h-auto flex-wrap justify-center gap-1.5">
-                  <TabsTrigger value="new-entry">New Entry</TabsTrigger>
-                  <TabsTrigger value="history">History</TabsTrigger>
-                  <TabsTrigger value="trends">Trends</TabsTrigger>
-                  
-                  {/* These tabs are hidden on small screens and shown on medium and larger screens */}
-                  {secondaryTabs.map(tab => (
-                    <TabsTrigger key={tab.value} value={tab.value} className="hidden md:flex">
-                        <tab.icon className="mr-2 h-4 w-4" />
-                        {tab.label}
-                    </TabsTrigger>
-                  ))}
-
-                  {/* The dropdown is shown only on small screens */}
-                  <div className="md:hidden">
-                    <DropdownTabs />
-                  </div>
+                  <TabsTrigger value="new-entry">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    New Entry
+                  </TabsTrigger>
+                  <TabsTrigger value="history">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    History
+                  </TabsTrigger>
+                  <TabsTrigger value="trends">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Trends
+                  </TabsTrigger>
+                  <DropdownTabs />
                 </TabsList>
             </div>
           
