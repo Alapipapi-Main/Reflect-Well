@@ -1,7 +1,5 @@
 # ReflectWell - A Mindful Journaling App
 
-[**Live Website**](https://reflect-well.vercel.app/)
-
 ReflectWell is a web application designed to help you practice mindfulness through daily journaling and mood tracking. It provides a clean, personal, and secure space to record your thoughts, reflect on your feelings, and visualize your emotional trends over time. With powerful AI features, you can now interact with your journal in a completely new way.
 
 This project was built using Firebase Studio.
@@ -9,15 +7,17 @@ This project was built using Firebase Studio.
 ## ✨ Features
 
 -   **Daily Journaling**: A rich text editor to write and save your daily reflections.
+-   **Voice-Guided Journaling**: Let a calming AI voice guide you through a reflective session—just listen and speak your mind.
 -   **AI-Powered Reflections**: Receive a gentle, insightful reflection from a compassionate AI after each entry.
 -   **AI Image Generation**: Create beautiful, abstract cover images for your entries based on their mood and content.
+-   **AI Dream Interpreter**: Describe your dreams and receive a symbolic interpretation to spark deeper reflection.
 -   **AI Journal Search**: Ask natural language questions about your past entries and get synthesized answers from your journal.
--   **Weekly Insights**: Generate an AI-powered summary of your week's themes and moods for deeper reflection.
--   **Mood Tracking**: Select your mood for each entry from a range of expressive emojis.
--   **Journal History**: Browse, search, and filter through your past entries in an easy-to-navigate accordion view.
--   **Mood Trends**: A beautiful chart that visualizes your mood fluctuations over time.
+-   **Weekly Insights**: Generate an AI-powered summary of your week's themes and moods.
+-   **Time Capsule**: Write messages to your "future self" that remain sealed and locked until a date you choose.
+-   **Journal Templates**: Create and manage reusable templates to streamline your common entry types.
+-   **Gratitude Wall**: Anonymously share something you're grateful for and read what others are thankful for in a collective space for positivity.
+-   **Mood Tracking & Trends**: Select your mood for each entry and visualize your emotional fluctuations over time with a beautiful chart.
 -   **Journaling Stats**: Track your journaling streak, total entries, and most frequent moods.
--   **Yesterday & "On This Day"**: Revisit your entry from yesterday and see what you wrote on this day last month or in past years.
 -   **Secure & Private**: All your entries are stored securely in your own private space using Firebase Authentication and Firestore.
 -   **Responsive Design**: A seamless experience across desktop, tablet, and mobile devices.
 
@@ -28,7 +28,7 @@ This project was built using Firebase Studio.
 -   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 -   **UI Components**: [ShadCN UI](https://ui.shadcn.com/)
 -   **Backend & Database**: [Firebase](https://firebase.google.com/) (Authentication & Firestore)
--   **AI Features**: [Puter.ai](https://developer.puter.com/) for generative text and images.
+-   **AI Features**: [Puter.ai](https://puter.com/) for generative text, images, and speech.
 -   **Charts**: [Recharts](https://recharts.org/)
 -   **Forms**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
 

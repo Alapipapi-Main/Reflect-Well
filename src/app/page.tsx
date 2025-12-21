@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { BookHeart, Feather, TrendingUp, Lock, Sparkles } from 'lucide-react';
+import { BookHeart, Feather, TrendingUp, Lock, Sparkles, Mic, Moon } from 'lucide-react';
 import Link from 'next/link';
 import { useUser } from '@/firebase';
 
@@ -53,7 +53,7 @@ export default function LandingPage() {
               Your Personal Space for Mindfulness
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              ReflectWell is a simple, beautiful, and private journal to help you track your moods and understand your emotional well-being.
+              ReflectWell is a simple, beautiful, and private journal to help you track your moods, understand your emotions, and discover your inner world.
             </p>
             <Button size="lg" asChild>
               <Link href="/signup">
@@ -85,7 +85,7 @@ export default function LandingPage() {
                 </div>
                 <h4 className="text-xl font-semibold mb-2">Effortless Journaling</h4>
                 <p className="text-muted-foreground">
-                  A clean, distraction-free editor to capture your thoughts and feelings easily.
+                  A clean, distraction-free editor to capture your thoughts, with AI prompts to inspire you.
                 </p>
               </div>
               <div className="flex flex-col items-center">
@@ -99,20 +99,23 @@ export default function LandingPage() {
               </div>
               <div className="flex flex-col items-center">
                 <div className="bg-primary/20 rounded-full p-4 mb-4">
-                  <Sparkles className="h-8 w-8 text-primary" />
+                  <div className="flex -space-x-2">
+                    <Mic className="h-8 w-8 text-primary" />
+                    <Moon className="h-8 w-8 text-primary" />
+                  </div>
                 </div>
-                <h4 className="text-xl font-semibold mb-2">AI-Powered Insights</h4>
+                <h4 className="text-xl font-semibold mb-2">Voice & Mind</h4>
                 <p className="text-muted-foreground">
-                  Ask questions, get weekly summaries, and receive gentle reflections from your personal AI companion.
+                  Try voice-guided journaling sessions or explore your subconscious with an AI dream interpreter.
                 </p>
               </div>
               <div className="flex flex-col items-center">
                 <div className="bg-primary/20 rounded-full p-4 mb-4">
                   <Lock className="h-8 w-8 text-primary" />
                 </div>
-                <h4 className="text-xl font-semibold mb-2">Completely Private</h4>
+                <h4 className="text-xl font-semibold mb-2">Private & Secure</h4>
                 <p className="text-muted-foreground">
-                  Your entries are your own. Securely stored and only accessible by you.
+                  Your entries are your own. Securely stored, only accessible by you, with options like Time Capsules for your future self.
                 </p>
               </div>
             </div>
