@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, ChevronDown, Image, FileText } from "lucide-react"
+import { BookHeart, Loader, ChevronDown, Image, FileText, Clock } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
-import type { JournalEntry, JournalTemplate } from "@/lib/types"
+import type { JournalEntry, JournalTemplate, TimeCapsuleEntry } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
 import { WeeklyInsights } from '@/components/weekly-insights';
@@ -32,6 +32,7 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import { VisualPrompt } from '@/components/visual-prompt';
 import { TemplateManager } from '@/components/template-manager';
+import { TimeCapsuleManager } from '@/components/time-capsule-manager';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -58,9 +59,15 @@ function JournalPageContent() {
     if (!user || !firestore) return null;
     return query(collection(firestore, 'users', user.uid, 'templates'), orderBy('title'));
   }, [firestore, user]);
+  
+  const timeCapsulesQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return query(collection(firestore, 'users', user.uid, 'timeCapsules'), orderBy('lockUntil', 'desc'));
+  }, [firestore, user]);
 
   const { data: rawEntries, isLoading: areEntriesLoading } = useCollection<JournalEntry>(journalEntriesQuery);
   const { data: templates, isLoading: areTemplatesLoading } = useCollection<JournalTemplate>(templatesQuery);
+  const { data: timeCapsules, isLoading: areTimeCapsulesLoading } = useCollection<TimeCapsuleEntry>(timeCapsulesQuery);
 
   const entries = useMemo(() => {
     if (!rawEntries) return [];
@@ -71,7 +78,7 @@ function JournalPageContent() {
     });
   }, [rawEntries]);
 
-  if (isUserLoading || !user || areEntriesLoading || areTemplatesLoading) {
+  if (isUserLoading || !user || areEntriesLoading || areTemplatesLoading || areTimeCapsulesLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="h-12 w-12 animate-spin text-primary" />
@@ -139,6 +146,10 @@ function JournalPageContent() {
                     <FileText className="mr-2 h-4 w-4" />
                     Templates
                   </TabsTrigger>
+                   <TabsTrigger value="time-capsule">
+                    <Clock className="mr-2 h-4 w-4" />
+                    Time Capsule
+                  </TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                   <TabsTrigger value="trends">Trends</TabsTrigger>
                   <TabsTrigger value="ask">Ask</TabsTrigger>
@@ -158,6 +169,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="templates" className="mt-6">
             <TemplateManager templates={templates || []} />
+          </TabsContent>
+          <TabsContent value="time-capsule" className="mt-6">
+            <TimeCapsuleManager timeCapsules={timeCapsules || []} />
           </TabsContent>
           <TabsContent value="guided" className="mt-6">
             <GuidedJournaling />
@@ -206,3 +220,5 @@ export default function JournalPage() {
       </ThemeProvider>
   )
 }
+
+    

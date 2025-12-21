@@ -34,3 +34,14 @@ export interface JournalTemplate {
   title: string;
   content: string;
 }
+
+export interface TimeCapsuleEntry {
+    id: string;
+    userId: string;
+    content: string;
+    createdAt: Timestamp;
+    lockUntil: Timestamp;
+    openedAt?: Timestamp | null;
+}
+
+    

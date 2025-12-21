@@ -194,6 +194,48 @@
         "content",
         "userId"
       ]
+    },
+    "TimeCapsuleEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TimeCapsuleEntry",
+      "type": "object",
+      "description": "Represents a 'Dear Future Self' message that is locked until a certain date.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the time capsule."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who created this entry."
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content of the message to the future self."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date the time capsule was created.",
+          "format": "date-time"
+        },
+        "lockUntil": {
+          "type": "string",
+          "description": "The date when this time capsule can be opened.",
+          "format": "date-time"
+        },
+        "openedAt": {
+          "type": "string",
+          "description": "The date the user first opened the time capsule, if applicable.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "content",
+        "createdAt",
+        "lockUntil"
+      ]
     }
   },
   "auth": {
@@ -277,6 +319,26 @@
         }
       },
       {
+        "path": "/users/{userId}/timeCapsules/{timeCapsuleId}",
+        "definition": {
+          "entityName": "TimeCapsuleEntry",
+          "schema": {
+            "$ref": "#/backend/entities/TimeCapsuleEntry"
+          },
+          "description": "Stores time capsule entries for each user. Path-based ownership ensures only the authenticated user can access their own time capsules.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "timeCapsuleId",
+              "description": "The unique identifier of the time capsule entry."
+            }
+          ]
+        }
+      },
+      {
         "path": "/moods/{moodId}",
         "definition": {
           "entityName": "Mood",
@@ -315,6 +377,8 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure data isolation and straightforward security rules by leveraging path-based ownership. Each user has their own collection of journal entries, eliminating the need for complex authorization logic or cross-collection queries for access control. This design achieves Authorization Independence by structuring data such that access control can be determined directly from the path and the `request.auth.uid`, avoiding the need to `get()` parent documents for authorization checks.\n\nThe structure supports the required QAPs as follows:\n\n1.  **Secure `list` operations**: Because each user's journal entries are stored under their specific `userId`, listing entries is inherently secure. Rules can easily enforce that only the authenticated user can list entries within their own `/users/{userId}/journalEntries` collection.\n\n2.  **Data Isolation**: User data is naturally isolated due to the path-based ownership model, preventing unauthorized access or modification.\n\n3.  **Scalability**: The design scales well because read and write operations are limited to a user's own data, avoiding potential bottlenecks associated with shared collections or complex authorization schemes."
+    "reasoning": "The Firestore structure is designed to ensure data isolation and straightforward security rules by leveraging path-based ownership. Each user has their own collection of journal entries, templates, and time capsules, eliminating the need for complex authorization logic or cross-collection queries for access control. This design achieves Authorization Independence by structuring data such that access control can be determined directly from the path and the `request.auth.uid`, avoiding the need to `get()` parent documents for authorization checks.\n\nThe structure supports the required QAPs as follows:\n\n1.  **Secure `list` operations**: Because each user's data is stored under their specific `userId`, listing entries is inherently secure. Rules can easily enforce that only the authenticated user can list items within their own subcollections.\n\n2.  **Data Isolation**: User data is naturally isolated due to the path-based ownership model, preventing unauthorized access or modification.\n\n3.  **Scalability**: The design scales well because read and write operations are limited to a user's own data, avoiding potential bottlenecks associated with shared collections or complex authorization schemes."
   }
 }
+
+    
