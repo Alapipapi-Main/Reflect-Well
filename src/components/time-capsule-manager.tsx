@@ -64,9 +64,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
     if (range.from) {
       form.setValue('lockUntil', range.from);
       // Automatically close the calendar after a single date is selected
-      if (!range.to) {
-        setIsCalendarOpen(false);
-      }
+      setIsCalendarOpen(false);
     }
   };
 
@@ -146,6 +144,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                        <CustomCalendar
+                         selectionMode="single"
                          selectedRange={{ from: selectedDate, to: null }}
                          onDateRangeSelect={handleDateSelect}
                        />

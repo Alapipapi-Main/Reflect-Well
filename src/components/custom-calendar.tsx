@@ -15,14 +15,21 @@ export interface DateRange {
 interface CustomCalendarProps {
   onDateRangeSelect: (range: DateRange) => void;
   selectedRange: DateRange;
+  selectionMode?: 'single' | 'range';
 }
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
-export function CustomCalendar({ onDateRangeSelect, selectedRange }: CustomCalendarProps) {
+export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode = 'range' }: CustomCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedRange?.from || new Date());
 
   const handleDateClick = (day: Date) => {
+    if (selectionMode === 'single') {
+        onDateRangeSelect({ from: startOfDay(day), to: null });
+        return;
+    }
+
+    // Logic for 'range' selectionMode
     let { from, to } = selectedRange;
 
     if (!from || (from && to)) {
