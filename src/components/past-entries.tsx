@@ -36,7 +36,7 @@ import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns"
 import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2, MessageSquareQuote } from "lucide-react"
-import { JournalFormFields } from "@/components/journal-form-fields"
+import { JournalFormFields } from "./journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
@@ -195,7 +195,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto">
                   <CustomCalendar
                     selectionMode="range"
                     onDateRangeSelect={handleDateRangeSelect}

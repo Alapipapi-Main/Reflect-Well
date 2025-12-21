@@ -142,7 +142,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                         {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto">
                        <CustomCalendar
                          selectionMode="single"
                          selectedRange={{ from: selectedDate, to: null }}
