@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Trash2, Loader2, Calendar as CalendarIcon, Lock, Unlock, Mail, Clock } from 'lucide-react';
-import { format, isFuture, startOfTomorrow, isPast } from 'date-fns';
+import { format, isFuture, startOfTomorrow, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import Balancer from 'react-wrap-balancer';
 
