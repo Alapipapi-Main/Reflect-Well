@@ -142,7 +142,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                         {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="p-0">
+                    <PopoverContent className="w-auto p-0">
                        <CustomCalendar
                          selectionMode="single"
                          selectedRange={{ from: selectedDate, to: null }}
@@ -171,7 +171,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
             {timeCapsules.length > 0 ? (
               <Accordion type="single" collapsible className="w-full">
                 {timeCapsules.map(capsule => {
-                  const isLocked = isFuture((capsule.lockUntil as any).toDate());
+                  const isLocked = capsule.lockUntil && isFuture((capsule.lockUntil as any).toDate());
                   return (
                     <AccordionItem value={capsule.id} key={capsule.id}>
                       <div className="flex items-center w-full">
@@ -187,7 +187,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                                     {isLocked ? "Locked" : "Unlocked"}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {isLocked ? `Opens on ${format((capsule.lockUntil as any).toDate(), 'PPP')}` : `Unlocked on ${format((capsule.lockUntil as any).toDate(), 'PPP')}`}
+                                    {isLocked && capsule.lockUntil ? `Opens on ${format((capsule.lockUntil as any).toDate(), 'PPP')}` : capsule.lockUntil ? `Unlocked on ${format((capsule.lockUntil as any).toDate(), 'PPP')}` : 'Date not set'}
                                 </p>
                                 </div>
                             </div>
@@ -208,7 +208,9 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                         <Card className="bg-secondary/30">
                            <CardHeader>
                              <CardTitle className="text-lg">Your message from the past</CardTitle>
-                             <CardDescription>Written on {format((capsule.createdAt as any).toDate(), 'PPP')}</CardDescription>
+                             <CardDescription>
+                                Written on {capsule.createdAt ? format((capsule.createdAt as any).toDate(), 'PPP') : 'just now'}
+                             </CardDescription>
                            </CardHeader>
                            <CardContent>
                               <p className="whitespace-pre-wrap">{capsule.content}</p>
