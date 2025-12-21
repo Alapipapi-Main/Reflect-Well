@@ -104,16 +104,16 @@ function JournalPageContent() {
         
         <Tabs value={isMoreTabActive ? 'more' : activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
-                <TabsList className="p-1.5 h-auto flex-wrap justify-center gap-1.5">
-                  <TabsTrigger value="new-entry">
+                <TabsList className="p-1.5 h-auto flex-wrap justify-center">
+                  <TabsTrigger value="new-entry" className="flex-1">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     New Entry
                   </TabsTrigger>
-                  <TabsTrigger value="history">
+                  <TabsTrigger value="history" className="flex-1">
                     <BookOpen className="mr-2 h-4 w-4" />
                     History
                   </TabsTrigger>
-                  <TabsTrigger value="trends">
+                  <TabsTrigger value="trends" className="flex-1">
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
                   </TabsTrigger>
@@ -123,10 +123,10 @@ function JournalPageContent() {
                             role="button"
                             data-state={isSheetOpen || isMoreTabActive ? 'active' : 'inactive'}
                             className={cn(
-                              'inline-flex items-center justify-center rounded-md px-3 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
-                              'border text-foreground',
+                              'inline-flex items-center justify-center rounded-md px-3 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer flex-1',
+                              'border text-foreground bg-background shadow-md',
                               'data-[state=inactive]:hover:bg-accent/80 data-[state=inactive]:hover:text-accent-foreground',
-                              'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md'
+                               isSheetOpen || isMoreTabActive ? 'bg-background text-foreground shadow-md' : 'data-[state=inactive]:hover:bg-accent/80 data-[state=inactive]:hover:text-accent-foreground'
                             )}
                           >
                             <MoreHorizontal className="h-4 w-4" />
