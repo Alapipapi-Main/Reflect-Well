@@ -209,11 +209,11 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
                           onClick={() => setDeleteCandidateId(template.id)}
                           aria-label="Delete template"
                         >
-                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive" />
+                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
                         </Button>
                       </div>
                    </div>
-                  <AccordionContent className="whitespace-pre-wrap text-muted-foreground p-4 bg-secondary/20 rounded-md">
+                  <AccordionContent className="whitespace-pre-wrap break-words text-muted-foreground p-4 bg-secondary/20 rounded-md">
                     {template.content}
                   </AccordionContent>
                 </AccordionItem>
@@ -239,7 +239,7 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteCandidateId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-900 dark:text-red-50 dark:hover:bg-red-800">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

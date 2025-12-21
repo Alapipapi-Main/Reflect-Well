@@ -269,7 +269,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                           aria-label="Delete entry"
                           disabled={isFormSubmitting}
                         >
-                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-400 dark:hover:text-red-300" />
+                          <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
                         </Button>
                       </div>
                   </div>
@@ -295,7 +295,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                         {entry.audioUrl && (
                           <audio src={entry.audioUrl} controls className="w-full" />
                         )}
-                        <p className="whitespace-pre-wrap">{entry.content || <span className="text-muted-foreground italic">No text content for this entry.</span>}</p>
+                        <p className="whitespace-pre-wrap break-words">{entry.content || <span className="text-muted-foreground italic">No text content for this entry.</span>}</p>
                         {entry.tags && entry.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2 items-center">
                             <Tag className="h-4 w-4 text-muted-foreground" />
@@ -337,7 +337,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteCandidateId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-900 dark:text-red-50 dark:hover:bg-red-800">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -516,7 +516,7 @@ Journal Entry:
             <div className="flex items-center gap-2">
               <audio src={currentAudioUrl} controls className="w-full" />
               <Button type="button" variant="ghost" size="icon" onClick={handleDeleteMemo}>
-                <Trash2 className="h-4 w-4 text-destructive/80 hover:text-destructive dark:text-red-400 dark:hover:text-red-300" />
+                <Trash2 className="h-4 w-4 text-destructive/80 hover:text-destructive dark:text-red-500 dark:hover:text-red-400" />
                 <span className="sr-only">Delete memo</span>
               </Button>
             </div>
