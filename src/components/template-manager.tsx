@@ -120,11 +120,11 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
     <>
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-start">
             <div>
               <CardTitle>Journal Templates</CardTitle>
               <CardDescription>Create and manage reusable templates for your journal entries.</CardDescription>
             </div>
+            <div className="flex justify-end">
              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                     <Button onClick={() => handleOpenDialog()}>
@@ -162,7 +162,7 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
                                         <FormLabel>Content</FormLabel>
                                         <FormControl>
                                             <Textarea
-                                                placeholder="Today's High: &#10;Today's Low: &#10;I'm grateful for: "
+                                                placeholder="Today's High: \nToday's Low: \nI'm grateful for: "
                                                 rows={8}
                                                 {...field}
                                                 disabled={isSubmitting}
