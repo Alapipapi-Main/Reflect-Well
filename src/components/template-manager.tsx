@@ -119,12 +119,12 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-col sm:flex-row sm:items-start sm:justify-between">
             <div>
               <CardTitle>Journal Templates</CardTitle>
               <CardDescription>Create and manage reusable templates for your journal entries.</CardDescription>
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-start sm:justify-end pt-4 sm:pt-0">
              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                     <Button onClick={() => handleOpenDialog()}>
