@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -108,7 +109,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                 <label className="text-sm font-medium">Your Message</label>
                 <AutosizeTextarea
                   placeholder="What do you want to remember? What are your hopes? What advice would you give?"
-                  minRows={5}
+                  minRows={4}
                   {...form.register('content')}
                   disabled={isSubmitting}
                 />
@@ -239,5 +240,3 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
     </>
   );
 }
-
-    
