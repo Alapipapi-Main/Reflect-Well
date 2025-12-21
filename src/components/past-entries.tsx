@@ -195,7 +195,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto">
+                <PopoverContent className="w-auto p-3">
                   <CustomCalendar
                     selectionMode="range"
                     onDateRangeSelect={handleDateRangeSelect}
