@@ -27,3 +27,10 @@ export interface GratitudePost {
   createdAt: Timestamp;
   authorId: string;
 }
+
+export interface JournalTemplate {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+}

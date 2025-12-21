@@ -164,6 +164,36 @@
         "createdAt",
         "authorId"
       ]
+    },
+    "JournalTemplate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JournalTemplate",
+      "type": "object",
+      "description": "Represents a user-created template for journal entries.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the template."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the template."
+        },
+        "content": {
+          "type": "string",
+          "description": "The markdown content of the template."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who created this template."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "content",
+        "userId"
+      ]
     }
   },
   "auth": {
@@ -206,6 +236,26 @@
             {
               "name": "journalEntryId",
               "description": "The unique identifier of the journal entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/templates/{templateId}",
+        "definition": {
+          "entityName": "JournalTemplate",
+          "schema": {
+            "$ref": "#/backend/entities/JournalTemplate"
+          },
+          "description": "Stores user-created journal templates. Path-based ownership ensures only the authenticated user can access their own templates.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "templateId",
+              "description": "The unique identifier of the journal template."
             }
           ]
         }

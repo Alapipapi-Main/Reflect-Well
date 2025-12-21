@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, ChevronDown, Image } from "lucide-react"
+import { BookHeart, Loader, ChevronDown, Image, FileText } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
-import type { JournalEntry } from "@/lib/types"
+import type { JournalEntry, JournalTemplate } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
 import { WeeklyInsights } from '@/components/weekly-insights';
@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import { VisualPrompt } from '@/components/visual-prompt';
+import { TemplateManager } from '@/components/template-manager';
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
@@ -53,7 +54,13 @@ function JournalPageContent() {
     );
   }, [firestore, user]);
 
+  const templatesQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return query(collection(firestore, 'users', user.uid, 'templates'), orderBy('title'));
+  }, [firestore, user]);
+
   const { data: rawEntries, isLoading: areEntriesLoading } = useCollection<JournalEntry>(journalEntriesQuery);
+  const { data: templates, isLoading: areTemplatesLoading } = useCollection<JournalTemplate>(templatesQuery);
 
   const entries = useMemo(() => {
     if (!rawEntries) return [];
@@ -64,7 +71,7 @@ function JournalPageContent() {
     });
   }, [rawEntries]);
 
-  if (isUserLoading || !user || areEntriesLoading) {
+  if (isUserLoading || !user || areEntriesLoading || areTemplatesLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="h-12 w-12 animate-spin text-primary" />
@@ -128,6 +135,10 @@ function JournalPageContent() {
                     <Image className="mr-2 h-4 w-4" />
                     Visual Prompt
                   </TabsTrigger>
+                   <TabsTrigger value="templates">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Templates
+                  </TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                   <TabsTrigger value="trends">Trends</TabsTrigger>
                   <TabsTrigger value="ask">Ask</TabsTrigger>
@@ -136,10 +147,17 @@ function JournalPageContent() {
             </div>
           
           <TabsContent value="new-entry" className="mt-6 space-y-6">
-            <JournalForm entries={entries || []} onSubmittingChange={setIsSubmittingNewEntry} />
+            <JournalForm 
+              entries={entries || []} 
+              onSubmittingChange={setIsSubmittingNewEntry}
+              templates={templates || []}
+            />
           </TabsContent>
           <TabsContent value="visual-prompt" className="mt-6">
             <VisualPrompt onSubmittingChange={setIsSubmittingNewEntry} />
+          </TabsContent>
+          <TabsContent value="templates" className="mt-6">
+            <TemplateManager templates={templates || []} />
           </TabsContent>
           <TabsContent value="guided" className="mt-6">
             <GuidedJournaling />

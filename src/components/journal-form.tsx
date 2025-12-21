@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2, X, Film, Eye } from "lucide-react"
+import { Save, Sparkles, Wand, Image as ImageIcon, Loader2, Mic, PlayCircle, Trash2, X, Film, Eye, FileText } from "lucide-react"
 import { collection, serverTimestamp, doc } from "firebase/firestore"
 import { useFirestore, useUser, addDocumentNonBlocking, useDoc, setDocumentNonBlocking, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase"
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -33,9 +33,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
-import type { JournalEntry, Mood, UserSettings } from "@/lib/types"
+import type { JournalEntry, Mood, UserSettings, JournalTemplate } from "@/lib/types"
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
 
 declare const puter: any;
@@ -61,6 +68,7 @@ interface JournalFormProps {
     description: string;
   };
   onSave?: () => void;
+  templates?: JournalTemplate[];
 }
 
 export function JournalForm({ 
@@ -68,6 +76,7 @@ export function JournalForm({
     externalImageUrl,
     formContext,
     onSave,
+    templates = [],
  }: JournalFormProps) {
   const { toast } = useToast()
   const firestore = useFirestore()
@@ -494,6 +503,10 @@ Generate one new prompt for the user now.`;
     }
   };
 
+  const handleUseTemplate = (templateContent: string) => {
+    form.setValue('content', templateContent);
+  };
+
   const defaultTitle = "Today's Reflection";
   const defaultDescription = "What's on your mind today? Let it all out.";
 
@@ -587,19 +600,38 @@ Generate one new prompt for the user now.`;
               )}
             </CardContent>
             <CardFooter className="flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-2">
-              <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecording || isProcessingAudio || isGeneratingImage}>
-                {isSubmitting ? (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
-                    Saving & Reflecting...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Entry
-                  </>
-                )}
-              </Button>
+               <div className="flex gap-2">
+                 <Button type="submit" disabled={isSubmitting || isGettingPrompt || isRecording || isProcessingAudio || isGeneratingImage}>
+                  {isSubmitting ? (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
+                      Saving & Reflecting...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Entry
+                    </>
+                  )}
+                 </Button>
+                {templates.length > 0 && !formContext && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button type="button" variant="outline">
+                          <FileText className="mr-2 h-4 w-4" />
+                          Use Template
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        {templates.map(template => (
+                          <DropdownMenuItem key={template.id} onSelect={() => handleUseTemplate(template.content)}>
+                            {template.title}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+               </div>
               
                <Button
                 type="button"

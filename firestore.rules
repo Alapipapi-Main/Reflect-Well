@@ -2,7 +2,7 @@
  * @file firestore.rules
  * @description Firestore Security Rules for the ReflectWell application.
  *
- * @version 1.0.0
+ * @version 1.1.0
  *
  * @summary
  * This ruleset enforces a strict, user-centric security model where all user-generated
@@ -13,8 +13,10 @@
  * Data Structure:
  * - /users/{userId}: Private user profile document.
  * - /users/{userId}/journalEntries/{journalEntryId}: Private journal entries owned by the user.
+ * - /users/{userId}/templates/{templateId}: Private journal templates owned by the user.
  * - /users/{userId}/settings/main: A private document for user settings.
  * - /moods/{moodId}: A global, read-only collection of available moods.
+ * - /gratitudeWall/{gratitudePostId}: A public, append-only collection for anonymous gratitude posts.
  *
  * Key Security Decisions:
  * 1.  Strict Data Isolation: Users can only read or write data within their own
@@ -128,6 +130,17 @@ service cloud.firestore {
         allow create: if isCreatingOwnContent(userId);
         allow update: if isUpdatingOwnContent(userId);
         allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Controls access to a user's private journal templates.
+       * @path /users/{userId}/templates/{templateId}
+       * @allow A signed-in user can perform all operations on their own templates.
+       * @deny Any user attempting to access another user's templates.
+       * @principle Enforces strict document ownership for user-created templates.
+       */
+      match /templates/{templateId} {
+        allow read, write: if isOwner(userId);
       }
 
       /**
