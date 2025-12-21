@@ -88,6 +88,9 @@ function JournalPageContent() {
     return <EmailVerificationGate user={user} />;
   }
 
+  const moreFeaturesTabs = ['visual-prompt', 'templates', 'time-capsule', 'dream-interpreter', 'guided', 'gratitude', 'ask', 'insights', 'stats', 'goals', 'yesterday', 'on-this-day'];
+  const isMoreTabActive = moreFeaturesTabs.includes(activeTab);
+
   return (
       <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         <header className="flex justify-between items-center mb-8">
@@ -99,7 +102,7 @@ function JournalPageContent() {
         </header>
         <p className="text-muted-foreground mb-8 -mt-6">Your personal space for daily reflection and mindfulness.</p>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={isMoreTabActive ? 'more' : activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
                 <TabsList className="p-1.5 h-auto flex-wrap justify-center gap-1.5">
                   <TabsTrigger value="new-entry">
@@ -114,12 +117,15 @@ function JournalPageContent() {
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
                   </TabsTrigger>
-                  <Sheet>
+                  <Sheet onOpenChange={setIsSheetOpen}>
                     <SheetTrigger asChild>
                         <div
                             role="button"
+                            data-state={isSheetOpen || isMoreTabActive ? 'active' : 'inactive'}
                             className={cn(
-                              'inline-flex items-center justify-center rounded-md px-3 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-accent hover:bg-accent/80 hover:text-accent-foreground cursor-pointer'
+                              'inline-flex items-center justify-center rounded-md px-3 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+                              'data-[state=inactive]:bg-background data-[state=inactive]:hover:bg-accent/80 data-[state=inactive]:hover:text-accent-foreground',
+                              'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md'
                             )}
                           >
                             <MoreHorizontal className="h-4 w-4" />
