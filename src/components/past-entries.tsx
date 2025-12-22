@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -48,6 +48,8 @@ interface PastEntriesProps {
   isFormSubmitting: boolean;
 }
 
+const ENTRIES_PER_PAGE = 5;
+
 const formSchema = z.object({
   content: z.string().min(10, {
     message: "Journal entry must be at least 10 characters.",
@@ -70,14 +72,15 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
   const [moodFilter, setMoodFilter] = useState<Mood | null>(null)
   const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const sortedEntries = [...entries].sort((a, b) => {
+  const sortedEntries = useMemo(() => [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
     const dateB = b.date ? (b.date as any).toDate() : new Date(0)
     return dateB.getTime() - dateA.getTime()
-  })
+  }), [entries]);
 
-  const filteredEntries = sortedEntries.filter(entry => {
+  const filteredEntries = useMemo(() => sortedEntries.filter(entry => {
     const entryDate = entry.date ? (entry.date as any).toDate() : null
     const content = entry.content || "";
     const tags = entry.tags || [];
@@ -92,7 +95,25 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
         return isWithinInterval(entryDate, { start: startOfDay(dateRange.from), end: endOfDay(toDate) });
     };
     return matchesSearchTerm && matchesMoodFilter && matchesDateFilter()
-  });
+  }), [sortedEntries, searchTerm, moodFilter, dateRange]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, moodFilter, dateRange]);
+
+  const totalPages = Math.ceil(filteredEntries.length / ENTRIES_PER_PAGE);
+  const paginatedEntries = filteredEntries.slice(
+    (currentPage - 1) * ENTRIES_PER_PAGE,
+    currentPage * ENTRIES_PER_PAGE
+  );
+
+  const handlePrevPage = () => {
+    setCurrentPage(p => Math.max(p - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(p => Math.min(p + 1, totalPages));
+  };
 
   const handleEditClick = (event: React.MouseEvent, entryId: string) => {
     event.stopPropagation()
@@ -234,8 +255,8 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
               </div>
             </div>
           </div>
-          {sortedEntries.length > 0 ? (
-            filteredEntries.length > 0 ? (
+          {entries.length > 0 ? (
+            paginatedEntries.length > 0 ? (
             <Accordion type="single" collapsible className="w-full"
               value={editingEntryId || undefined}
               onValueChange={(value) => {
@@ -244,7 +265,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                 }
               }}
             >
-              {filteredEntries.map((entry) => (
+              {paginatedEntries.map((entry) => (
                 <AccordionItem value={entry.id} key={entry.id}>
                   <div className="flex items-center w-full">
                     <AccordionTrigger>
@@ -326,6 +347,19 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
             </div>
           )}
         </CardContent>
+        {totalPages > 1 && (
+          <CardFooter className="flex justify-between items-center">
+            <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="outline">
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="outline">
+              Next
+            </Button>
+          </CardFooter>
+        )}
       </Card>
       
       <AlertDialog open={!!deleteCandidateId} onOpenChange={(open) => !open && setDeleteCandidateId(null)}>
@@ -474,7 +508,7 @@ Journal Entry:
       const transcriptionText = transcriptionResult.text;
       
       const currentContent = form.getValues("content");
-      const newContent = `${currentContent}\n\n---\n\n**Voice Memo Transcription:**\n*${transcriptionText}*`;
+      const newContent = `${currentContent}\\n\\n---\\n\\n**Voice Memo Transcription:**\\n*${transcriptionText}*`;
       form.setValue("content", newContent);
 
       toast({ title: 'Transcription Added', description: 'The voice memo transcription has been added to your entry content.' });

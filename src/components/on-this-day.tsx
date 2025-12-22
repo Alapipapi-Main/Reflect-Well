@@ -1,19 +1,25 @@
 
+
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { format, subMonths } from "date-fns"
 import Image from "next/image"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import type { JournalEntry } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { Clock } from "lucide-react"
+import { Button } from "./ui/button"
 
 interface OnThisDayProps {
   entries: JournalEntry[]
 }
 
+const ENTRIES_PER_PAGE = 3;
+
 export function OnThisDay({ entries }: OnThisDayProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+
   const memories = useMemo(() => {
     if (!entries || entries.length === 0) {
       return []
@@ -54,9 +60,23 @@ export function OnThisDay({ entries }: OnThisDayProps) {
     return filtered.sort((a, b) => {
         const dateA = a.date ? (a.date as any).toDate() : new Date(0);
         const dateB = b.date ? (b.date as any).toDate() : new Date(0);
-        return dateA.getTime() - dateB.getTime();
+        return dateB.getTime() - dateA.getTime();
     });
-  }, [entries])
+  }, [entries]);
+
+  const totalPages = Math.ceil(memories.length / ENTRIES_PER_PAGE);
+  const paginatedMemories = memories.slice(
+    (currentPage - 1) * ENTRIES_PER_PAGE,
+    currentPage * ENTRIES_PER_PAGE
+  );
+
+  const handlePrevPage = () => {
+    setCurrentPage(p => Math.max(p - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(p => Math.min(p + 1, totalPages));
+  };
 
   return (
     <Card>
@@ -73,7 +93,7 @@ export function OnThisDay({ entries }: OnThisDayProps) {
           </div>
         ) : (
           <div className="space-y-6">
-            {memories.map(entry => (
+            {paginatedMemories.map(entry => (
                 <Card key={entry.id} className="bg-secondary/30">
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between text-xl">
@@ -102,6 +122,19 @@ export function OnThisDay({ entries }: OnThisDayProps) {
           </div>
         )}
       </CardContent>
+       {totalPages > 1 && (
+        <CardFooter className="flex justify-between items-center">
+          <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="outline">
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="outline">
+            Next
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   )
 }
