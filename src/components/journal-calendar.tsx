@@ -15,9 +15,10 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerDescription,
+  DrawerOverlay,
+  DrawerPortal,
 } from '@/components/ui/drawer';
 import Image from 'next/image';
-import { ScrollArea } from './ui/scroll-area';
 
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -45,7 +46,13 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
     const dateKey = format(day, 'yyyy-MM-dd');
     const dayEntries = entriesByDate.get(dateKey);
     if (dayEntries) {
-      setSelectedEntries(dayEntries);
+      // Sort entries for the selected day chronologically
+      const sortedDayEntries = dayEntries.sort((a, b) => {
+          const dateA = a.date ? (a.date as any).toDate().getTime() : 0;
+          const dateB = b.date ? (b.date as any).toDate().getTime() : 0;
+          return dateA - dateB;
+      });
+      setSelectedEntries(sortedDayEntries);
     }
   };
 
@@ -95,8 +102,8 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
             {daysInMonth.map((day) => {
               const dateKey = format(day, 'yyyy-MM-dd');
               const dayEntries = entriesByDate.get(dateKey);
-              // Show the mood of the first entry for the day if multiple exist
-              const entryForDisplay = dayEntries?.[0];
+              // Show the mood of the last entry for the day if multiple exist
+              const entryForDisplay = dayEntries?.[dayEntries.length -1];
               return (
                 <div
                   key={day.toString()}
@@ -123,47 +130,52 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
       </Card>
       
       <Drawer open={!!selectedEntries} onOpenChange={(isOpen) => !isOpen && setSelectedEntries(null)}>
-        <DrawerContent>
-          {selectedEntries && selectedEntries.length > 0 && (
-            <div className="container mx-auto max-w-2xl flex flex-col h-full">
-              <DrawerHeader>
-                <DrawerTitle className="flex items-center justify-between text-2xl">
-                    <span>{format((selectedEntries[0].date as any).toDate(), "EEEE, MMMM d, yyyy")}</span>
-                    {/* Show multiple emojis if moods are different */}
-                    <div className="flex -space-x-2">
-                      {[...new Set(selectedEntries.map(e => e.mood))].map(mood => (
-                        <span key={mood} className="text-3xl sm:text-4xl">{MOODS[mood].emoji}</span>
+         <DrawerPortal>
+            <DrawerOverlay />
+            <DrawerContent className="max-h-[96%] flex flex-col">
+              {selectedEntries && selectedEntries.length > 0 && (
+                <>
+                  <div className="p-4 bg-background rounded-t-[10px] flex-shrink-0">
+                    <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted mb-4" />
+                    <DrawerHeader className="p-0 text-left">
+                      <DrawerTitle className="flex items-center justify-between text-2xl">
+                          <span>{format((selectedEntries[0].date as any).toDate(), "EEEE, MMMM d, yyyy")}</span>
+                          <div className="flex -space-x-2">
+                            {[...new Set(selectedEntries.map(e => e.mood))].map(mood => (
+                              <span key={mood} className="text-3xl sm:text-4xl" title={MOODS[mood].label}>{MOODS[mood].emoji}</span>
+                            ))}
+                          </div>
+                      </DrawerTitle>
+                    </DrawerHeader>
+                  </div>
+                  <div className="p-4 overflow-auto flex-grow">
+                    <div className="space-y-6">
+                      {selectedEntries.map(entry => (
+                        <Card key={entry.id} className="bg-secondary/20">
+                          <CardContent className="p-4 space-y-4">
+                            {entry.videoUrl && (
+                              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
+                                <video src={entry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                              </div>
+                            )}
+                            {entry.imageUrl && !entry.videoUrl && (
+                              <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+                                <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
+                              </div>
+                            )}
+                            {entry.audioUrl && (
+                              <audio src={entry.audioUrl} controls className="w-full" />
+                            )}
+                            <p className="whitespace-pre-wrap text-base leading-relaxed break-words">{entry.content || <span className="italic text-muted-foreground">No text content for this entry.</span>}</p>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
-                </DrawerTitle>
-              </DrawerHeader>
-              <ScrollArea className="max-h-[70vh] p-1">
-                <div className="p-4 space-y-6">
-                  {selectedEntries.map(entry => (
-                    <Card key={entry.id} className="bg-secondary/20">
-                      <CardContent className="p-4 space-y-4">
-                        {entry.videoUrl && (
-                          <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
-                            <video src={entry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-                          </div>
-                        )}
-                        {entry.imageUrl && !entry.videoUrl && (
-                          <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-                            <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
-                          </div>
-                        )}
-                        {entry.audioUrl && (
-                          <audio src={entry.audioUrl} controls className="w-full" />
-                        )}
-                        <p className="whitespace-pre-wrap text-base leading-relaxed">{entry.content || <span className="italic text-muted-foreground">No text content for this entry.</span>}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-        </DrawerContent>
+                  </div>
+                </>
+              )}
+            </DrawerContent>
+         </DrawerPortal>
       </Drawer>
     </>
   );
