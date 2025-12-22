@@ -6,6 +6,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths,
 import { Button } from "./ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { JournalEntry } from "@/lib/types";
 
 export interface DateRange {
   from: Date | null;
@@ -13,15 +14,28 @@ export interface DateRange {
 }
 
 interface CustomCalendarProps {
-  onDateRangeSelect: (range: DateRange) => void;
-  selectedRange: DateRange;
+  onDateRangeSelect?: (range: DateRange) => void;
+  selectedRange?: DateRange;
   selectionMode?: 'single' | 'range';
   disabled?: (date: Date) => boolean;
+  onDateClick?: (date: Date) => void;
+  onMonthChange?: (date: Date) => void;
+  events?: Map<string, JournalEntry[]>;
+  renderDay?: (day: Date, dayEntries: JournalEntry[] | undefined) => React.ReactNode;
 }
 
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
-export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode = 'range', disabled }: CustomCalendarProps) {
+export function CustomCalendar({ 
+  onDateRangeSelect, 
+  selectedRange, 
+  selectionMode = 'range', 
+  disabled,
+  onDateClick,
+  onMonthChange,
+  events,
+  renderDay,
+}: CustomCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedRange?.from || new Date());
 
   const handleDateClick = (day: Date) => {
@@ -29,7 +43,19 @@ export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode
       return;
     }
     
+    if(onDateClick) {
+      onDateClick(day);
+      return;
+    }
+
+    if (!onDateRangeSelect) return;
+
     if (selectionMode === 'single') {
+        onDateRangeSelect({ from: startOfDay(day), to: null });
+        return;
+    }
+
+    if (!selectedRange) {
         onDateRangeSelect({ from: startOfDay(day), to: null });
         return;
     }
@@ -62,14 +88,19 @@ export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode
   const startingDayIndex = getDay(firstDayOfMonth);
 
   const handlePrevMonth = () => {
-    setCurrentMonth(subMonths(currentMonth, 1));
+    const newMonth = subMonths(currentMonth, 1);
+    setCurrentMonth(newMonth);
+    if(onMonthChange) onMonthChange(newMonth);
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth(addMonths(currentMonth, 1));
+    const newMonth = addMonths(currentMonth, 1);
+    setCurrentMonth(newMonth);
+    if (onMonthChange) onMonthChange(newMonth);
   };
 
   const isDateInRange = (day: Date) => {
+    if (!selectedRange) return false;
     const { from, to } = selectedRange;
     if (!from) return false;
     if (from && !to) return isSameDay(day, from);
@@ -77,8 +108,8 @@ export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode
     return false;
   };
   
-  const isRangeStart = (day: Date) => selectedRange.from && isSameDay(day, selectedRange.from);
-  const isRangeEnd = (day: Date) => selectedRange.to && isSameDay(day, selectedRange.to);
+  const isRangeStart = (day: Date) => selectedRange && selectedRange.from && isSameDay(day, selectedRange.from);
+  const isRangeEnd = (day: Date) => selectedRange && selectedRange.to && isSameDay(day, selectedRange.to);
 
   return (
     <div className="p-1">
@@ -105,10 +136,30 @@ export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode
           <div key={`empty-${index}`} />
         ))}
         {daysInMonth.map((day) => {
+            const dateKey = format(day, 'yyyy-MM-dd');
+            const dayEntries = events?.get(dateKey);
+
+            if (renderDay) {
+              return (
+                 <div
+                  key={day.toString()}
+                  className={cn(
+                    "border rounded-md p-1.5 h-16 sm:h-20 flex flex-col justify-start items-start relative transition-colors text-sm",
+                    dayEntries ? "cursor-pointer hover:bg-accent" : "",
+                    isSameDay(day, new Date()) && "bg-secondary/30",
+                    isToday(day) && "font-bold text-primary",
+                  )}
+                  onClick={() => handleDateClick(day)}
+                >
+                  {renderDay(day, dayEntries)}
+                </div>
+              )
+            }
+            
             const isSelected = isDateInRange(day);
             const isStart = isRangeStart(day);
             const isEnd = isRangeEnd(day);
-            const isSingleSelection = isStart && (!selectedRange.to || isSameDay(selectedRange.from, selectedRange.to));
+            const isSingleSelection = selectedRange && isStart && (!selectedRange.to || isSameDay(selectedRange.from, selectedRange.to));
             const isDisabled = disabled ? disabled(day) : false;
 
             return (
@@ -140,3 +191,4 @@ export function CustomCalendar({ onDateRangeSelect, selectedRange, selectionMode
     </div>
   );
 }
+
