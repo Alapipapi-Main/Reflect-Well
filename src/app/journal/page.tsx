@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp } from "lucide-react"
+import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp, Calendar } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import type { JournalEntry, JournalTemplate, TimeCapsuleEntry } from "@/lib/types"
@@ -21,6 +21,7 @@ import { AskJournal } from '@/components/ask-journal';
 import { JournalGoals } from '@/components/journal-goals';
 import { GuidedJournaling } from '@/components/guided-journaling';
 import { GratitudeWall } from '@/components/gratitude-wall';
+import { JournalCalendar } from '@/components/journal-calendar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -113,6 +114,10 @@ function JournalPageContent() {
                     <BookOpen className="mr-2 h-4 w-4" />
                     History
                   </TabsTrigger>
+                   <TabsTrigger value="calendar">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Calendar
+                  </TabsTrigger>
                   <TabsTrigger value="trends" >
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
@@ -154,6 +159,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="history" className="mt-6">
             <PastEntries entries={entries || []} isFormSubmitting={isSubmittingNewEntry} />
+          </TabsContent>
+          <TabsContent value="calendar" className="mt-6">
+            <JournalCalendar entries={entries || []} />
           </TabsContent>
           <TabsContent value="trends" className="mt-6">
             <MoodChart entries={entries || []} />
