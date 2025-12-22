@@ -111,7 +111,7 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                     {format(day, "d")}
                   </span>
                   {entryForDisplay && (
-                    <div className="absolute inset-0 flex items-center justify-center text-3xl sm:text-5xl opacity-80" title={MOODS[entryForDisplay.mood].label}>
+                    <div className="absolute inset-0 flex items-center justify-center text-3xl sm:text-4xl opacity-80" title={MOODS[entryForDisplay.mood].label}>
                       {MOODS[entryForDisplay.mood].emoji}
                     </div>
                   )}
@@ -125,14 +125,14 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
       <Drawer open={!!selectedEntries} onOpenChange={(isOpen) => !isOpen && setSelectedEntries(null)}>
         <DrawerContent>
           {selectedEntries && selectedEntries.length > 0 && (
-            <div className="container mx-auto max-w-2xl py-8 px-4">
+            <div className="container mx-auto max-w-2xl flex flex-col h-full">
               <DrawerHeader>
                 <DrawerTitle className="flex items-center justify-between text-2xl">
                     <span>{format((selectedEntries[0].date as any).toDate(), "EEEE, MMMM d, yyyy")}</span>
                     {/* Show multiple emojis if moods are different */}
                     <div className="flex -space-x-2">
                       {[...new Set(selectedEntries.map(e => e.mood))].map(mood => (
-                        <span key={mood} className="text-4xl">{MOODS[mood].emoji}</span>
+                        <span key={mood} className="text-3xl sm:text-4xl">{MOODS[mood].emoji}</span>
                       ))}
                     </div>
                 </DrawerTitle>
@@ -149,7 +149,7 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                         )}
                         {entry.imageUrl && !entry.videoUrl && (
                           <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-                            <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
+                            <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
                           </div>
                         )}
                         {entry.audioUrl && (
