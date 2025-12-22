@@ -99,22 +99,7 @@ export function JournalFormFields({
           <FormItem>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
               <FormLabel>Your journal entry</FormLabel>
-              <div className="flex flex-row items-center gap-2">
-                 {onAskCompanion && (
-                    <Button type="button" variant="outline" size="sm" onClick={onAskCompanion} disabled={isCompanionButtonDisabled}>
-                      {isCompanionLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Thinking...
-                        </>
-                      ) : (
-                        <>
-                          <MessageCircleQuestion className="mr-2 h-4 w-4" />
-                          Ask for a thought
-                        </>
-                      )}
-                    </Button>
-                  )}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                  {!isEditing && onGeneratePrompt && (
                     <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt || isGenerating || !moodValue}>
                       {isGettingPrompt ? (
@@ -126,6 +111,21 @@ export function JournalFormFields({
                         <>
                           <Wand className="mr-2 h-4 w-4" />
                           Inspire Me
+                        </>
+                      )}
+                    </Button>
+                  )}
+                 {onAskCompanion && (
+                    <Button type="button" variant="outline" size="sm" onClick={onAskCompanion} disabled={isCompanionButtonDisabled}>
+                      {isCompanionLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Thinking...
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircleQuestion className="mr-2 h-4 w-4" />
+                          Ask for a thought
                         </>
                       )}
                     </Button>
