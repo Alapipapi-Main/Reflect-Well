@@ -44,6 +44,7 @@ import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
 import type { JournalEntry, Mood, UserSettings, JournalTemplate } from "@/lib/types"
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
+import { AiCompanionThought } from "./ai-companion-thought"
 
 declare const puter: any;
 
@@ -109,6 +110,10 @@ export function JournalForm({
 
   const [audioReflection, setAudioReflection] = useState<HTMLAudioElement | null>(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+
+  const [isCompanionLoading, setIsCompanionLoading] = useState(false);
+  const [companionThought, setCompanionThought] = useState<string | null>(null);
+  const [showCompanionDialog, setShowCompanionDialog] = useState(false);
 
   const {
     startRecording,
@@ -208,7 +213,7 @@ Journal Entry:
     }
   }, [recorderError, toast]);
   
-  const isGenerating = isGeneratingVideo || isGeneratingAudio;
+  const isGenerating = isGeneratingVideo || isGeneratingAudio || isCompanionLoading;
 
   const resetDialogState = () => {
     setReflection(null);
@@ -407,6 +412,40 @@ Generate one new prompt for the user now.`;
     }
   };
 
+  const handleAskCompanion = async () => {
+    const content = form.getValues("content");
+    if (!content || content.length < 20) {
+      toast({
+        variant: "destructive",
+        title: "More Content Needed",
+        description: "Please write a little more before asking for a thought.",
+      });
+      return;
+    }
+
+    setIsCompanionLoading(true);
+    try {
+      const prompt = `You are a gentle, Socratic journaling companion. A user is writing in their journal and has asked you for a thought.
+Read their entry so far and ask one, and only one, gentle, open-ended question to encourage them to reflect more deeply.
+Do not offer advice or summaries. Just ask a question. Frame it as a curious friend.
+
+Examples:
+- If they write "I'm so stressed at work", you might ask "What does that stress feel like in your body?"
+- If they write "I had a great time with my friends", you could ask "What was it about that time together that felt so good?"
+
+User's entry so far:
+"${content}"`;
+
+      const aiResponse = await puter.ai.chat(prompt);
+      setCompanionThought(aiResponse.message.content);
+      setShowCompanionDialog(true);
+    } catch (error) {
+      toast({ variant: "destructive", title: "AI Companion Error" });
+    } finally {
+      setIsCompanionLoading(false);
+    }
+  };
+
   const clearInspirationPrompt = () => {
     if (settingsDocRef) {
         setDocumentNonBlocking(settingsDocRef, { inspirationPrompt: null }, { merge: true });
@@ -550,6 +589,8 @@ Generate one new prompt for the user now.`;
                 suggestedTags={suggestedTags}
                 isSuggestingTags={isSuggestingTags && !isSubmitting}
                 onAddTag={handleAddTag}
+                onAskCompanion={handleAskCompanion}
+                isCompanionLoading={isCompanionLoading}
               />
               {/* AI Cover Art Section */}
               {!externalImageUrl && (
@@ -747,6 +788,14 @@ Generate one new prompt for the user now.`;
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* AI Companion Dialog */}
+      <AiCompanionThought
+        isOpen={showCompanionDialog}
+        onOpenChange={setShowCompanionDialog}
+        thought={companionThought}
+        isLoading={isCompanionLoading}
+      />
     </>
   )
 }

@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { MOODS } from "@/lib/constants"
 import type { Mood } from "@/lib/types"
 import { Button } from "./ui/button"
-import { Wand, Loader2, Sparkles } from "lucide-react"
+import { Wand, Loader2, Sparkles, MessageCircleQuestion } from "lucide-react"
 import { Badge } from "./ui/badge"
 
 interface JournalFormFieldsProps {
@@ -28,6 +28,8 @@ interface JournalFormFieldsProps {
   suggestedTags?: string[]
   isSuggestingTags?: boolean
   onAddTag?: (tag: string) => void
+  onAskCompanion?: () => void;
+  isCompanionLoading?: boolean;
 }
 
 export function JournalFormFields({ 
@@ -37,10 +39,15 @@ export function JournalFormFields({
   isEditing = false,
   suggestedTags = [],
   isSuggestingTags = false,
-  onAddTag
+  onAddTag,
+  onAskCompanion,
+  isCompanionLoading,
 }: JournalFormFieldsProps) {
   const { control, watch } = useFormContext()
   const moodValue = watch("mood")
+  const contentValue = watch("content")
+
+  const isCompanionButtonDisabled = isCompanionLoading || isGenerating || isGettingPrompt || !contentValue || contentValue.length < 20;
 
   return (
     <>
@@ -90,23 +97,40 @@ export function JournalFormFields({
         name="content"
         render={({ field }) => (
           <FormItem>
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
               <FormLabel>Your journal entry</FormLabel>
-              {!isEditing && onGeneratePrompt && (
-                <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt || isGenerating || !moodValue}>
-                  {isGettingPrompt ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Wand className="mr-2 h-4 w-4" />
-                      Inspire Me
-                    </>
+              <div className="flex items-center gap-2">
+                 {onAskCompanion && (
+                    <Button type="button" variant="outline" size="sm" onClick={onAskCompanion} disabled={isCompanionButtonDisabled}>
+                      {isCompanionLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Thinking...
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircleQuestion className="mr-2 h-4 w-4" />
+                          Ask for a thought
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
-              )}
+                 {!isEditing && onGeneratePrompt && (
+                    <Button type="button" variant="ghost" size="sm" onClick={onGeneratePrompt} disabled={isGettingPrompt || isGenerating || !moodValue}>
+                      {isGettingPrompt ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Wand className="mr-2 h-4 w-4" />
+                          Inspire Me
+                        </>
+                      )}
+                    </Button>
+                  )}
+              </div>
             </div>
             <FormControl>
               <Textarea
@@ -117,7 +141,7 @@ export function JournalFormFields({
               />
             </FormControl>
             <FormDescription>
-              This is your private space. Feel free to be open and honest.
+             Need a nudge? Try the "Ask for a thought" button after writing a bit.
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -175,5 +199,3 @@ export function JournalFormFields({
     </>
   )
 }
-
-    
