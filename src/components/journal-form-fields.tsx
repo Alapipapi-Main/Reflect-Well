@@ -99,7 +99,7 @@ export function JournalFormFields({
           <FormItem>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
               <FormLabel>Your journal entry</FormLabel>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 self-start sm:self-center">
+              <div className="flex flex-row items-center gap-2">
                  {onAskCompanion && (
                     <Button type="button" variant="outline" size="sm" onClick={onAskCompanion} disabled={isCompanionButtonDisabled}>
                       {isCompanionLoading ? (
