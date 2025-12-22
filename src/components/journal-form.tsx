@@ -19,7 +19,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -45,6 +44,7 @@ import { MOODS } from "@/lib/constants"
 import type { JournalEntry, Mood, UserSettings, JournalTemplate } from "@/lib/types"
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
 import { AiCompanionThought } from "./ai-companion-thought"
+import { format } from "date-fns"
 
 declare const puter: any;
 
@@ -73,6 +73,7 @@ interface JournalFormProps {
 }
 
 export function JournalForm({ 
+    entries = [],
     onSubmittingChange,
     externalImageUrl,
     formContext,
@@ -424,18 +425,38 @@ Generate one new prompt for the user now.`;
     }
 
     setIsCompanionLoading(true);
-    try {
-      const prompt = `You are a gentle, Socratic journaling companion. A user is writing in their journal and has asked you for a thought.
-Read their entry so far and ask one, and only one, gentle, open-ended question to encourage them to reflect more deeply.
-Do not offer advice or summaries. Just ask a question. Frame it as a curious friend.
+
+    // Get the last 3 entries for context
+    const recentEntries = [...entries]
+        .sort((a, b) => (b.date as any).toDate().getTime() - (a.date as any).toDate().getTime())
+        .slice(0, 3);
+        
+    const history = recentEntries.map(entry => {
+        const date = format((entry.date as any).toDate(), "MMMM d, yyyy");
+        const mood = MOODS[entry.mood].label;
+        return `On ${date}, I felt ${mood} and wrote: "${entry.content}"`;
+    }).join("\n\n");
+
+    const prompt = `You are a gentle, Socratic journaling companion with "memory". A user is writing in their journal and has asked you for a thought.
+Your goal is to help them reflect more deeply by asking one, and only one, gentle, open-ended question.
+
+1.  Read their recent journal history to understand their ongoing narrative.
+2.  Read their current, unfinished entry.
+3.  If relevant, ask a question that connects their current thoughts to a theme from their past entries. This makes you feel like a continuous, attentive guide.
+4.  If past entries aren't relevant, just ask a thoughtful question about their current entry.
+5.  Do not offer advice, summaries, or affirmations. Just ask one insightful question.
 
 Examples:
-- If they write "I'm so stressed at work", you might ask "What does that stress feel like in your body?"
-- If they write "I had a great time with my friends", you could ask "What was it about that time together that felt so good?"
+- If a past entry mentioned stress and the current one is calm: "I notice you wrote about feeling calm today, which feels different from the stress you mentioned last week. What do you think contributed to this shift?"
+- If the current entry is about a success: "It sounds like this was a really positive moment. What was it about this achievement that felt most meaningful to you?"
 
-User's entry so far:
+**Recent Journal History:**
+${history || "No recent history available."}
+
+**User's Current (Unfinished) Entry:**
 "${content}"`;
 
+    try {
       const aiResponse = await puter.ai.chat(prompt);
       setCompanionThought(aiResponse.message.content);
       setShowCompanionDialog(true);
@@ -799,3 +820,5 @@ User's entry so far:
     </>
   )
 }
+
+    
