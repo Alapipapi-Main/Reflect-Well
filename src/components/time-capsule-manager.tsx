@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { TimeCapsuleEntry } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -30,10 +30,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Trash2, Loader2, Calendar as CalendarIcon, Lock, Unlock, Mail, Clock } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, Calendar as CalendarIcon, Lock, Unlock, Mail, Clock, Film, Sparkles, X } from 'lucide-react';
 import { format, isFuture, startOfTomorrow, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import Balancer from 'react-wrap-balancer';
+import Image from 'next/image';
+
+declare const puter: any;
 
 interface TimeCapsuleManagerProps {
   timeCapsules: TimeCapsuleEntry[];
@@ -54,6 +57,8 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
 
   const form = useForm<z.infer<typeof timeCapsuleSchema>>({
@@ -68,6 +73,38 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
     }
   };
 
+  const handleGenerateVideo = async () => {
+    const content = form.getValues('content');
+    if (!content) {
+        toast({ variant: 'destructive', title: 'Message Required', description: 'Please write your message before generating a video.' });
+        return;
+    }
+    if (typeof puter === 'undefined') {
+        toast({ variant: 'destructive', title: 'AI Not Available' });
+        return;
+    }
+
+    setIsGeneratingVideo(true);
+    setVideoUrl(null);
+
+    const prompt = `Create a short, cinematic, and emotionally resonant video that captures the essence of this message to a person's future self. The tone should be reflective, hopeful, and a little nostalgic. The style should be abstract and beautiful, not literal.
+
+Message: "${content}"`;
+
+    try {
+        const videoElement = await puter.ai.txt2vid(prompt, { model: "Wan-AI/Wan2.2-T2V-A14B" });
+        const generatedVideoUrl = videoElement.src;
+        setVideoUrl(generatedVideoUrl);
+        videoElement.addEventListener('loadeddata', () => videoElement.play().catch(() => {}));
+        toast({ title: 'Video Generated!', description: 'A video has been created for your time capsule.' });
+    } catch (error) {
+        console.error("Error generating video for time capsule:", error);
+        toast({ variant: 'destructive', title: 'Video Generation Failed', description: 'Could not create a video at this time.' });
+    } finally {
+        setIsGeneratingVideo(false);
+    }
+};
+
   const onSubmit = async (values: z.infer<typeof timeCapsuleSchema>) => {
     if (!user || !firestore) return;
 
@@ -79,9 +116,11 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
         ...values,
         userId: user.uid,
         createdAt: serverTimestamp(),
+        videoUrl: videoUrl,
       });
       toast({ title: 'Time Capsule Sealed!', description: `Your message will be available to read on ${format(values.lockUntil, 'PPP')}.` });
       form.reset({ content: '', lockUntil: undefined });
+      setVideoUrl(null);
     } catch (error) {
       console.error('Error saving time capsule:', error);
       toast({ variant: 'destructive', title: 'Save Failed', description: 'Could not save the time capsule.' });
@@ -106,6 +145,8 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
   };
 
   const selectedDate = form.watch('lockUntil');
+  const messageContent = form.watch('content');
+  const isGenerating = isSubmitting || isGeneratingVideo;
 
   return (
     <>
@@ -123,16 +164,63 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                   placeholder="What do you want to remember? What are your hopes? What advice would you give?"
                   minRows={4}
                   {...form.register('content')}
-                  disabled={isSubmitting}
+                  disabled={isGenerating}
                 />
                 {form.formState.errors.content && <p className="text-sm font-medium text-destructive">{form.formState.errors.content.message}</p>}
               </div>
+
+               <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-muted-foreground">AI Video Message</h3>
+                    <div className="p-4 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-4 text-center min-h-[180px]">
+                    {isGeneratingVideo ? (
+                        <>
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p className="text-muted-foreground">Generating your video...</p>
+                        </>
+                    ) : videoUrl ? (
+                        <div className="relative w-full aspect-video rounded-md overflow-hidden">
+                          <video src={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                          <Button 
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-2 right-2 h-7 w-7"
+                              onClick={() => setVideoUrl(null)}
+                              disabled={isGenerating}
+                          >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove video</span>
+                          </Button>
+                        </div>
+                    ) : (
+                        <>
+                        <div className="bg-secondary p-3 rounded-full">
+                            <Film className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-muted-foreground max-w-xs">
+                            Add a short, cinematic video to your message based on what you write.
+                        </p>
+                        <Button 
+                            type="button"
+                            variant="secondary"
+                            onClick={handleGenerateVideo}
+                            disabled={isGenerating || !messageContent}
+                        >
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Generate Video
+                        </Button>
+                        </>
+                    )}
+                    </div>
+                </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Unlock On</label>
                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant={"outline"}
+                        disabled={isGenerating}
                         className={cn(
                           "w-full sm:w-[240px] justify-start text-left font-normal",
                           !selectedDate && "text-muted-foreground"
@@ -153,12 +241,14 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                   </Popover>
                   {form.formState.errors.lockUntil && <p className="text-sm font-medium text-destructive">{form.formState.errors.lockUntil.message}</p>}
               </div>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sealing...</>
-                ) : <><Lock className="mr-2 h-4 w-4" /> Seal Time Capsule</>}
-              </Button>
             </CardContent>
+             <CardFooter>
+                 <Button type="submit" disabled={isGenerating}>
+                    {isSubmitting ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sealing...</>
+                    ) : <><Lock className="mr-2 h-4 w-4" /> Seal Time Capsule</>}
+                </Button>
+            </CardFooter>
           </form>
         </Card>
 
@@ -212,7 +302,12 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
                                 Written on {capsule.createdAt ? format((capsule.createdAt as any).toDate(), 'PPP') : 'just now'}
                              </CardDescription>
                            </CardHeader>
-                           <CardContent>
+                           <CardContent className="space-y-4">
+                            {capsule.videoUrl && (
+                                <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
+                                    <video src={capsule.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                                </div>
+                            )}
                               <p className="whitespace-pre-wrap">{capsule.content}</p>
                            </CardContent>
                         </Card>

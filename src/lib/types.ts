@@ -42,6 +42,7 @@ export interface TimeCapsuleEntry {
     createdAt: Timestamp;
     lockUntil: Timestamp;
     openedAt?: Timestamp | null;
+    videoUrl?: string | null;
 }
 
     
