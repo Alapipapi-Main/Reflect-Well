@@ -34,13 +34,6 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-
-    /* Mood Colors */
-    --mood-ecstatic: 120 73% 75%; /* Bright Green */
-    --mood-happy: 45 100% 75%; /* Sunny Yellow */
-    --mood-neutral: 240 10% 75%; /* Muted Blue-Gray */
-    --mood-sad: 210 100% 80%; /* Soft Blue */
-    --mood-angry: 0 90% 80%; /* Soft Red */
   }
   .dark {
     --background: 240 10% 10%;
@@ -64,13 +57,6 @@ body {
     --ring: 351 90% 75%;
     --chart-1: 351 90% 75%;
     --chart-2: 240 20% 50%;
-
-    /* Mood Colors */
-    --mood-ecstatic: 120 60% 50%;
-    --mood-happy: 45 80% 60%;
-    --mood-neutral: 240 10% 50%;
-    --mood-sad: 210 70% 60%;
-    --mood-angry: 0 70% 60%;
   }
 
   .theme-forest {

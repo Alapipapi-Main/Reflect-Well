@@ -56,13 +56,6 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-        mood: {
-          ecstatic: 'hsl(var(--mood-ecstatic))',
-          happy: 'hsl(var(--mood-happy))',
-          neutral: 'hsl(var(--mood-neutral))',
-          sad: 'hsl(var(--mood-sad))',
-          angry: 'hsl(var(--mood-angry))',
-        }
       },
       borderRadius: {
         lg: 'var(--radius)',
