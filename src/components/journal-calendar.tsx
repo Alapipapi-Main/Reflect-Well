@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameDay } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, X, BookOpen, Wind } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Wind } from 'lucide-react';
 import { MOODS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { JournalEntry } from '@/lib/types';
@@ -17,6 +17,7 @@ import {
   DrawerDescription,
 } from '@/components/ui/drawer';
 import Image from 'next/image';
+import { ScrollArea } from './ui/scroll-area';
 
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -26,23 +27,25 @@ interface JournalCalendarProps {
 
 export function JournalCalendar({ entries }: JournalCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
+  const [selectedEntries, setSelectedEntries] = useState<JournalEntry[] | null>(null);
 
   const entriesByDate = useMemo(() => {
-    const map = new Map<string, JournalEntry>();
+    const map = new Map<string, JournalEntry[]>();
     entries.forEach(entry => {
       const dateKey = format((entry.date as any).toDate(), 'yyyy-MM-dd');
-      // For simplicity, we'll show the last entry if there are multiple on the same day
-      map.set(dateKey, entry);
+      if (!map.has(dateKey)) {
+        map.set(dateKey, []);
+      }
+      map.get(dateKey)!.push(entry);
     });
     return map;
   }, [entries]);
 
   const handleDateClick = (day: Date) => {
     const dateKey = format(day, 'yyyy-MM-dd');
-    const entry = entriesByDate.get(dateKey);
-    if (entry) {
-      setSelectedEntry(entry);
+    const dayEntries = entriesByDate.get(dateKey);
+    if (dayEntries) {
+      setSelectedEntries(dayEntries);
     }
   };
 
@@ -91,12 +94,15 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
             ))}
             {daysInMonth.map((day) => {
               const dateKey = format(day, 'yyyy-MM-dd');
-              const entry = entriesByDate.get(dateKey);
+              const dayEntries = entriesByDate.get(dateKey);
+              // Show the mood of the first entry for the day if multiple exist
+              const entryForDisplay = dayEntries?.[0];
               return (
                 <div
                   key={day.toString()}
                   className={cn(
-                    "border rounded-md p-1.5 h-20 sm:h-24 flex flex-col justify-start items-start relative cursor-pointer hover:bg-accent transition-colors",
+                    "border rounded-md p-1.5 h-20 sm:h-24 flex flex-col justify-start items-start relative transition-colors",
+                    dayEntries ? "cursor-pointer hover:bg-accent" : "",
                     isSameDay(day, new Date()) && "bg-secondary/30"
                   )}
                   onClick={() => handleDateClick(day)}
@@ -104,9 +110,9 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                   <span className={cn("font-medium", isSameDay(day, new Date()) ? "text-primary" : "text-muted-foreground")}>
                     {format(day, "d")}
                   </span>
-                  {entry && (
-                    <div className="absolute inset-0 flex items-center justify-center text-4xl sm:text-5xl opacity-80" title={MOODS[entry.mood].label}>
-                      {MOODS[entry.mood].emoji}
+                  {entryForDisplay && (
+                    <div className="absolute inset-0 flex items-center justify-center text-3xl sm:text-5xl opacity-80" title={MOODS[entryForDisplay.mood].label}>
+                      {MOODS[entryForDisplay.mood].emoji}
                     </div>
                   )}
                 </div>
@@ -116,32 +122,45 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
         </CardContent>
       </Card>
       
-      <Drawer open={!!selectedEntry} onOpenChange={(isOpen) => !isOpen && setSelectedEntry(null)}>
+      <Drawer open={!!selectedEntries} onOpenChange={(isOpen) => !isOpen && setSelectedEntries(null)}>
         <DrawerContent>
-          {selectedEntry && (
+          {selectedEntries && selectedEntries.length > 0 && (
             <div className="container mx-auto max-w-2xl py-8 px-4">
               <DrawerHeader>
                 <DrawerTitle className="flex items-center justify-between text-2xl">
-                    <span>{format((selectedEntry.date as any).toDate(), "EEEE, MMMM d, yyyy")}</span>
-                    <span className="text-4xl">{MOODS[selectedEntry.mood].emoji}</span>
+                    <span>{format((selectedEntries[0].date as any).toDate(), "EEEE, MMMM d, yyyy")}</span>
+                    {/* Show multiple emojis if moods are different */}
+                    <div className="flex -space-x-2">
+                      {[...new Set(selectedEntries.map(e => e.mood))].map(mood => (
+                        <span key={mood} className="text-4xl">{MOODS[mood].emoji}</span>
+                      ))}
+                    </div>
                 </DrawerTitle>
               </DrawerHeader>
-              <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-                {selectedEntry.videoUrl && (
-                  <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
-                    <video src={selectedEntry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-                  </div>
-                )}
-                {selectedEntry.imageUrl && !selectedEntry.videoUrl && (
-                  <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
-                    <Image src={selectedEntry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
-                  </div>
-                )}
-                {selectedEntry.audioUrl && (
-                  <audio src={selectedEntry.audioUrl} controls className="w-full" />
-                )}
-                <p className="whitespace-pre-wrap text-base leading-relaxed">{selectedEntry.content}</p>
-              </div>
+              <ScrollArea className="max-h-[70vh] p-1">
+                <div className="p-4 space-y-6">
+                  {selectedEntries.map(entry => (
+                    <Card key={entry.id} className="bg-secondary/20">
+                      <CardContent className="p-4 space-y-4">
+                        {entry.videoUrl && (
+                          <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
+                            <video src={entry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        {entry.imageUrl && !entry.videoUrl && (
+                          <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+                            <Image src={entry.imageUrl} alt="AI-generated image for the entry" layout="fill" objectFit="cover" />
+                          </div>
+                        )}
+                        {entry.audioUrl && (
+                          <audio src={entry.audioUrl} controls className="w-full" />
+                        )}
+                        <p className="whitespace-pre-wrap text-base leading-relaxed">{entry.content || <span className="italic text-muted-foreground">No text content for this entry.</span>}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
           )}
         </DrawerContent>
