@@ -223,11 +223,12 @@ The user has written a message to you. Your task is to provide one single, encou
                         variant="secondary"
                         onClick={handleGetFutureSelfReply}
                         disabled={isGenerating || !messageContent || messageContent.length < 15}
+                        className="w-full justify-center"
                     >
                         {isGettingReply ? (
                             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Thinking...</>
                         ) : (
-                            <><Bot className="mr-2 h-4 w-4" /> Ask for a thought from your Future Self</>
+                            <><Bot className="mr-2 h-4 w-4" /> <span className="sm:hidden">Ask Future Self</span><span className="hidden sm:inline">Ask for a thought from your Future Self</span></>
                         )}
                     </Button>
                </div>
