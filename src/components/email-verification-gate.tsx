@@ -20,7 +20,7 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   const router = useRouter();
   const [isSending, setIsSending] = useState(false);
 
-  // Effect to force light theme
+  // Effect to force light theme and manage it during component lifecycle
   useEffect(() => {
     const root = document.documentElement;
     // Store original classes to restore them on unmount
@@ -32,7 +32,7 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
 
     // Cleanup function to run when the component unmounts
     return () => {
-      // Restore the original classes, which will respect the user's
+      // Restore the original classes. This will respect the user's
       // system/saved preference on other pages.
       root.className = originalClasses;
     };
