@@ -8,9 +8,9 @@ import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
 import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp, Calendar } from "lucide-react"
-import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase"
-import { collection, query, orderBy } from "firebase/firestore"
-import type { JournalEntry, JournalTemplate, TimeCapsuleEntry } from "@/lib/types"
+import { useUser, useFirestore, useMemoFirebase, useCollection, useDoc } from "@/firebase"
+import { collection, query, orderBy, doc } from "firebase/firestore"
+import type { JournalEntry, JournalTemplate, TimeCapsuleEntry, UserSettings } from "@/lib/types"
 import { UserMenu } from '@/components/user-menu';
 import { EmailVerificationGate } from '@/components/email-verification-gate';
 import { WeeklyInsights } from '@/components/weekly-insights';
@@ -31,20 +31,34 @@ import { TimeCapsuleManager } from '@/components/time-capsule-manager';
 import { DreamInterpreter } from '@/components/dream-interpreter';
 import { MoreFeaturesSheet } from '@/components/more-features-sheet';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+import { Celebration } from '@/components/celebration';
+import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+
+const DEFAULT_GOAL = 3;
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
+  const { toast } = useToast();
+  
   const [isSubmittingNewEntry, setIsSubmittingNewEntry] = useState(false);
   const [activeTab, setActiveTab] = useState("new-entry");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.replace('/login');
     }
   }, [user, isUserLoading, router]);
+
+  const settingsDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid, 'settings', 'main');
+  }, [user, firestore]);
+  const { data: settings } = useDoc<UserSettings>(settingsDocRef);
 
   const journalEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -77,6 +91,42 @@ function JournalPageContent() {
     });
   }, [rawEntries]);
 
+  // Goal celebration logic
+  const weeklyProgress = useMemo(() => {
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+    const entriesThisWeek = entries.filter(entry => {
+      const entryDate = (entry.date as any).toDate();
+      return isWithinInterval(entryDate, { start: weekStart, end: weekEnd });
+    });
+    
+    const uniqueDays = new Set(entriesThisWeek.map(entry => format((entry.date as any).toDate(), 'yyyy-MM-dd')));
+    return uniqueDays.size;
+  }, [entries]);
+
+  const goal = settings?.goal ?? DEFAULT_GOAL;
+  
+  useEffect(() => {
+    const wasGoalMetPreviously = localStorage.getItem('goalMetWeek') === format(new Date(), 'yyyy-w');
+    const isGoalMetNow = weeklyProgress >= goal;
+
+    if (isGoalMetNow && !wasGoalMetPreviously) {
+      setShowCelebration(true);
+      toast({
+        title: "Goal Achieved!",
+        description: `Congratulations on journaling ${goal} times this week!`,
+        duration: 5000,
+      });
+      localStorage.setItem('goalMetWeek', format(new Date(), 'yyyy-w'));
+      
+      const timer = setTimeout(() => setShowCelebration(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [weeklyProgress, goal, toast]);
+
+
   if (isUserLoading || !user || areEntriesLoading || areTemplatesLoading || areTimeCapsulesLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -93,7 +143,8 @@ function JournalPageContent() {
   const isMoreTabActive = moreFeaturesTabs.includes(activeTab);
 
   return (
-      <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+      <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8 relative">
+        {showCelebration && <Celebration />}
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-2">
             <BookHeart className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />

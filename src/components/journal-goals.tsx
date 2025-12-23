@@ -10,7 +10,6 @@ import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
 import { Target, Trophy, Loader2 } from 'lucide-react';
 import { useUser, useFirestore, useMemoFirebase, useDoc, setDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { Celebration } from './celebration';
 
 interface JournalGoalsProps {
   entries: JournalEntry[];
@@ -31,7 +30,6 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
   const { data: settings, isLoading: isLoadingSettings } = useDoc<UserSettings>(settingsDocRef);
 
   const [goal, setGoal] = useState<number>(DEFAULT_GOAL);
-  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
     if (settings && typeof settings.goal === 'number') {
@@ -63,31 +61,17 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
     // Count unique days with entries
     const uniqueDays = new Set(entriesThisWeek.map(entry => format((entry.date as any).toDate(), 'yyyy-MM-dd')));
 
-    return {
-      count: uniqueDays.size,
-      weekStart,
-      weekEnd,
-    };
+    return uniqueDays.size;
   }, [entries]);
 
   const progressPercentage = useMemo(() => {
     if (goal === 0) return 0;
-    const percentage = (weeklyProgress.count / goal) * 100;
+    const percentage = (weeklyProgress / goal) * 100;
     return Math.min(percentage, 100); // Cap the percentage at 100
-  }, [weeklyProgress.count, goal]);
+  }, [weeklyProgress, goal]);
   
-  const isGoalMet = weeklyProgress.count >= goal;
-  const displayCount = isGoalMet ? goal : weeklyProgress.count;
-
-  // Trigger celebration
-  useEffect(() => {
-    if (isGoalMet) {
-      setShowCelebration(true);
-      // Hide celebration after a few seconds
-      const timer = setTimeout(() => setShowCelebration(false), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [isGoalMet]);
+  const isGoalMet = weeklyProgress >= goal;
+  const displayCount = isGoalMet ? goal : weeklyProgress;
 
   if (isLoadingSettings) {
     return (
@@ -105,7 +89,6 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
 
   return (
     <Card className="relative overflow-hidden">
-      {showCelebration && <Celebration />}
       <CardHeader>
         <CardTitle>Weekly Journaling Goal</CardTitle>
         <CardDescription>Set a goal for how many days you want to write this week.</CardDescription>
