@@ -5,7 +5,7 @@ import { SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { BarChart, BookCopy, Bot, Clock, Gift, Heart, HelpCircle, Image, Moon, Star, Sun, Trophy } from 'lucide-react';
+import { BarChart, BookCopy, Bot, Clock, Compass, Gift, Heart, HelpCircle, Image, Moon, Star, Sun, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
   
 interface MoreFeaturesSheetProps {
@@ -37,6 +37,7 @@ const features = [
             { value: 'templates', label: 'Templates', icon: BookCopy },
             { value: 'time-capsule', label: 'Time Capsule', icon: Clock },
             { value: 'gratitude', label: 'Gratitude Wall', icon: Heart },
+            { value: 'explorer', label: 'Emotion Explorer', icon: Compass },
         ]
     },
     {
@@ -77,7 +78,7 @@ export function MoreFeaturesSheet({ setActiveTab, hasUnopenedCapsules }: MoreFea
                                         <tab.icon className="mr-2 h-4 w-4" />
                                         <span>{tab.label}</span>
                                         {showDot && (
-                                            <div className="absolute right-3 w-2 h-2 rounded-full bg-blue-500"></div>
+                                            <div className="absolute right-3 w-2.5 h-2.5 rounded-full bg-blue-500"></div>
                                         )}
                                     </Button>
                                 </SheetClose>

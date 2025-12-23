@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp, Calendar } from "lucide-react"
+import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp, Calendar, Compass } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection, useDoc } from "@/firebase"
 import { collection, query, orderBy, doc } from "firebase/firestore"
 import type { JournalEntry, JournalTemplate, TimeCapsuleEntry, UserSettings } from "@/lib/types"
@@ -30,6 +30,7 @@ import { TemplateManager } from '@/components/template-manager';
 import { TimeCapsuleManager } from '@/components/time-capsule-manager';
 import { DreamInterpreter } from '@/components/dream-interpreter';
 import { MoreFeaturesSheet } from '@/components/more-features-sheet';
+import { EmotionExplorer } from '@/components/emotion-explorer';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Celebration } from '@/components/celebration';
 import { startOfWeek, endOfWeek, isWithinInterval, format, isPast } from 'date-fns';
@@ -181,6 +182,10 @@ function JournalPageContent() {
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
                   </TabsTrigger>
+                  <TabsTrigger value="explorer">
+                    <Compass className="mr-2 h-4 w-4" />
+                    Explorer
+                  </TabsTrigger>
 
                   {/* Dummy trigger for state management, visually hidden */}
                   <TabsTrigger value="more" className="hidden">More</TabsTrigger>
@@ -227,6 +232,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="trends" className="mt-6">
             <MoodChart entries={entries || []} />
+          </TabsContent>
+           <TabsContent value="explorer" className="mt-6">
+            <EmotionExplorer />
           </TabsContent>
 
           {/* Dummy content for the 'more' tab to prevent breaking the component */}
