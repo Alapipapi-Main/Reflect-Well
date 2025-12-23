@@ -20,6 +20,21 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   const router = useRouter();
   const [isSending, setIsSending] = useState(false);
 
+  // Effect to force light theme
+  useEffect(() => {
+    const root = document.documentElement;
+    const originalClasses = root.className;
+    
+    // Force light mode
+    root.classList.remove('dark');
+    root.classList.add('light');
+
+    // Cleanup on unmount
+    return () => {
+      root.className = originalClasses;
+    };
+  }, []);
+
   // Poll for verification status periodically
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -83,7 +98,7 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen light">
+    <div className="flex flex-col min-h-screen">
        <header className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-end items-center">
         <UserMenu user={user} showThemeToggle={false} />
       </header>
