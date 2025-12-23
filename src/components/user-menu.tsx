@@ -51,6 +51,15 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
   };
 
   const handleExportJSON = () => {
+    if (!user.emailVerified) {
+        toast({
+            variant: 'destructive',
+            title: 'Email Verification Required',
+            description: 'Please verify your email to export your journal entries.',
+        });
+        return;
+    }
+
     if (!entries || entries.length === 0) {
       toast({
         title: 'No Data to Export',
@@ -93,6 +102,15 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
   };
 
   const handleExportCSV = () => {
+    if (!user.emailVerified) {
+        toast({
+            variant: 'destructive',
+            title: 'Email Verification Required',
+            description: 'Please verify your email to export your journal entries.',
+        });
+        return;
+    }
+    
     if (!entries || entries.length === 0) {
       toast({
         title: 'No Data to Export',
