@@ -5,7 +5,7 @@ import { useState, useMemo, useRef } from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tag, Wind, PlayCircle, Loader2, StopCircle } from 'lucide-react';
+import { Tag, Wind, PlayCircle, Loader2, StopCircle, X } from 'lucide-react';
 import { MOODS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { JournalEntry } from '@/lib/types';
@@ -100,17 +100,17 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
       
        <Drawer open={!!selectedEntries} onOpenChange={(isOpen) => !isOpen && handleCloseDrawer()}>
          <DrawerPortal>
-            <DrawerOverlay className="fixed inset-0 bg-black/40" />
-            <DrawerContent className="bg-background flex flex-col fixed bottom-0 left-0 right-0 max-h-[96%]">
+            <DrawerOverlay />
+            <DrawerContent>
               {selectedEntries && selectedEntries.length > 0 && (
-                <div className="w-full mx-auto flex flex-col overflow-auto rounded-t-[10px]">
+                <div className="w-full mx-auto flex flex-col overflow-auto">
                     <div className="p-4 flex-shrink-0">
                       <DrawerHeader className="p-0 text-left">
                         <DrawerTitle className="flex items-center justify-between text-2xl">
                             <Balancer>{format((selectedEntries[0].date as any).toDate(), "EEEE, MMMM d, yyyy")}</Balancer>
                              <DrawerClose asChild>
                                 <Button variant="ghost" size="icon" onClick={handleCloseDrawer}>
-                                    <Wind className="h-6 w-6" />
+                                    <X className="h-6 w-6" />
                                     <span className="sr-only">Close</span>
                                 </Button>
                              </DrawerClose>
