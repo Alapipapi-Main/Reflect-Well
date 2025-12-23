@@ -56,14 +56,14 @@ export function EmotionExplorer() {
                   className={cn(
                     'p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    emotion.color,
+                    'bg-secondary/30 hover:bg-secondary/60',
                     activePrimary?.name === emotion.name
                       ? 'ring-2 ring-primary ring-offset-2 shadow-lg'
                       : 'opacity-70 hover:opacity-100'
                   )}
                 >
                   <span className="text-3xl sm:text-4xl">{emotion.emoji}</span>
-                  <span className="font-semibold text-sm sm:text-base text-white mix-blend-difference">{emotion.name}</span>
+                  <span className="font-semibold text-sm sm:text-base text-foreground">{emotion.name}</span>
                 </button>
               ))}
             </div>

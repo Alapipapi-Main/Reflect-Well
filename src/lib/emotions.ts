@@ -7,7 +7,6 @@ export interface SecondaryEmotion {
 
 export interface PrimaryEmotion {
   name: string;
-  color: string; // Tailwind CSS class for background color
   emoji: string;
   emotions: SecondaryEmotion[];
 }
@@ -16,7 +15,6 @@ export const EMOTIONS: PrimaryEmotion[] = [
   {
     name: 'Joy',
     emoji: '😄',
-    color: 'bg-yellow-400',
     emotions: [
       {
         name: 'Contentment',
@@ -48,7 +46,6 @@ export const EMOTIONS: PrimaryEmotion[] = [
   {
     name: 'Sadness',
     emoji: '😢',
-    color: 'bg-blue-500',
     emotions: [
       {
         name: 'Disappointment',
@@ -80,7 +77,6 @@ export const EMOTIONS: PrimaryEmotion[] = [
   {
     name: 'Anger',
     emoji: '😠',
-    color: 'bg-red-500',
     emotions: [
       {
         name: 'Frustration',
@@ -112,7 +108,6 @@ export const EMOTIONS: PrimaryEmotion[] = [
   {
     name: 'Fear',
     emoji: '😨',
-    color: 'bg-purple-500',
     emotions: [
       {
         name: 'Anxiety',
@@ -139,7 +134,6 @@ export const EMOTIONS: PrimaryEmotion[] = [
   {
     name: 'Surprise',
     emoji: '😮',
-    color: 'bg-teal-500',
     emotions: [
       {
         name: 'Amazement',
