@@ -5,7 +5,7 @@ import { useState, useMemo, useRef } from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tag, Wind, PlayCircle, Loader2, StopCircle, X } from 'lucide-react';
+import { Tag, PlayCircle, Loader2, StopCircle, X } from 'lucide-react';
 import { MOODS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { JournalEntry } from '@/lib/types';
@@ -103,7 +103,7 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
             <DrawerOverlay />
             <DrawerContent>
               {selectedEntries && selectedEntries.length > 0 && (
-                <div className="w-full mx-auto flex flex-col overflow-auto">
+                <div className="w-full mx-auto flex flex-col h-[80vh]">
                     <div className="p-4 flex-shrink-0">
                       <DrawerHeader className="p-0 text-left">
                         <DrawerTitle className="flex items-center justify-between text-2xl">
