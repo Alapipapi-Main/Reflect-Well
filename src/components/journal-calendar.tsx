@@ -96,7 +96,6 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
               {selectedEntries && selectedEntries.length > 0 && (
                 <div className="w-full mx-auto flex flex-col overflow-auto rounded-t-[10px]">
                     <div className="p-4 flex-shrink-0">
-                      <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted mb-4" />
                       <DrawerHeader className="p-0 text-left">
                         <DrawerTitle className="flex items-center justify-between text-2xl">
                             <Balancer>{format((selectedEntries[0].date as any).toDate(), "EEEE, MMMM d, yyyy")}</Balancer>
