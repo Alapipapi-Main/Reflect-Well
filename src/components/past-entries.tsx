@@ -399,7 +399,7 @@ function ViewJournalContent({ entry }: { entry: JournalEntry }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-start">
         <Button
           size="sm"
           variant="outline"
