@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp, Calendar, Compass } from "lucide-react"
+import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp, Calendar } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection, useDoc } from "@/firebase"
 import { collection, query, orderBy, doc } from "firebase/firestore"
 import type { JournalEntry, JournalTemplate, TimeCapsuleEntry, UserSettings } from "@/lib/types"
@@ -148,7 +148,7 @@ function JournalPageContent() {
     return <EmailVerificationGate user={user} />;
   }
 
-  const moreFeaturesTabs = ['visual-prompt', 'templates', 'time-capsule', 'dream-interpreter', 'guided', 'gratitude', 'ask', 'insights', 'stats', 'goals', 'yesterday', 'on-this-day'];
+  const moreFeaturesTabs = ['visual-prompt', 'templates', 'time-capsule', 'dream-interpreter', 'guided', 'gratitude', 'ask', 'insights', 'stats', 'goals', 'yesterday', 'on-this-day', 'explorer'];
   const isMoreTabActive = moreFeaturesTabs.includes(activeTab);
 
   return (
@@ -182,11 +182,7 @@ function JournalPageContent() {
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
                   </TabsTrigger>
-                  <TabsTrigger value="explorer">
-                    <Compass className="mr-2 h-4 w-4" />
-                    Explorer
-                  </TabsTrigger>
-
+                  
                   {/* Dummy trigger for state management, visually hidden */}
                   <TabsTrigger value="more" className="hidden">More</TabsTrigger>
                   
