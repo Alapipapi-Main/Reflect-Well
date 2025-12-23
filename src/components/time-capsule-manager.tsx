@@ -30,7 +30,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Trash2, Loader2, Calendar as CalendarIcon, Lock, Unlock, Mail, Clock, Film, Sparkles, X } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, Calendar as CalendarIcon, Lock, Unlock, Mail, Clock, Film, Sparkles, X, Bot } from 'lucide-react';
 import { format, isFuture, startOfTomorrow, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import Balancer from 'react-wrap-balancer';
@@ -59,6 +59,8 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [isGettingReply, setIsGettingReply] = useState(false);
+  const [futureSelfReply, setFutureSelfReply] = useState<string | null>(null);
 
 
   const form = useForm<z.infer<typeof timeCapsuleSchema>>({
@@ -105,22 +107,68 @@ Message: "${content}"`;
     }
 };
 
+const handleGetFutureSelfReply = async () => {
+    const content = form.getValues('content');
+    if (!content || content.length < 15) {
+      toast({ variant: 'destructive', title: 'More Detail Needed', description: 'Write a bit more in your message to get a thoughtful reply.' });
+      return;
+    }
+    if (typeof puter === 'undefined') {
+      toast({ variant: 'destructive', title: 'AI Not Available' });
+      return;
+    }
+
+    setIsGettingReply(true);
+    setFutureSelfReply(null);
+
+    const prompt = `You are an AI role-playing as a person's wise, compassionate, and optimistic "Future Self".
+The user has written a message to you. Your task is to provide one single, encouraging, and insightful reply.
+
+- Your tone should be warm, reassuring, and full of perspective. You've been through it, and you've come out stronger and wiser.
+- Read the user's message and identify their core emotion, hope, or fear.
+- Your reply should be short (2-3 sentences).
+- Do not offer concrete advice or predictions. Instead, offer perspective and encouragement.
+- Use "I" statements from the perspective of their future self. For example: "I remember feeling that way. It's amazing to look back now and see..."
+- End with a feeling of hope and reassurance.
+
+**User's Message to You (Their Future Self):**
+"${content}"`;
+
+    try {
+      const aiResponse = await puter.ai.chat(prompt);
+      setFutureSelfReply(aiResponse.message.content);
+    } catch (error) {
+      console.error("Error getting future self reply:", error);
+      toast({ variant: 'destructive', title: 'AI Reply Failed', description: 'Could not get a reply at this time.' });
+    } finally {
+      setIsGettingReply(false);
+    }
+  };
+
+
   const onSubmit = async (values: z.infer<typeof timeCapsuleSchema>) => {
     if (!user || !firestore) return;
 
     setIsSubmitting(true);
 
+    let finalContent = values.content;
+    if (futureSelfReply) {
+        finalContent += `\n\n---\n\n**A Reply from My Future Self:**\n*${futureSelfReply}*`;
+    }
+
     try {
       const timeCapsulesRef = collection(firestore, 'users', user.uid, 'timeCapsules');
       await addDocumentNonBlocking(timeCapsulesRef, {
-        ...values,
         userId: user.uid,
+        content: finalContent,
+        lockUntil: values.lockUntil,
         createdAt: serverTimestamp(),
         videoUrl: videoUrl,
       });
       toast({ title: 'Time Capsule Sealed!', description: `Your message will be available to read on ${format(values.lockUntil, 'PPP')}.` });
       form.reset({ content: '', lockUntil: undefined });
       setVideoUrl(null);
+      setFutureSelfReply(null);
     } catch (error) {
       console.error('Error saving time capsule:', error);
       toast({ variant: 'destructive', title: 'Save Failed', description: 'Could not save the time capsule.' });
@@ -146,7 +194,7 @@ Message: "${content}"`;
 
   const selectedDate = form.watch('lockUntil');
   const messageContent = form.watch('content');
-  const isGenerating = isSubmitting || isGeneratingVideo;
+  const isGenerating = isSubmitting || isGeneratingVideo || isGettingReply;
 
   return (
     <>
@@ -157,7 +205,7 @@ Message: "${content}"`;
             <CardDescription>Write a message to your future self. It will be sealed and locked until the date you choose.</CardDescription>
           </CardHeader>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Your Message</label>
                 <AutosizeTextarea
@@ -169,8 +217,39 @@ Message: "${content}"`;
                 {form.formState.errors.content && <p className="text-sm font-medium text-destructive">{form.formState.errors.content.message}</p>}
               </div>
 
+               <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={handleGetFutureSelfReply}
+                        disabled={isGenerating || !messageContent || messageContent.length < 15}
+                    >
+                        {isGettingReply ? (
+                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Thinking...</>
+                        ) : (
+                            <><Bot className="mr-2 h-4 w-4" /> Ask for a thought from your Future Self</>
+                        )}
+                    </Button>
+               </div>
+
+                {futureSelfReply && (
+                    <div className="p-4 bg-secondary/50 rounded-lg space-y-2 border">
+                        <h4 className="font-semibold text-foreground flex items-center gap-2">
+                        <Bot className="text-primary" /> A Reply from Your Future Self
+                        </h4>
+                        <p className="text-foreground/90 italic">"{futureSelfReply}"</p>
+                    </div>
+                )}
+                {isGettingReply && (
+                    <div className="flex items-center justify-center p-4 text-muted-foreground gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Your future self is reflecting...
+                    </div>
+                )}
+
+
                <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">AI Video Message</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">AI Video Message (Optional)</h3>
                     <div className="p-4 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-4 text-center min-h-[180px]">
                     {isGeneratingVideo ? (
                         <>
