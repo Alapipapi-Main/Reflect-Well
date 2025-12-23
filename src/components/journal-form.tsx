@@ -34,11 +34,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog"
 
 import { useToast } from "@/hooks/use-toast"
 import { MOODS } from "@/lib/constants"
@@ -46,6 +49,7 @@ import type { JournalEntry, Mood, UserSettings, JournalTemplate } from "@/lib/ty
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder"
 import { AiCompanionThought } from "./ai-companion-thought"
 import { format } from "date-fns"
+import { ScrollArea } from "./ui/scroll-area"
 
 declare const puter: any;
 
@@ -694,21 +698,37 @@ ${history || "No recent history available."}
                   )}
                  </Button>
                 {templates.length > 0 && !formContext && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                    <Dialog>
+                      <DialogTrigger asChild>
                         <Button type="button" variant="outline" className="w-full sm:w-auto flex-1">
                           <FileText className="mr-2 h-4 w-4" />
                           Use Template
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        {templates.map(template => (
-                          <DropdownMenuItem key={template.id} onSelect={() => handleUseTemplate(template.content)}>
-                            {template.title}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Select a Template</DialogTitle>
+                          <DialogDescription>
+                            Choose one of your saved templates to apply to your entry.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="max-h-[60vh] pr-4">
+                          <div className="space-y-2">
+                            {templates.map(template => (
+                              <DialogClose asChild key={template.id}>
+                                <button
+                                  onClick={() => handleUseTemplate(template.content)}
+                                  className="w-full text-left p-4 rounded-md border bg-secondary/30 hover:bg-secondary/60 transition-colors"
+                                >
+                                  <h4 className="font-semibold">{template.title}</h4>
+                                  <p className="text-sm text-muted-foreground truncate">{template.content}</p>
+                                </button>
+                              </DialogClose>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </DialogContent>
+                    </Dialog>
                   )}
               </div>
               <Button
