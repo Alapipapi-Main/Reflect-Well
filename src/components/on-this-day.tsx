@@ -98,7 +98,12 @@ export function OnThisDay({ entries }: OnThisDayProps) {
                 <Card key={entry.id} className="bg-secondary/30">
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between text-xl">
-                    <span>{format((entry.date as any).toDate(), "MMMM d, yyyy")}</span>
+                      <div className="flex flex-col">
+                        <span>{format((entry.date as any).toDate(), "MMMM d, yyyy")}</span>
+                         <span className="text-sm text-muted-foreground font-normal">
+                          {format((entry.date as any).toDate(), 'p')}
+                        </span>
+                      </div>
                     <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
                     </CardTitle>
                 </CardHeader>
@@ -114,8 +119,7 @@ export function OnThisDay({ entries }: OnThisDayProps) {
                       </div>
                     )}
                     {entry.audioUrl && (
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm text-muted-foreground">{format((entry.date as any).toDate(), 'p')}</span>
+                       <div className="mt-2">
                         <audio src={entry.audioUrl} controls className="w-full" />
                       </div>
                     )}
