@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -41,6 +42,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogFooter,
 } from "@/components/ui/dialog"
 
 import { useToast } from "@/hooks/use-toast"
@@ -76,6 +78,8 @@ interface JournalFormProps {
   onSave?: () => void;
   templates?: JournalTemplate[];
 }
+
+const TEMPLATES_PER_PAGE = 4;
 
 export function JournalForm({ 
     entries = [],
@@ -120,6 +124,8 @@ export function JournalForm({
   const [isCompanionLoading, setIsCompanionLoading] = useState(false);
   const [companionThought, setCompanionThought] = useState<string | null>(null);
   const [showCompanionDialog, setShowCompanionDialog] = useState(false);
+
+  const [templatePage, setTemplatePage] = useState(1);
 
   const {
     startRecording,
@@ -591,6 +597,22 @@ ${history || "No recent history available."}
   const defaultTitle = "Today's Reflection";
   const defaultDescription = "What's on your mind today? Let it all out.";
 
+  // Pagination for templates dialog
+  const totalTemplatePages = Math.ceil(templates.length / TEMPLATES_PER_PAGE);
+  const paginatedTemplates = templates.slice(
+    (templatePage - 1) * TEMPLATES_PER_PAGE,
+    templatePage * TEMPLATES_PER_PAGE
+  );
+  
+  const handlePrevTemplatePage = () => {
+    setTemplatePage(p => Math.max(p - 1, 1));
+  };
+
+  const handleNextTemplatePage = () => {
+    setTemplatePage(p => Math.min(p + 1, totalTemplatePages));
+  };
+
+
   return (
     <>
       <Card>
@@ -698,7 +720,7 @@ ${history || "No recent history available."}
                   )}
                  </Button>
                 {templates.length > 0 && !formContext && (
-                    <Dialog>
+                    <Dialog onOpenChange={(open) => !open && setTemplatePage(1)}>
                       <DialogTrigger asChild>
                         <Button type="button" variant="outline" className="w-full sm:w-auto flex-1">
                           <FileText className="mr-2 h-4 w-4" />
@@ -712,9 +734,8 @@ ${history || "No recent history available."}
                             Choose one of your saved templates to apply to your entry.
                           </DialogDescription>
                         </DialogHeader>
-                        <ScrollArea className="max-h-[60vh] pr-4">
                           <div className="space-y-2">
-                            {templates.map(template => (
+                            {paginatedTemplates.map(template => (
                               <DialogClose asChild key={template.id}>
                                 <button
                                   onClick={() => handleUseTemplate(template.content)}
@@ -726,7 +747,19 @@ ${history || "No recent history available."}
                               </DialogClose>
                             ))}
                           </div>
-                        </ScrollArea>
+                        {totalTemplatePages > 1 && (
+                            <DialogFooter className="sm:justify-between items-center pt-4">
+                                <Button onClick={handlePrevTemplatePage} disabled={templatePage === 1} variant="outline">
+                                    Previous
+                                </Button>
+                                <span className="text-sm text-muted-foreground">
+                                    Page {templatePage} of {totalTemplatePages}
+                                </span>
+                                <Button onClick={handleNextTemplatePage} disabled={templatePage === totalTemplatePages} variant="outline">
+                                    Next
+                                </Button>
+                            </DialogFooter>
+                        )}
                       </DialogContent>
                     </Dialog>
                   )}
