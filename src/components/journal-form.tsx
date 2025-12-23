@@ -235,26 +235,42 @@ Journal Entry:
       return;
     }
 
-    // Set audio loading state
     setIsGeneratingAudio(true);
 
-    const voiceMemoContext = entry.audioUrl ? "Note: The user has also attached a voice memo to this entry. You don't have access to the audio content, but you can acknowledge its presence if relevant. For example, if the text is short, you might gently suggest that more of their thoughts could be in the recording." : "";
+    const recentEntries = [...entries]
+        .sort((a, b) => (b.date as any).toDate().getTime() - (a.date as any).toDate().getTime())
+        .slice(0, 3);
+        
+    const history = recentEntries.map(e => {
+        const date = format((e.date as any).toDate(), "MMMM d, yyyy");
+        const mood = MOODS[e.mood].label;
+        return `On ${date}, I felt ${mood} and wrote: "${e.content}"`;
+    }).join("\n\n");
 
-    const prompt = `You are a compassionate and insightful journaling companion. Your role is to provide a brief, gentle, and encouraging reflection on a user's journal entry.
-${voiceMemoContext}
-You can either provide a warm, affirming statement or ask a soft, open-ended question that encourages deeper thought. Your response should feel like a supportive friend listening without judgment.
+    const voiceMemoContext = entry.audioUrl ? "Note: The user has also attached a voice memo to this new entry. You don't have access to the audio content, but you can acknowledge its presence." : "";
 
-Keep your reflection to one or two sentences. Do not give advice.
+    const prompt = `You are a compassionate and insightful journaling companion. Your role is to provide a brief, gentle, and encouraging reflection on a user's newest journal entry, keeping their recent history in mind.
 
-Journal Entry:
-"${entry.content}"`;
+- Your tone should be warm and encouraging, like a supportive friend.
+- Briefly review the user's recent journal history for context.
+- Read the user's newest entry.
+- Your reflection should be 1-2 sentences. It can be an affirming statement or a soft, open-ended question.
+- If you notice a connection, a contrast, or a recurring theme between the new entry and the past entries, gently point it out. For example: "It's lovely to see you writing about joy again after a tough week." or "This feeling of uncertainty seems to be a recurring theme for you lately. What does it feel like in this specific moment?"
+- If there's no strong connection, just focus on the current entry.
+- Do not give advice or pass judgment.
+
+**Recent Journal History:**
+${history || "No recent history available."}
+
+**User's Newest Entry:**
+"${entry.content}"
+${voiceMemoContext}`;
 
     try {
       const aiResponse = await puter.ai.chat(prompt);
       const reflectionText = aiResponse.message.content;
       setReflection(reflectionText);
 
-      // Generate audio from the reflection text with a male voice
       const audio = await puter.ai.txt2speech(reflectionText, { voice: 'Matthew', engine: 'neural', language: 'en-US' });
       setAudioReflection(audio);
 
