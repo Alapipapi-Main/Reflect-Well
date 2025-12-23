@@ -156,7 +156,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
     return (
         <Card className="bg-secondary/30">
             <CardHeader>
-                 <div className="flex items-start justify-between">
+                 <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
                          <div className="flex flex-col">
@@ -169,7 +169,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                         variant="outline"
                         onClick={handleListen}
                         disabled={isLoadingAudio}
-                        className="shrink-0"
+                        className="shrink-0 w-full sm:w-auto"
                     >
                         {isLoadingAudio ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -211,4 +211,5 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         </Card>
     );
 }
+
 
