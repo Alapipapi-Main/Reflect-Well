@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Wind } from 'lucide-react';
+import { Tag, Wind } from 'lucide-react';
 import { MOODS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { JournalEntry } from '@/lib/types';
@@ -20,6 +20,7 @@ import {
 import Image from 'next/image';
 import Balancer from 'react-wrap-balancer';
 import { CustomCalendar } from './custom-calendar';
+import { Badge } from './ui/badge';
 
 interface JournalCalendarProps {
   entries: JournalEntry[];
@@ -106,17 +107,13 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                       <div className="space-y-6">
                         {selectedEntries.map(entry => (
                           <Card key={entry.id} className="bg-secondary/20">
-                             <CardHeader className="flex-row items-center justify-between">
-                                {entry.audioUrl ? (
-                                    <audio src={entry.audioUrl} controls className="w-full" />
-                                ): (
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm text-muted-foreground">
-                                            {format((entry.date as any).toDate(), 'p')}
-                                        </span>
-                                    </div>
-                                )}
-                                <span className="text-3xl sm:text-4xl" title={MOODS[entry.mood].label}>{MOODS[entry.mood].emoji}</span>
+                             <CardHeader className="flex flex-row items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-3xl" title={MOODS[entry.mood].label}>{MOODS[entry.mood].emoji}</span>
+                                    <span className="text-sm text-muted-foreground">
+                                        {format((entry.date as any).toDate(), 'p')}
+                                    </span>
+                                </div>
                             </CardHeader>
                             <CardContent className="p-4 pt-0 space-y-4">
                               {entry.videoUrl && (
@@ -129,7 +126,20 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                                   <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
                                 </div>
                               )}
-                              <p className="whitespace-pre-wrap text-base leading-relaxed break-words">{entry.content || <span className="italic text-muted-foreground">No text content for this entry.</span>}</p>
+                              {entry.audioUrl && (
+                                <div className="mt-2">
+                                    <audio src={entry.audioUrl} controls className="w-full" />
+                                </div>
+                              )}
+                              <p className="whitespace-pre-wrap text-base leading-relaxed break-words pt-2">{entry.content || <span className="italic text-muted-foreground">No text content for this entry.</span>}</p>
+                               {entry.tags && entry.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 items-center pt-2">
+                                  <Tag className="h-4 w-4 text-muted-foreground" />
+                                  {entry.tags.map(tag => (
+                                    <Badge key={tag} variant="secondary">{tag}</Badge>
+                                  ))}
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
                         ))}

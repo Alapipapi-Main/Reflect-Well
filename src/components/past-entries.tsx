@@ -269,9 +269,12 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                 <AccordionItem value={entry.id} key={entry.id}>
                   <div className="flex items-center w-full">
                     <AccordionTrigger>
-                      <div className="flex items-center gap-4 text-lg">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 text-left">
                         <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
-                        <span>{format(entry.date ? (entry.date as any).toDate() : new Date(), "MMMM d, yyyy")}</span>
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-base">{format(entry.date ? (entry.date as any).toDate() : new Date(), "MMMM d, yyyy")}</span>
+                            <span className="text-sm text-muted-foreground font-normal">{format(entry.date ? (entry.date as any).toDate() : new Date(), "p")}</span>
+                        </div>
                       </div>
                     </AccordionTrigger>
                     <div className="flex items-center gap-2 pr-4 pl-2">
@@ -508,7 +511,7 @@ Journal Entry:
       const transcriptionText = transcriptionResult.text;
       
       const currentContent = form.getValues("content");
-      const newContent = `${currentContent}\\n\\n---\\n\\n**Voice Memo Transcription:**\\n*${transcriptionText}*`;
+      const newContent = `${currentContent}\n\n---\n\n**Voice Memo Transcription:**\n*${transcriptionText}*`;
       form.setValue("content", newContent);
 
       toast({ title: 'Transcription Added', description: 'The voice memo transcription has been added to your entry content.' });

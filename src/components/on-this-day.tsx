@@ -8,8 +8,9 @@ import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import type { JournalEntry } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
-import { Clock } from "lucide-react"
+import { Clock, Tag } from "lucide-react"
 import { Button } from "./ui/button"
+import { Badge } from "./ui/badge"
 
 interface OnThisDayProps {
   entries: JournalEntry[]
@@ -113,9 +114,20 @@ export function OnThisDay({ entries }: OnThisDayProps) {
                       </div>
                     )}
                     {entry.audioUrl && (
+                      <div className="flex flex-col gap-2">
+                        <span className="text-sm text-muted-foreground">{format((entry.date as any).toDate(), 'p')}</span>
                         <audio src={entry.audioUrl} controls className="w-full" />
+                      </div>
                     )}
                     <p className="whitespace-pre-wrap">{entry.content}</p>
+                    {entry.tags && entry.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 items-center pt-2">
+                          <Tag className="h-4 w-4 text-muted-foreground" />
+                          {entry.tags.map(tag => (
+                            <Badge key={tag} variant="secondary">{tag}</Badge>
+                          ))}
+                        </div>
+                    )}
                 </CardContent>
                 </Card>
             ))}
