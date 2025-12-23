@@ -32,7 +32,7 @@ import { DreamInterpreter } from '@/components/dream-interpreter';
 import { MoreFeaturesSheet } from '@/components/more-features-sheet';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Celebration } from '@/components/celebration';
-import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
+import { startOfWeek, endOfWeek, isWithinInterval, format, isPast } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 const DEFAULT_GOAL = 3;
@@ -127,6 +127,13 @@ function JournalPageContent() {
     }
   }, [weeklyProgress, goal, toast]);
 
+  const hasUnopenedCapsules = useMemo(() => {
+    if (!timeCapsules) return false;
+    return timeCapsules.some(capsule => 
+      capsule.lockUntil && isPast((capsule.lockUntil as any).toDate()) && !capsule.openedAt
+    );
+  }, [timeCapsules]);
+
 
   if (isUserLoading || !user || areEntriesLoading || areTemplatesLoading || areTimeCapsulesLoading) {
     return (
@@ -185,7 +192,7 @@ function JournalPageContent() {
                             // Manually set data-state for visual consistency
                             data-state={isMoreTabActive ? 'active' : 'inactive'}
                             className={cn(
-                              'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+                              'relative inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
                               // These classes mimic the TabsTrigger styles
                               'data-[state=inactive]:bg-transparent data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground',
                               'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md'
@@ -193,10 +200,13 @@ function JournalPageContent() {
                           >
                             <MoreHorizontal className="h-4 w-4" />
                             <span className='ml-2'>More</span>
+                            {hasUnopenedCapsules && (
+                              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse ring-2 ring-background"></div>
+                            )}
                         </div>
                     </SheetTrigger>
                     <SheetContent>
-                        <MoreFeaturesSheet setActiveTab={setActiveTab} />
+                        <MoreFeaturesSheet setActiveTab={setActiveTab} hasUnopenedCapsules={hasUnopenedCapsules} />
                     </SheetContent>
                   </Sheet>
                 </TabsList>

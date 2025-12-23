@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BarChart, BookCopy, Bot, Clock, Gift, Heart, HelpCircle, Image, Moon, Star, Sun, Trophy } from 'lucide-react';
+import { cn } from '@/lib/utils';
   
 interface MoreFeaturesSheetProps {
     setActiveTab: (tab: string) => void;
+    hasUnopenedCapsules?: boolean;
 }
   
 const features = [
@@ -46,7 +48,7 @@ const features = [
     }
 ];
 
-export function MoreFeaturesSheet({ setActiveTab }: MoreFeaturesSheetProps) {
+export function MoreFeaturesSheet({ setActiveTab, hasUnopenedCapsules }: MoreFeaturesSheetProps) {
     const handleSelect = (value: string) => {
       setActiveTab(value);
     };
@@ -63,18 +65,24 @@ export function MoreFeaturesSheet({ setActiveTab }: MoreFeaturesSheetProps) {
                         {index > 0 && <Separator className="my-2" />}
                         <h3 className="px-3 py-2 text-sm font-semibold text-muted-foreground">{group.label}</h3>
                         <div className='flex flex-col'>
-                            {group.items.map(tab => (
+                            {group.items.map(tab => {
+                                const showDot = hasUnopenedCapsules && tab.value === 'time-capsule';
+                                return (
                                 <SheetClose asChild key={tab.value}>
                                     <Button
                                         variant="ghost"
-                                        className="w-full justify-start"
+                                        className="w-full justify-start relative"
                                         onClick={() => handleSelect(tab.value)}
                                     >
                                         <tab.icon className="mr-2 h-4 w-4" />
-                                        {tab.label}
+                                        <span>{tab.label}</span>
+                                        {showDot && (
+                                            <div className="absolute right-3 w-2 h-2 rounded-full bg-blue-500"></div>
+                                        )}
                                     </Button>
                                 </SheetClose>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 ))}
