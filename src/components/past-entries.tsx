@@ -35,7 +35,7 @@ import { Badge } from "@/components/ui/badge"
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns"
-import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2, MessageSquareQuote } from "lucide-react"
+import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2, MessageSquareQuote, PlayCircle, StopCircle } from "lucide-react"
 import { JournalFormFields } from "./journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -306,30 +306,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                         onCancel={() => setEditingEntryId(null)}
                       />
                     ) : (
-                       <div className="space-y-4">
-                        {entry.videoUrl && (
-                          <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
-                              <video src={entry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-                          </div>
-                        )}
-                        {entry.imageUrl && !entry.videoUrl && (
-                          <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-                            <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
-                          </div>
-                        )}
-                        {entry.audioUrl && (
-                          <audio src={entry.audioUrl} controls className="w-full" />
-                        )}
-                        <p className="whitespace-pre-wrap break-words">{entry.content || <span className="text-muted-foreground italic">No text content for this entry.</span>}</p>
-                        {entry.tags && entry.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 items-center">
-                            <Tag className="h-4 w-4 text-muted-foreground" />
-                            {entry.tags.map(tag => (
-                              <Badge key={tag} variant="secondary">{tag}</Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                       <ViewJournalContent entry={entry} />
                     )}
                   </AccordionContent>
                 </AccordionItem>
@@ -382,6 +359,90 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
     </>
   )
 }
+
+function ViewJournalContent({ entry }: { entry: JournalEntry }) {
+  const { toast } = useToast();
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleListen = async () => {
+    if (isPlaying) {
+      audioPlayerRef.current?.pause();
+      setIsPlaying(false);
+      return;
+    }
+
+    if (typeof puter === 'undefined') {
+      toast({ variant: 'destructive', title: 'AI Feature Not Available' });
+      return;
+    }
+    if (!entry.content) {
+      toast({ title: 'No text content to read.' });
+      return;
+    }
+
+    setIsLoadingAudio(true);
+    try {
+      const audio = await puter.ai.txt2speech(entry.content, { voice: 'Matthew' });
+      audioPlayerRef.current = audio;
+      audio.play();
+      setIsPlaying(true);
+      audio.onended = () => setIsPlaying(false);
+    } catch (error) {
+      console.error("Error generating audio:", error);
+      toast({ variant: 'destructive', title: 'Audio Generation Failed' });
+    } finally {
+      setIsLoadingAudio(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleListen}
+          disabled={isLoadingAudio}
+        >
+          {isLoadingAudio ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : isPlaying ? (
+            <StopCircle className="mr-2 h-4 w-4" />
+          ) : (
+            <PlayCircle className="mr-2 h-4 w-4" />
+          )}
+          {isPlaying ? 'Stop' : 'Listen'}
+        </Button>
+      </div>
+
+      {entry.videoUrl && (
+        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
+          <video src={entry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+        </div>
+      )}
+      {entry.imageUrl && !entry.videoUrl && (
+        <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+          <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
+        </div>
+      )}
+      {entry.audioUrl && (
+        <audio src={entry.audioUrl} controls className="w-full" />
+      )}
+      <p className="whitespace-pre-wrap break-words">{entry.content || <span className="text-muted-foreground italic">No text content for this entry.</span>}</p>
+      {entry.tags && entry.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 items-center">
+          <Tag className="h-4 w-4 text-muted-foreground" />
+          {entry.tags.map(tag => (
+            <Badge key={tag} variant="secondary">{tag}</Badge>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 interface EditJournalFormProps {
   entry: JournalEntry
