@@ -115,6 +115,7 @@ function JournalPageContent() {
     if (isGoalMetNow && !wasGoalMetPreviously) {
       setShowCelebration(true);
       toast({
+        variant: 'success',
         title: "Goal Achieved!",
         description: `Congratulations on journaling ${goal} times this week!`,
         duration: 5000,
