@@ -23,14 +23,17 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   // Effect to force light theme
   useEffect(() => {
     const root = document.documentElement;
+    // Store original classes to restore them on unmount
     const originalClasses = root.className;
     
-    // Force light mode
+    // Force light mode by removing 'dark' and adding 'light'
     root.classList.remove('dark');
     root.classList.add('light');
 
-    // Cleanup on unmount
+    // Cleanup function to run when the component unmounts
     return () => {
+      // Restore the original classes, which will respect the user's
+      // system/saved preference on other pages.
       root.className = originalClasses;
     };
   }, []);
