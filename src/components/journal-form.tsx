@@ -748,14 +748,14 @@ ${history || "No recent history available."}
                             ))}
                           </div>
                         {totalTemplatePages > 1 && (
-                            <DialogFooter className="sm:justify-between items-center pt-4">
-                                <Button onClick={handlePrevTemplatePage} disabled={templatePage === 1} variant="outline">
+                            <DialogFooter className="flex-col sm:flex-row sm:justify-between items-center pt-4">
+                                <Button onClick={handlePrevTemplatePage} disabled={templatePage === 1} variant="outline" className="sm:order-1 order-3">
                                     Previous
                                 </Button>
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-muted-foreground order-2 my-2 sm:my-0">
                                     Page {templatePage} of {totalTemplatePages}
                                 </span>
-                                <Button onClick={handleNextTemplatePage} disabled={templatePage === totalTemplatePages} variant="outline">
+                                <Button onClick={handleNextTemplatePage} disabled={templatePage === totalTemplatePages} variant="outline" className="sm:order-3 order-1">
                                     Next
                                 </Button>
                             </DialogFooter>
