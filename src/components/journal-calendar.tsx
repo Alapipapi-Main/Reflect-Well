@@ -100,11 +100,6 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                       <DrawerHeader className="p-0 text-left">
                         <DrawerTitle className="flex items-center justify-between text-2xl">
                             <Balancer>{format((selectedEntries[0].date as any).toDate(), "EEEE, MMMM d, yyyy")}</Balancer>
-                            <div className="flex -space-x-2">
-                              {[...new Set(selectedEntries.map(e => e.mood))].map(mood => (
-                                <span key={mood} className="text-3xl sm:text-4xl" title={MOODS[mood].label}>{MOODS[mood].emoji}</span>
-                              ))}
-                            </div>
                         </DrawerTitle>
                       </DrawerHeader>
                     </div>
@@ -112,7 +107,19 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                       <div className="space-y-6">
                         {selectedEntries.map(entry => (
                           <Card key={entry.id} className="bg-secondary/20">
-                            <CardContent className="p-4 space-y-4">
+                             <CardHeader className="flex-row items-center justify-between">
+                                {entry.audioUrl ? (
+                                    <audio src={entry.audioUrl} controls className="w-full" />
+                                ): (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-muted-foreground">
+                                            {format((entry.date as any).toDate(), 'p')}
+                                        </span>
+                                    </div>
+                                )}
+                                <span className="text-3xl sm:text-4xl" title={MOODS[entry.mood].label}>{MOODS[entry.mood].emoji}</span>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-0 space-y-4">
                               {entry.videoUrl && (
                                 <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
                                   <video src={entry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
@@ -122,9 +129,6 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                                 <div className="relative aspect-video w-full rounded-lg overflow-hidden">
                                   <Image src={entry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
                                 </div>
-                              )}
-                              {entry.audioUrl && (
-                                <audio src={entry.audioUrl} controls className="w-full" />
                               )}
                               <p className="whitespace-pre-wrap text-base leading-relaxed break-words">{entry.content || <span className="italic text-muted-foreground">No text content for this entry.</span>}</p>
                             </CardContent>
