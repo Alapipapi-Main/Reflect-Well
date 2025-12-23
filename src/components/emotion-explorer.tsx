@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import Balancer from 'react-wrap-balancer';
 
 export function EmotionExplorer() {
-  const [activePrimary, setActivePrimary] = useState<PrimaryEmotion | null>(EMOTIONS[0]);
+  const [activePrimary, setActivePrimary] = useState<PrimaryEmotion | null>(null);
   const [selectedSecondary, setSelectedSecondary] = useState<SecondaryEmotion | null>(null);
 
   const handlePrimaryClick = (emotion: PrimaryEmotion) => {
