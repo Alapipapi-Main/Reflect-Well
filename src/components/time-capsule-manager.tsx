@@ -49,6 +49,8 @@ const timeCapsuleSchema = z.object({
   }).min(startOfTomorrow(), { message: "Unlock date must be in the future." }),
 });
 
+const CAPSULES_PER_PAGE = 5;
+
 export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
   const { user } = useUser();
   const firestore = useFirestore();
@@ -61,7 +63,7 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isGettingReply, setIsGettingReply] = useState(false);
   const [futureSelfReply, setFutureSelfReply] = useState<string | null>(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
 
   const form = useForm<z.infer<typeof timeCapsuleSchema>>({
     resolver: zodResolver(timeCapsuleSchema),
@@ -70,7 +72,6 @@ export function TimeCapsuleManager({ timeCapsules }: TimeCapsuleManagerProps) {
   const handleDateSelect = (range: DateRange) => {
     if (range.from) {
       form.setValue('lockUntil', range.from, { shouldValidate: true });
-      // Automatically close the calendar after a single date is selected
       setIsCalendarOpen(false);
     }
   };
@@ -195,6 +196,21 @@ The user has written a message to you. Your task is to provide one single, encou
   const selectedDate = form.watch('lockUntil');
   const messageContent = form.watch('content');
   const isGenerating = isSubmitting || isGeneratingVideo || isGettingReply;
+
+  const totalPages = Math.ceil(timeCapsules.length / CAPSULES_PER_PAGE);
+  const paginatedCapsules = timeCapsules.slice(
+    (currentPage - 1) * CAPSULES_PER_PAGE,
+    currentPage * CAPSULES_PER_PAGE
+  );
+
+  const handlePrevPage = () => {
+    setCurrentPage(p => Math.max(p - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(p => Math.min(p + 1, totalPages));
+  };
+
 
   return (
     <>
@@ -340,7 +356,7 @@ The user has written a message to you. Your task is to provide one single, encou
           <CardContent>
             {timeCapsules.length > 0 ? (
               <Accordion type="single" collapsible className="w-full">
-                {timeCapsules.map(capsule => {
+                {paginatedCapsules.map(capsule => {
                   const isLocked = capsule.lockUntil && isFuture((capsule.lockUntil as any).toDate());
                   return (
                     <AccordionItem value={capsule.id} key={capsule.id}>
@@ -408,6 +424,19 @@ The user has written a message to you. Your task is to provide one single, encou
               </div>
             )}
           </CardContent>
+           {totalPages > 1 && (
+            <CardFooter className="flex justify-between items-center">
+              <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="outline">
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="outline">
+                Next
+              </Button>
+            </CardFooter>
+          )}
         </Card>
       </div>
       
@@ -428,3 +457,5 @@ The user has written a message to you. Your task is to provide one single, encou
     </>
   );
 }
+
+    

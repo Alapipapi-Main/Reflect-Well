@@ -8,7 +8,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { JournalTemplate } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -50,6 +50,8 @@ const templateSchema = z.object({
   content: z.string().min(10, 'Template content must be at least 10 characters long.'),
 });
 
+const TEMPLATES_PER_PAGE = 5;
+
 export function TemplateManager({ templates }: TemplateManagerProps) {
   const { user } = useUser();
   const firestore = useFirestore();
@@ -59,6 +61,7 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<JournalTemplate | null>(null);
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const form = useForm<z.infer<typeof templateSchema>>({
     resolver: zodResolver(templateSchema),
@@ -114,6 +117,20 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
       description: "Your journal template has been removed.",
     });
     setDeleteCandidateId(null);
+  };
+
+  const totalPages = Math.ceil(templates.length / TEMPLATES_PER_PAGE);
+  const paginatedTemplates = templates.slice(
+    (currentPage - 1) * TEMPLATES_PER_PAGE,
+    currentPage * TEMPLATES_PER_PAGE
+  );
+
+  const handlePrevPage = () => {
+    setCurrentPage(p => Math.max(p - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(p => Math.min(p + 1, totalPages));
   };
 
   return (
@@ -188,7 +205,7 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
         <CardContent>
           {templates.length > 0 ? (
             <Accordion type="single" collapsible className="w-full">
-              {templates.map(template => (
+              {paginatedTemplates.map(template => (
                 <AccordionItem value={template.id} key={template.id}>
                    <div className="flex items-center w-full">
                     <AccordionTrigger>
@@ -227,6 +244,19 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
             </div>
           )}
         </CardContent>
+        {totalPages > 1 && (
+            <CardFooter className="flex justify-between items-center">
+              <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="outline">
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="outline">
+                Next
+              </Button>
+            </CardFooter>
+          )}
       </Card>
       
        <AlertDialog open={!!deleteCandidateId} onOpenChange={(open) => !open && setDeleteCandidateId(null)}>
@@ -246,3 +276,5 @@ export function TemplateManager({ templates }: TemplateManagerProps) {
     </>
   );
 }
+
+    
