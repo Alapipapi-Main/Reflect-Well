@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -82,7 +83,7 @@ export function EmailVerificationGate({ user }: EmailVerificationGateProps) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen light">
        <header className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-end items-center">
         <UserMenu user={user} showThemeToggle={false} />
       </header>
