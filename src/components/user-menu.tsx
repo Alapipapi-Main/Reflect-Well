@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +36,27 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
   const router = useRouter();
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      // Required for some older browsers
+      e.returnValue = '';
+      return '';
+    };
+
+    if (isExporting) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    } else {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    }
+
+    // Cleanup function to remove the listener if the component unmounts
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isExporting]);
+
 
   const handleLogout = async () => {
     try {
