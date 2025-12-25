@@ -67,9 +67,6 @@ Generate one new prompt.`;
 
   const dashboardData = useMemo(() => {
     const goal = settings?.goal ?? DEFAULT_GOAL;
-    const now = new Date();
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
     
     if (!entries || entries.length === 0) {
       return {
@@ -78,8 +75,16 @@ Generate one new prompt.`;
         progressPercentage: 0,
       };
     }
+    
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
-    const entriesThisWeek = entries.filter(entry => isWithinInterval((entry.date as any).toDate(), { start: weekStart, end: weekEnd }));
+    const entriesThisWeek = entries.filter(entry => {
+      if (!entry.date) return false;
+      const entryDate = (entry.date as any).toDate();
+      return isWithinInterval(entryDate, { start: weekStart, end: weekEnd });
+    });
     const uniqueDays = new Set(entriesThisWeek.map(entry => format((entry.date as any).toDate(), 'yyyy-MM-dd')));
     const weeklyProgress = uniqueDays.size;
     const progressPercentage = Math.min((weeklyProgress / goal) * 100, 100);
