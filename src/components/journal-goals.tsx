@@ -122,10 +122,10 @@ export function JournalGoals({ entries }: JournalGoalsProps) {
           </p>
           <Progress value={progressPercentage} className="w-full" />
            {isGoalMet && (
-            <div className="pt-4 flex items-center gap-3 text-green-600 dark:text-green-400 bg-green-500/10 p-4 rounded-lg">
-                <Trophy className="h-10 w-10" />
+            <div className="pt-4 flex items-center gap-3 text-green-700 dark:text-green-300 bg-green-500/10 p-4 rounded-lg">
+                <Trophy className="h-10 w-10 text-green-600 dark:text-green-400" />
                 <div className='flex flex-col'>
-                    <h4 className="font-bold text-lg">Goal Achieved!</h4>
+                    <h4 className="font-bold text-lg text-green-800 dark:text-green-200">Goal Achieved!</h4>
                     <p className="text-sm">Congratulations on your consistency this week. Keep it up!</p>
                 </div>
             </div>
