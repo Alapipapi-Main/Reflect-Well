@@ -188,14 +188,14 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
     const tagGap = 8;
     const fontSize = 12;
     
-    ctx.font = `${fontSize}px sans-serif`;
+    ctx.font = `${fontSize}px Literata, serif`;
 
     const tagWidths = tags.map(tag => ctx.measureText(tag).width);
     const totalWidth = tagWidths.reduce((sum, width) => sum + width + (tagPaddingX * 2), 0) + (tagGap * (tags.length - 1));
 
     canvas.width = totalWidth;
     canvas.height = tagHeight;
-    ctx.font = `${fontSize}px sans-serif`; // Reset font after canvas resize
+    ctx.font = `${fontSize}px Literata, serif`; // Reset font after canvas resize
     ctx.textBaseline = 'middle';
 
     let currentX = 0;
@@ -260,16 +260,16 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
             entryElement.style.left = '-9999px';
             entryElement.style.width = `${contentWidth}pt`;
             entryElement.style.padding = `${margin}pt`;
-            entryElement.style.fontFamily = 'serif';
+            entryElement.style.fontFamily = 'Literata, serif';
             entryElement.style.fontSize = '12pt';
             entryElement.style.lineHeight = '1.5';
             entryElement.style.color = '#333';
             entryElement.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8pt; margin-bottom: 16pt;">
-                    <h1 style="font-size: 16pt; font-weight: bold; margin: 0;">${format(entryDate, "MMMM d, yyyy")}</h1>
-                    <span style="font-size: 24pt;">${MOODS[entry.mood].emoji}</span>
+                    <h1 style="font-family: Literata, serif; font-size: 16pt; font-weight: bold; margin: 0;">${format(entryDate, "MMMM d, yyyy")}</h1>
+                    <div id="emoji-placeholder-${i}" style="font-size: 24pt; width: 30pt; height: 30pt;"></div>
                 </div>
-                ${entry.imageUrl ? `<img src="${entry.imageUrl}" style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 16pt;" />` : ''}
+                ${entry.imageUrl ? `<div style="width: 100%; margin-bottom: 16pt; border-radius: 8px; overflow: hidden;"><img src="${entry.imageUrl}" style="width: 100%; height: auto;" /></div>` : ''}
                 <div style="white-space: pre-wrap; word-wrap: break-word;">${entry.content.replace(/\n/g, '<br />')}</div>
                 ${tagsImageHtml}
             `;
@@ -278,6 +278,12 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
             const canvas = await html2canvas(entryElement, { 
                 scale: 2, 
                 useCORS: true,
+                onclone: (clonedDoc) => {
+                    const emojiPlaceholder = clonedDoc.getElementById(`emoji-placeholder-${i}`);
+                    if (emojiPlaceholder) {
+                        emojiPlaceholder.innerText = MOODS[entry.mood].emoji;
+                    }
+                }
             });
             const imgData = canvas.toDataURL('image/png');
             const imgHeight = (canvas.height * contentWidth) / canvas.width;
