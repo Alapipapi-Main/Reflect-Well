@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,11 +16,14 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 import type { User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { LogOut, Download, FileJson, FileText } from 'lucide-react';
+import { LogOut, FileJson, FileText, FileDown, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from './theme-toggle';
 import type { JournalEntry } from '@/lib/types';
 import { MOODS } from '@/lib/constants';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { format } from 'date-fns';
 
 interface UserMenuProps {
   user: User;
@@ -31,6 +35,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -49,15 +54,15 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
       });
     }
   };
-
-  const handleExportJSON = () => {
+  
+  const checkPermissionsAndData = () => {
     if (!user.emailVerified) {
         toast({
             variant: 'destructive',
             title: 'Email Verification Required',
             description: 'Please verify your email to export your journal entries.',
         });
-        return;
+        return false;
     }
 
     if (!entries || entries.length === 0) {
@@ -65,13 +70,17 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
         title: 'No Data to Export',
         description: 'You have no journal entries to download.',
       });
-      return;
+      return false;
     }
+    return true;
+  }
+
+  const handleExportJSON = () => {
+    if (!checkPermissionsAndData()) return;
 
     try {
       const dataToExport = entries.map(entry => ({
         ...entry,
-        // Convert Firestore Timestamp to a readable ISO string
         date: entry.date ? ((entry.date as any).toDate ? (entry.date as any).toDate().toISOString() : entry.date) : null,
       }));
 
@@ -102,47 +111,27 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
   };
 
   const handleExportCSV = () => {
-    if (!user.emailVerified) {
-        toast({
-            variant: 'destructive',
-            title: 'Email Verification Required',
-            description: 'Please verify your email to export your journal entries.',
-        });
-        return;
-    }
-    
-    if (!entries || entries.length === 0) {
-      toast({
-        title: 'No Data to Export',
-        description: 'You have no journal entries to download.',
-      });
-      return;
-    }
+    if (!checkPermissionsAndData()) return;
 
     try {
       const headers = ['date', 'mood', 'content', 'tags', 'imageUrl'];
       
-      // Helper to format a value for CSV, handling commas and quotes
       const formatCsvField = (field: any): string => {
-        if (field === null || field === undefined) {
-          return '';
-        }
+        if (field === null || field === undefined) return '';
         const str = String(field);
-        // If the string contains a comma, double quote, or newline, wrap it in double quotes
         if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-          // Escape existing double quotes by doubling them
           return `"${str.replace(/"/g, '""')}"`;
         }
         return str;
       };
 
-      const csvRows = [headers.join(',')]; // Header row
+      const csvRows = [headers.join(',')];
 
       for (const entry of entries) {
         const date = entry.date ? ((entry.date as any).toDate ? (entry.date as any).toDate().toISOString() : entry.date) : '';
         const mood = MOODS[entry.mood]?.label || entry.mood;
         const content = entry.content || '';
-        const tags = entry.tags?.join('; ') || ''; // Use semicolon to avoid comma conflicts
+        const tags = entry.tags?.join('; ') || '';
         const imageUrl = entry.imageUrl || '';
 
         const row = [date, mood, content, tags, imageUrl].map(formatCsvField).join(',');
@@ -174,6 +163,93 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
     }
   };
 
+  const handleExportPDF = async () => {
+    if (!checkPermissionsAndData() || isExporting) return;
+
+    setIsExporting(true);
+    toast({
+        title: 'Preparing PDF Export',
+        description: `This may take a moment for ${entries.length} entries...`,
+    });
+
+    try {
+        const pdf = new jsPDF('p', 'pt', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const margin = 40;
+        const contentWidth = pdfWidth - (margin * 2);
+
+        // Sort entries chronologically for the book
+        const sortedEntries = [...entries].sort((a, b) => {
+            const dateA = a.date ? ((a.date as any).toDate ? (a.date as any).toDate() : new Date(a.date as string)) : new Date(0);
+            const dateB = b.date ? ((b.date as any).toDate ? (b.date as any).toDate() : new Date(b.date as string)) : new Date(0);
+            return dateA.getTime() - dateB.getTime();
+        });
+
+        for (let i = 0; i < sortedEntries.length; i++) {
+            const entry = sortedEntries[i];
+            const entryDate = entry.date ? ((entry.date as any).toDate ? (entry.date as any).toDate() : new Date(entry.date as string)) : new Date();
+
+            const entryElement = document.createElement('div');
+            entryElement.style.position = 'absolute';
+            entryElement.style.left = '-9999px';
+            entryElement.style.width = `${contentWidth}pt`;
+            entryElement.style.padding = `${margin}pt`;
+            entryElement.style.fontFamily = 'serif';
+            entryElement.style.fontSize = '12pt';
+            entryElement.style.lineHeight = '1.5';
+            entryElement.style.color = '#333';
+            entryElement.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8pt; margin-bottom: 16pt;">
+                    <h1 style="font-size: 16pt; font-weight: bold; margin: 0;">${format(entryDate, "MMMM d, yyyy")}</h1>
+                    <span style="font-size: 24pt;">${MOODS[entry.mood].emoji}</span>
+                </div>
+                ${entry.imageUrl ? `<img src="${entry.imageUrl}" style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 16pt;" />` : ''}
+                <div style="white-space: pre-wrap; word-wrap: break-word;">${entry.content.replace(/\n/g, '<br />')}</div>
+            `;
+            document.body.appendChild(entryElement);
+
+            const canvas = await html2canvas(entryElement, { 
+                scale: 2, 
+                useCORS: true,
+                onclone: (doc) => {
+                  // Re-evaluate image src for the cloned document
+                  const img = doc.querySelector('img');
+                  if (img && entry.imageUrl) {
+                      img.src = entry.imageUrl;
+                  }
+                }
+            });
+            const imgData = canvas.toDataURL('image/png');
+            const imgHeight = (canvas.height * contentWidth) / canvas.width;
+            
+            if (i > 0) {
+                pdf.addPage();
+            }
+            pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, imgHeight);
+
+            document.body.removeChild(entryElement);
+        }
+
+        pdf.save('reflectwell_export.pdf');
+        toast({
+            title: 'Export Complete!',
+            description: 'Your journal has been downloaded as a PDF.',
+        });
+
+    } catch (error) {
+        console.error('PDF Export Error:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Export Failed',
+            description: 'Could not generate PDF. Please try again.',
+        });
+    } finally {
+        setIsExporting(false);
+    }
+  };
+
+
   const getInitials = (email: string | null) => {
     if (!email) return 'U';
     return email[0].toUpperCase();
@@ -202,14 +278,18 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
              <DropdownMenuLabel>Export Data</DropdownMenuLabel>
-             <DropdownMenuItem onClick={handleExportJSON}>
+             <DropdownMenuItem onClick={handleExportJSON} disabled={isExporting}>
               <FileJson className="mr-2 h-4 w-4" />
               <span>Export to JSON</span>
             </DropdownMenuItem>
-             <DropdownMenuItem onClick={handleExportCSV}>
+             <DropdownMenuItem onClick={handleExportCSV} disabled={isExporting}>
               <FileText className="mr-2 h-4 w-4" />
               <span>Export to CSV</span>
             </DropdownMenuItem>
+             <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting}>
+                {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+                <span>Export to PDF</span>
+             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>
