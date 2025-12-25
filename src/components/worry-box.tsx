@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Archive, Send } from 'lucide-react';
+import { Loader2, Trash2, Send } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from './ui/scroll-area';
 import Balancer from 'react-wrap-balancer';
@@ -148,7 +148,7 @@ export function WorryBox() {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 h-full">
-                        <Archive className="h-12 w-12 mb-4" />
+                        <Trash2 className="h-12 w-12 mb-4" />
                         <h3 className="text-xl font-semibold mb-2">The Box is Empty</h3>
                         <p>Be the first to release a worry and lighten your load.</p>
                     </div>
