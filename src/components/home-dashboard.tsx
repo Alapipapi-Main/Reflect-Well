@@ -4,7 +4,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import type { JournalEntry, UserSettings } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
 import { Target, Wand, Loader2 } from 'lucide-react';
