@@ -178,6 +178,47 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
     }
   };
 
+  const createTagsImage = async (tags: string[]): Promise<string> => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+
+    const tagHeight = 22;
+    const tagPaddingX = 12;
+    const tagGap = 8;
+    const fontSize = 12;
+    
+    ctx.font = `${fontSize}px sans-serif`;
+
+    const tagWidths = tags.map(tag => ctx.measureText(tag).width);
+    const totalWidth = tagWidths.reduce((sum, width) => sum + width + (tagPaddingX * 2), 0) + (tagGap * (tags.length - 1));
+
+    canvas.width = totalWidth;
+    canvas.height = tagHeight;
+    ctx.font = `${fontSize}px sans-serif`; // Reset font after canvas resize
+    ctx.textBaseline = 'middle';
+
+    let currentX = 0;
+    for (let i = 0; i < tags.length; i++) {
+        const tag = tags[i];
+        const tagWidth = tagWidths[i] + (tagPaddingX * 2);
+
+        // Draw background
+        ctx.fillStyle = '#f1f5f9'; // bg-slate-100
+        ctx.beginPath();
+        ctx.roundRect(currentX, 0, tagWidth, tagHeight, tagHeight / 2);
+        ctx.fill();
+
+        // Draw text
+        ctx.fillStyle = '#475569'; // text-slate-600
+        ctx.fillText(tag, currentX + tagPaddingX, tagHeight / 2);
+        
+        currentX += tagWidth + tagGap;
+    }
+
+    return canvas.toDataURL('image/png');
+  };
+
   const handleExportPDF = async () => {
     if (!checkPermissionsAndData() || isExporting) return;
 
@@ -204,14 +245,15 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
             const entry = sortedEntries[i];
             const entryDate = entry.date ? ((entry.date as any).toDate ? (entry.date as any).toDate() : new Date(entry.date as string)) : new Date();
 
-            const tagsHtml = entry.tags && entry.tags.length > 0
-                ? `<div style="margin-top: 16pt; padding-top: 8pt; border-top: 1px solid #eee;">
-                        <h2 style="font-weight: bold; font-size: 10pt; margin-bottom: 4pt; color: #555;">Tags</h2>
-                        <div style="display: flex; flex-wrap: wrap; gap: 4pt;">
-                            ${entry.tags.map(tag => `<span style="background-color: #f1f5f9; color: #475569; padding: 0 8pt; border-radius: 9999px; font-size: 9pt; height: 18pt; line-height: 18pt;">${tag}</span>`).join('')}
-                        </div>
-                   </div>`
-                : '';
+            let tagsImageHtml = '';
+            if (entry.tags && entry.tags.length > 0) {
+              const tagsImageUrl = await createTagsImage(entry.tags);
+              tagsImageHtml = `
+                <div style="margin-top: 16pt; padding-top: 8pt; border-top: 1px solid #eee;">
+                    <h2 style="font-weight: bold; font-size: 10pt; margin-bottom: 8pt; color: #555;">Tags</h2>
+                    <img src="${tagsImageUrl}" style="height: 22px; width: auto;" />
+                </div>`;
+            }
 
             const entryElement = document.createElement('div');
             entryElement.style.position = 'absolute';
@@ -229,7 +271,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
                 </div>
                 ${entry.imageUrl ? `<img src="${entry.imageUrl}" style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 16pt;" />` : ''}
                 <div style="white-space: pre-wrap; word-wrap: break-word;">${entry.content.replace(/\n/g, '<br />')}</div>
-                ${tagsHtml}
+                ${tagsImageHtml}
             `;
             document.body.appendChild(entryElement);
 
