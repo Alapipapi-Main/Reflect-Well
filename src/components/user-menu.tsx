@@ -190,6 +190,15 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
             const entry = sortedEntries[i];
             const entryDate = entry.date ? ((entry.date as any).toDate ? (entry.date as any).toDate() : new Date(entry.date as string)) : new Date();
 
+            const tagsHtml = entry.tags && entry.tags.length > 0
+                ? `<div style="margin-top: 16pt; padding-top: 8pt; border-top: 1px solid #eee;">
+                        <h2 style="font-weight: bold; font-size: 10pt; margin-bottom: 4pt; color: #555;">Tags</h2>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4pt;">
+                            ${entry.tags.map(tag => `<span style="background-color: #f1f5f9; color: #475569; padding: 2pt 6pt; border-radius: 9999px; font-size: 9pt;">${tag}</span>`).join('')}
+                        </div>
+                   </div>`
+                : '';
+
             const entryElement = document.createElement('div');
             entryElement.style.position = 'absolute';
             entryElement.style.left = '-9999px';
@@ -206,6 +215,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
                 </div>
                 ${entry.imageUrl ? `<img src="${entry.imageUrl}" style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 16pt;" />` : ''}
                 <div style="white-space: pre-wrap; word-wrap: break-word;">${entry.content.replace(/\n/g, '<br />')}</div>
+                ${tagsHtml}
             `;
             document.body.appendChild(entryElement);
 
