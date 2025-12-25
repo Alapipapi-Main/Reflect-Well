@@ -28,6 +28,13 @@ export interface GratitudePost {
   authorId: string;
 }
 
+export interface WorryPost {
+  id: string;
+  text: string;
+  createdAt: Timestamp;
+  authorId: string;
+}
+
 export interface JournalTemplate {
   id: string;
   userId: string;

@@ -21,6 +21,7 @@ import { AskJournal } from '@/components/ask-journal';
 import { JournalGoals } from '@/components/journal-goals';
 import { GuidedJournaling } from '@/components/guided-journaling';
 import { GratitudeWall } from '@/components/gratitude-wall';
+import { WorryBox } from '@/components/worry-box';
 import { JournalCalendar } from '@/components/journal-calendar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -148,7 +149,7 @@ function JournalPageContent() {
     return <EmailVerificationGate user={user} />;
   }
 
-  const moreFeaturesTabs = ['visual-prompt', 'templates', 'time-capsule', 'dream-interpreter', 'guided', 'gratitude', 'ask', 'insights', 'stats', 'goals', 'yesterday', 'on-this-day', 'explorer'];
+  const moreFeaturesTabs = ['visual-prompt', 'templates', 'time-capsule', 'dream-interpreter', 'guided', 'gratitude', 'worry-box', 'ask', 'insights', 'stats', 'goals', 'yesterday', 'on-this-day', 'explorer'];
   const isMoreTabActive = moreFeaturesTabs.includes(activeTab);
 
   return (
@@ -231,7 +232,7 @@ function JournalPageContent() {
           </TabsContent>
            <TabsContent value="explorer" className="mt-6">
             <EmotionExplorer />
-          </TabsContent>
+           </TabsContent>
 
           {/* Dummy content for the 'more' tab to prevent breaking the component */}
           <TabsContent value="more" className="mt-6" />
@@ -254,6 +255,9 @@ function JournalPageContent() {
           </TabsContent>
           <TabsContent value="gratitude" className="mt-6">
             <GratitudeWall />
+          </TabsContent>
+          <TabsContent value="worry-box" className="mt-6">
+            <WorryBox />
           </TabsContent>
           <TabsContent value="ask" className="mt-6">
             <AskJournal entries={entries || []} />

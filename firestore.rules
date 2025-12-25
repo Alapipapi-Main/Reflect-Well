@@ -2,7 +2,7 @@
  * @file firestore.rules
  * @description Firestore Security Rules for the ReflectWell application.
  *
- * @version 1.2.0
+ * @version 1.3.0
  *
  * @summary
  * This ruleset enforces a strict, user-centric security model where all user-generated
@@ -18,6 +18,7 @@
  * - /users/{userId}/settings/main: A private document for user settings.
  * - /moods/{moodId}: A global, read-only collection of available moods.
  * - /gratitudeWall/{gratitudePostId}: A public, append-only collection for anonymous gratitude posts.
+ * - /worryBox/{worryPostId}: A public, append-only collection for anonymous worry posts.
  *
  * Key Security Decisions:
  * 1.  Strict Data Isolation: Users can only read or write data within their own
@@ -197,7 +198,23 @@ service cloud.firestore {
             && request.resource.data.authorId == request.auth.uid;
         allow update, delete: if false;
     }
+
+    /**
+     * @description Defines access for the 'worryBox' collection.
+     * @path /worryBox/{worryId}
+     * @allow (read) Any user can read posts in the worry box.
+     * @allow (create) Only signed-in users can create a new post.
+     * @deny (update, delete) No one can edit or delete a post.
+     * @principle Creates a public, immutable space for releasing worries.
+     */
+    match /worryBox/{worryId} {
+        allow read: if true;
+        allow create: if isSignedIn()
+            && request.resource.data.text is string
+            && request.resource.data.text.size() > 0
+            && request.resource.data.text.size() <= 280
+            && request.resource.data.authorId == request.auth.uid;
+        allow update, delete: if false;
+    }
   }
 }
-
-    

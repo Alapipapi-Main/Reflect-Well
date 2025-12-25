@@ -165,6 +165,37 @@
         "authorId"
       ]
     },
+    "WorryPost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WorryPost",
+      "type": "object",
+      "description": "Represents an anonymous post on the community worry box.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the worry post."
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the worry post."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The timestamp when the post was created.",
+          "format": "date-time"
+        },
+        "authorId": {
+          "type": "string",
+          "description": "The UID of the user who created the post."
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "createdAt",
+        "authorId"
+      ]
+    },
     "JournalTemplate": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "JournalTemplate",
@@ -371,6 +402,22 @@
         }
       },
       {
+        "path": "/worryBox/{worryId}",
+        "definition": {
+          "entityName": "WorryPost",
+          "schema": {
+            "$ref": "#/backend/entities/WorryPost"
+          },
+          "description": "Stores anonymous posts for the community worry box. This collection is globally readable but write access is restricted.",
+          "params": [
+            {
+              "name": "worryId",
+              "description": "The unique identifier of the worry post."
+            }
+          ]
+        }
+      },
+      {
         "path": "/auth/action",
         "definition": {
           "description": "Client-side route for handling email verification and password reset actions."
@@ -380,5 +427,3 @@
     "reasoning": "The Firestore structure is designed to ensure data isolation and straightforward security rules by leveraging path-based ownership. Each user has their own collection of journal entries, templates, and time capsules, eliminating the need for complex authorization logic or cross-collection queries for access control. This design achieves Authorization Independence by structuring data such that access control can be determined directly from the path and the `request.auth.uid`, avoiding the need to `get()` parent documents for authorization checks.\n\nThe structure supports the required QAPs as follows:\n\n1.  **Secure `list` operations**: Because each user's data is stored under their specific `userId`, listing entries is inherently secure. Rules can easily enforce that only the authenticated user can list items within their own subcollections.\n\n2.  **Data Isolation**: User data is naturally isolated due to the path-based ownership model, preventing unauthorized access or modification.\n\n3.  **Scalability**: The design scales well because read and write operations are limited to a user's own data, avoiding potential bottlenecks associated with shared collections or complex authorization schemes."
   }
 }
-
-    
