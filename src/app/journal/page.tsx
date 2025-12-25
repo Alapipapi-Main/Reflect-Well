@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JournalForm } from "@/components/journal-form"
 import { PastEntries } from "@/components/past-entries"
 import { MoodChart } from "@/components/mood-chart"
-import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp, Calendar } from "lucide-react"
+import { BookHeart, Loader, MoreHorizontal, PlusCircle, BookOpen, TrendingUp, Calendar, Home } from "lucide-react"
 import { useUser, useFirestore, useMemoFirebase, useCollection, useDoc } from "@/firebase"
 import { collection, query, orderBy, doc } from "firebase/firestore"
 import type { JournalEntry, JournalTemplate, TimeCapsuleEntry, UserSettings } from "@/lib/types"
@@ -36,6 +36,7 @@ import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Celebration } from '@/components/celebration';
 import { startOfWeek, endOfWeek, isWithinInterval, format, isPast } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { HomeDashboard } from '@/components/home-dashboard';
 
 const DEFAULT_GOAL = 3;
 
@@ -46,7 +47,7 @@ function JournalPageContent() {
   const { toast } = useToast();
   
   const [isSubmittingNewEntry, setIsSubmittingNewEntry] = useState(false);
-  const [activeTab, setActiveTab] = useState("new-entry");
+  const [activeTab, setActiveTab] = useState("home");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
@@ -167,6 +168,10 @@ function JournalPageContent() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
                 <TabsList className="p-1.5 h-auto flex flex-wrap justify-center gap-2">
+                  <TabsTrigger value="home" >
+                    <Home className="mr-2 h-4 w-4" />
+                    Home
+                  </TabsTrigger>
                   <TabsTrigger value="new-entry" >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     New Entry
@@ -214,6 +219,9 @@ function JournalPageContent() {
                 </TabsList>
             </div>
           
+          <TabsContent value="home" className="mt-6">
+            <HomeDashboard entries={entries || []} user={user} settings={settings} />
+          </TabsContent>
           <TabsContent value="new-entry" className="mt-6 space-y-6">
             <JournalForm 
               entries={entries || []} 
@@ -294,3 +302,5 @@ export default function JournalPage() {
       </ThemeProvider>
   )
 }
+
+    
