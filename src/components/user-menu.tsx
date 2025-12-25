@@ -265,9 +265,11 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
             entryElement.style.lineHeight = '1.5';
             entryElement.style.color = '#333';
             entryElement.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #eee; padding-bottom: 8pt; margin-bottom: 16pt;">
-                    <h1 style="font-family: Literata, serif; font-size: 16pt; font-weight: bold; margin: 0;">${format(entryDate, "MMMM d, yyyy")}</h1>
-                    <div id="emoji-placeholder-${i}" style="font-size: 24pt; width: 30pt; height: 30pt;"></div>
+                <div style="border-bottom: 1px solid #eee; padding-bottom: 8pt; margin-bottom: 16pt;">
+                    <h1 style="font-family: Literata, serif; font-size: 16pt; font-weight: bold; margin: 0;">
+                        ${format(entryDate, "MMMM d, yyyy")}
+                        <span style="font-size: 24pt; vertical-align: middle; margin-left: 16pt;">${MOODS[entry.mood].emoji}</span>
+                    </h1>
                 </div>
                 ${entry.imageUrl ? `<div style="width: 100%; margin-bottom: 16pt; border-radius: 8px; overflow: hidden;"><img src="${entry.imageUrl}" style="width: 100%; height: auto;" /></div>` : ''}
                 <div style="white-space: pre-wrap; word-wrap: break-word;">${entry.content.replace(/\n/g, '<br />')}</div>
@@ -278,12 +280,6 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
             const canvas = await html2canvas(entryElement, { 
                 scale: 2, 
                 useCORS: true,
-                onclone: (clonedDoc) => {
-                    const emojiPlaceholder = clonedDoc.getElementById(`emoji-placeholder-${i}`);
-                    if (emojiPlaceholder) {
-                        emojiPlaceholder.innerText = MOODS[entry.mood].emoji;
-                    }
-                }
             });
             const imgData = canvas.toDataURL('image/png');
             const imgHeight = (canvas.height * contentWidth) / canvas.width;
