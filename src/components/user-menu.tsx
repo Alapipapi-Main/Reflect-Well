@@ -208,7 +208,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
                 ? `<div style="margin-top: 16pt; padding-top: 8pt; border-top: 1px solid #eee;">
                         <h2 style="font-weight: bold; font-size: 10pt; margin-bottom: 4pt; color: #555;">Tags</h2>
                         <div style="display: flex; flex-wrap: wrap; gap: 4pt;">
-                            ${entry.tags.map(tag => `<span style="background-color: #f1f5f9; color: #475569; padding: 4pt 8pt; border-radius: 9999px; font-size: 9pt; display: inline-flex; align-items: center; height: 18pt;">${tag}</span>`).join('')}
+                            ${entry.tags.map(tag => `<span style="background-color: #f1f5f9; color: #475569; padding: 0 8pt; border-radius: 9999px; font-size: 9pt; height: 18pt; line-height: 18pt;">${tag}</span>`).join('')}
                         </div>
                    </div>`
                 : '';
