@@ -206,7 +206,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
         // Draw background
         ctx.fillStyle = '#f1f5f9'; // bg-slate-100
         ctx.beginPath();
-        ctx.roundRect(currentX, 0, tagWidth, tagHeight, tagHeight / 2);
+        ctx.roundRect(currentX, 0, tagWidth, tagHeight, 4);
         ctx.fill();
 
         // Draw text
@@ -265,7 +265,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
             entryElement.style.lineHeight = '1.5';
             entryElement.style.color = '#333';
             entryElement.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8pt; margin-bottom: 16pt;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #eee; padding-bottom: 8pt; margin-bottom: 16pt;">
                     <h1 style="font-family: Literata, serif; font-size: 16pt; font-weight: bold; margin: 0;">${format(entryDate, "MMMM d, yyyy")}</h1>
                     <div id="emoji-placeholder-${i}" style="font-size: 24pt; width: 30pt; height: 30pt;"></div>
                 </div>
