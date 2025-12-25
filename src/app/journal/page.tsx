@@ -101,6 +101,8 @@ function JournalPageContent() {
     const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
     const entriesThisWeek = entries.filter(entry => {
+      // Add a guard to ensure entry.date is not null before calling .toDate()
+      if (!entry.date) return false;
       const entryDate = (entry.date as any).toDate();
       return isWithinInterval(entryDate, { start: weekStart, end: weekEnd });
     });
@@ -302,5 +304,3 @@ export default function JournalPage() {
       </ThemeProvider>
   )
 }
-
-    
