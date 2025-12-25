@@ -70,6 +70,15 @@ Generate one new prompt.`;
     const now = new Date();
     const weekStart = startOfWeek(now, { weekStartsOn: 1 });
     const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+    
+    if (!entries || entries.length === 0) {
+      return {
+        goal,
+        weeklyProgress: 0,
+        progressPercentage: 0,
+      };
+    }
+
     const entriesThisWeek = entries.filter(entry => isWithinInterval((entry.date as any).toDate(), { start: weekStart, end: weekEnd }));
     const uniqueDays = new Set(entriesThisWeek.map(entry => format((entry.date as any).toDate(), 'yyyy-MM-dd')));
     const weeklyProgress = uniqueDays.size;
@@ -108,7 +117,7 @@ Generate one new prompt.`;
                 ) : inspiration ? (
                     <blockquote className="text-lg italic text-foreground/90">"{inspiration}"</blockquote>
                 ) : (
-                    <p className="text-muted-foreground">Could not load a prompt.</p>
+                    <p className="text-muted-foreground">Could not load a prompt. Try generating a new one.</p>
                 )}
             </CardContent>
              <CardFooter>
