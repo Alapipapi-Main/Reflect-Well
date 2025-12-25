@@ -39,19 +39,13 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      // Required for some older browsers
-      e.returnValue = '';
-      return '';
+      if (isExporting) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
     };
 
-    if (isExporting) {
-      window.addEventListener('beforeunload', handleBeforeUnload);
-    } else {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    }
-
-    // Cleanup function to remove the listener if the component unmounts
+    window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
@@ -196,7 +190,6 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
     try {
         const pdf = new jsPDF('p', 'pt', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 40;
         const contentWidth = pdfWidth - (margin * 2);
 
@@ -215,7 +208,7 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
                 ? `<div style="margin-top: 16pt; padding-top: 8pt; border-top: 1px solid #eee;">
                         <h2 style="font-weight: bold; font-size: 10pt; margin-bottom: 4pt; color: #555;">Tags</h2>
                         <div style="display: flex; flex-wrap: wrap; gap: 4pt;">
-                            ${entry.tags.map(tag => `<span style="background-color: #f1f5f9; color: #475569; padding: 2pt 6pt; border-radius: 9999px; font-size: 9pt;">${tag}</span>`).join('')}
+                            ${entry.tags.map(tag => `<span style="background-color: #f1f5f9; color: #475569; padding: 2pt 6pt; border-radius: 9999px; font-size: 9pt; display: inline-flex; align-items: center; height: 18pt;">${tag}</span>`).join('')}
                         </div>
                    </div>`
                 : '';
@@ -244,10 +237,10 @@ export function UserMenu({ user, showThemeToggle = true, entries = [] }: UserMen
                 scale: 2, 
                 useCORS: true,
                 onclone: (doc) => {
-                  // Re-evaluate image src for the cloned document
                   const img = doc.querySelector('img');
                   if (img && entry.imageUrl) {
-                      img.src = entry.imageUrl;
+                      const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(entry.imageUrl)}`;
+                      img.src = proxyUrl;
                   }
                 }
             });
