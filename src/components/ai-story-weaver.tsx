@@ -54,7 +54,8 @@ export function AiStoryWeaver({ selectedEntries }: AiStoryWeaverProps) {
         const date = format((entry.date as any).toDate(), 'EEEE, MMMM d, yyyy');
         const mood = MOODS[entry.mood].label;
         const tags = entry.tags && entry.tags.length > 0 ? `Tags: ${entry.tags.join(', ')}` : '';
-        return `On ${date}, the feeling was ${mood}. The entry, tagged with '${tags}', reads:\n"${entry.content}"`;
+        const voiceMemoContext = entry.audioUrl ? '(Voice memo attached)' : '';
+        return `On ${date}, the feeling was ${mood}. The entry, tagged with '${tags}', reads:\n"${entry.content}" ${voiceMemoContext}`;
       })
       .join('\n\n---\n\n');
 
@@ -63,7 +64,7 @@ export function AiStoryWeaver({ selectedEntries }: AiStoryWeaverProps) {
 - **Perspective:** Write in the third person (e.g., "they felt," "she experienced," "he wondered"). Refer to the protagonist of the story as "the journaler" or "they".
 - **Tone:** Your tone should be empathetic, reflective, and slightly literary or poetic.
 - **Narrative Arc:** Find a common thread or a sense of progression through the entries. It could be a changing mood, a recurring theme, or a journey from a problem to a resolution (or acceptance).
-- **Incorporate Details:** Gently incorporate key feelings, events, and symbols from the entries. Mention the moods and tags if they are relevant to the story's emotional arc.
+- **Incorporate Details:** Gently incorporate key feelings, events, and symbols from the entries. Mention the moods and tags if they are relevant to the story's emotional arc. If an entry notes "(Voice memo attached)", you can acknowledge that more thoughts might be in the audio, e.g., "They recorded a voice memo that day, perhaps to capture more of the feeling."
 - **Do Not Judge or Advise:** Your role is to narrate and reflect, not to analyze or give advice.
 - **Structure:** The story should be a few paragraphs long. It should have a beginning, a middle, and an end that provides a sense of summary or thoughtful conclusion based on the provided entries.
 

@@ -296,16 +296,20 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                 }
               }}
             >
-              {paginatedEntries.map((entry) => (
+              {paginatedEntries.map((entry) => {
+                const isLetterEntry = entry.tags?.includes('letter to past self');
+                return (
                 <AccordionItem value={entry.id} key={entry.id}>
                   <div className="flex items-center w-full">
                     <div
-                      className="flex items-center p-4 pr-2 cursor-pointer"
-                      onClick={(e) => handleSelectEntry(e, entry.id)}
+                      className={cn("flex items-center p-4 pr-2", isLetterEntry ? "cursor-not-allowed" : "cursor-pointer")}
+                      onClick={(e) => !isLetterEntry && handleSelectEntry(e, entry.id)}
+                      title={isLetterEntry ? "Letters to a past self cannot be used in stories." : undefined}
                     >
                       <Checkbox
                         checked={selectedEntryIds.has(entry.id)}
                         aria-label={`Select entry from ${format(entry.date ? (entry.date as any).toDate() : new Date(), "MMMM d, yyyy")}`}
+                        disabled={isLetterEntry}
                       />
                     </div>
                     <AccordionTrigger>
@@ -350,7 +354,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                     )}
                   </AccordionContent>
                 </AccordionItem>
-              ))}
+              )})}
             </Accordion>
           ) : (
              <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
@@ -739,6 +743,7 @@ function useUserAndFirestore() {
     const firestore = useFirestore();
     return { user, firestore };
 }
+
 
 
 
