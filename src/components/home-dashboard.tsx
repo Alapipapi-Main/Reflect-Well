@@ -81,6 +81,11 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
                             <Image src={latestEntry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
                         </div>
                     )}
+                    {latestEntry.audioUrl && (
+                        <div className="mt-2">
+                            <audio src={latestEntry.audioUrl} controls className="w-full" />
+                        </div>
+                    )}
                     <p className="text-muted-foreground line-clamp-3 pt-2">
                         {latestEntry.content}
                     </p>
