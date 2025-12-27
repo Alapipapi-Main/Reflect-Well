@@ -35,6 +35,7 @@ export function CommunityGratitude() {
   // Select a random post when the component mounts or when posts data changes
   useEffect(() => {
     selectRandomPost();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts]);
 
 
