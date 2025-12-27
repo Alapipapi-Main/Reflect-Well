@@ -294,7 +294,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                 <AccordionItem value={entry.id} key={entry.id}>
                   <div className="flex items-center w-full">
                     <div
-                      className="flex items-center gap-4 pl-4 cursor-pointer"
+                      className="flex items-center p-4 cursor-pointer"
                       onClick={(e) => handleSelectEntry(e, entry.id)}
                     >
                       <Checkbox
@@ -713,4 +713,5 @@ function useUserAndFirestore() {
     const firestore = useFirestore();
     return { user, firestore };
 }
+
 
