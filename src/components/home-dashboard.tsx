@@ -10,7 +10,6 @@ import Balancer from 'react-wrap-balancer';
 import { MOODS } from '@/lib/constants';
 import { format } from 'date-fns';
 import { AudioAmbiance } from './audio-ambiance';
-import { CommunityGratitude } from './community-gratitude';
 
 
 interface HomeDashboardProps {
@@ -54,7 +53,6 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
       <div className="grid gap-6 md:grid-cols-2">
         
         <AudioAmbiance />
-        <CommunityGratitude />
         
         {/* Latest Reflection */}
         <Card className="md:col-span-2">

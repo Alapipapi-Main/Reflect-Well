@@ -130,7 +130,7 @@ export function AudioAmbiance() {
                 </label>
                 <Input
                     id="ambiance-prompt"
-                    placeholder="e.g., I am focused and ready for the day."
+                    placeholder="e.g., I am calm and focused."
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     disabled={isLoading}
