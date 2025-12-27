@@ -4,14 +4,15 @@
 import { useMemo, useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import type { JournalEntry, UserSettings } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
-import { Target, Wand, Loader2, BookCheck } from 'lucide-react';
+import { Target, Wand, Loader2, BookCheck, Sparkles } from 'lucide-react';
 import Balancer from 'react-wrap-balancer';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { MOODS } from '@/lib/constants';
+import Image from 'next/image';
 
 declare const puter: any;
 
@@ -23,9 +24,19 @@ interface HomeDashboardProps {
 
 const DEFAULT_GOAL = 3;
 
+const VISUAL_PROMPTS = [
+    "A dreamy landscape representing new beginnings, pastel colors, ethereal, soft light.",
+    "An abstract visualization of inner peace, flowing lines, cool tones of blue and green, tranquil.",
+    "The feeling of a breakthrough moment, explosive light, dynamic shapes, vibrant energy.",
+    "A cozy, safe space for quiet reflection, warm tones, soft textures, gentle shadows.",
+    "The essence of joyful energy, bright yellows and oranges, sunburst patterns, playful.",
+    "A representation of overcoming a challenge, a single light source in a dark space, sense of hope.",
+    "The feeling of nostalgia and memory, sepia tones, blurry edges, dreamlike quality."
+];
+
 export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
   const { toast } = useToast();
-  const [inspiration, setInspiration] = useState<string | null>(null);
+  const [inspirationUrl, setInspirationUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const getGreeting = () => {
@@ -45,17 +56,17 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
           return;
       }
       setIsGenerating(true);
+      setInspirationUrl(null);
       
-      const prompt = `You are an insightful and creative journaling assistant. Your task is to generate a single, open-ended, and thought-provoking journal prompt for a user.
-The prompt should encourage self-reflection, mindfulness, or creativity. Avoid simple "yes/no" questions. Make it personal and gentle.
-Generate one new prompt.`;
+      const randomPrompt = VISUAL_PROMPTS[Math.floor(Math.random() * VISUAL_PROMPTS.length)];
+      const fullPrompt = `Generate a beautiful, abstract, and artistic image that is evocative and inspires emotion. Style: ethereal, painterly. Theme: ${randomPrompt}`;
 
       try {
-        const aiResponse = await puter.ai.chat(prompt);
-        setInspiration(aiResponse.message.content);
+        const imageElement = await puter.ai.txt2img(fullPrompt, {});
+        setInspirationUrl(imageElement.src);
       } catch (error) {
         console.error("Error generating inspiration:", error);
-        toast({ variant: 'destructive', title: 'Could not generate prompt.' });
+        toast({ variant: 'destructive', title: 'Could not generate image.' });
       } finally {
         setIsGenerating(false);
       }
@@ -75,7 +86,7 @@ Generate one new prompt.`;
         goal,
         weeklyProgress: 0,
         progressPercentage: 0,
-        latestEntry,
+        latestEntry: null,
       };
     }
     
@@ -112,29 +123,31 @@ Generate one new prompt.`;
 
       <div className="grid gap-6 md:grid-cols-2">
         
-        {/* Inspirational Prompt */}
-        <Card>
+        {/* Inspirational Image */}
+        <Card className="flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Wand className="h-5 w-5 text-primary" />
-                    A Prompt for Today
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Inspirational Image
                 </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center text-center min-h-[120px]">
+            <CardContent className="flex-grow flex flex-col items-center justify-center text-center min-h-[120px]">
                 {isGenerating ? (
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                ) : inspiration ? (
-                    <blockquote className="text-lg italic text-foreground/90">"{inspiration}"</blockquote>
+                ) : inspirationUrl ? (
+                    <div className="relative w-full aspect-video rounded-md overflow-hidden border">
+                        <Image src={inspirationUrl} alt="AI-generated visual prompt" layout="fill" objectFit="cover" />
+                    </div>
                 ) : (
-                    <p className="text-muted-foreground">Could not load a prompt. Try generating a new one.</p>
+                    <p className="text-muted-foreground">Could not load an image. Try generating a new one.</p>
                 )}
             </CardContent>
-             <CardFooter>
-                <Button variant="ghost" onClick={generateInspiration} disabled={isGenerating}>
+            <div className="p-6 pt-0">
+                <Button variant="ghost" onClick={generateInspiration} disabled={isGenerating} className="w-full">
                     <Wand className="mr-2 h-4 w-4" />
                     Get another one
                 </Button>
-            </CardFooter>
+            </div>
         </Card>
         
         {/* Latest Reflection */}
