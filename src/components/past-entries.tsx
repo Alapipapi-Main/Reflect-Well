@@ -29,15 +29,16 @@ import { useFirestore, useUser, updateDocumentNonBlocking, deleteDocumentNonBloc
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CustomCalendar, type DateRange } from "@/components/custom-calendar"
+import { CustomCalendar, type DateRange } from "./custom-calendar"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { AiStoryWeaver } from "@/components/ai-story-weaver"
+import { LetterToPastSelf } from "@/components/letter-to-past-self"
 
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns"
-import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2, MessageSquareQuote, PlayCircle, StopCircle, Wand2 } from "lucide-react"
+import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2, MessageSquareQuote, PlayCircle, StopCircle, Wand2, Archive } from "lucide-react"
 import { JournalFormFields } from "./journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -76,6 +77,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedEntryIds, setSelectedEntryIds] = useState<Set<string>>(new Set());
+  const [letterEntry, setLetterEntry] = useState<JournalEntry | null>(null);
 
   const sortedEntries = useMemo(() => [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
@@ -191,6 +193,10 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
     }
     setSelectedEntryIds(newSelectedIds);
   };
+  
+  const handleOpenLetterDialog = (entry: JournalEntry) => {
+    setLetterEntry(entry);
+  };
 
 
   return (
@@ -294,7 +300,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                 <AccordionItem value={entry.id} key={entry.id}>
                   <div className="flex items-center w-full">
                     <div
-                      className="flex items-center p-4 cursor-pointer"
+                      className="flex items-center p-4 pr-2 cursor-pointer"
                       onClick={(e) => handleSelectEntry(e, entry.id)}
                     >
                       <Checkbox
@@ -340,7 +346,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
                         onCancel={() => setEditingEntryId(null)}
                       />
                     ) : (
-                       <ViewJournalContent entry={entry} />
+                       <ViewJournalContent entry={entry} onWriteLetter={() => handleOpenLetterDialog(entry)} />
                     )}
                   </AccordionContent>
                 </AccordionItem>
@@ -376,6 +382,14 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
         )}
       </Card>
       
+      {letterEntry && (
+        <LetterToPastSelf 
+            entry={letterEntry}
+            isOpen={!!letterEntry}
+            onOpenChange={(isOpen) => !isOpen && setLetterEntry(null)}
+        />
+      )}
+
       <AlertDialog open={!!deleteCandidateId} onOpenChange={(open) => !open && setDeleteCandidateId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -394,7 +408,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
   )
 }
 
-function ViewJournalContent({ entry }: { entry: JournalEntry }) {
+function ViewJournalContent({ entry, onWriteLetter }: { entry: JournalEntry; onWriteLetter: () => void; }) {
   const { toast } = useToast();
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -433,7 +447,7 @@ function ViewJournalContent({ entry }: { entry: JournalEntry }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-start">
+      <div className="flex flex-wrap gap-2 justify-start">
         <Button
           size="sm"
           variant="outline"
@@ -448,6 +462,14 @@ function ViewJournalContent({ entry }: { entry: JournalEntry }) {
             <PlayCircle className="mr-2 h-4 w-4" />
           )}
           {isPlaying ? 'Stop' : 'Listen'}
+        </Button>
+         <Button
+          size="sm"
+          variant="outline"
+          onClick={onWriteLetter}
+        >
+            <Archive className="mr-2 h-4 w-4" />
+            Write a Letter to Past Self
         </Button>
       </div>
 
@@ -713,5 +735,6 @@ function useUserAndFirestore() {
     const firestore = useFirestore();
     return { user, firestore };
 }
+
 
 
