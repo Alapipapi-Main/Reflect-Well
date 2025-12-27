@@ -26,7 +26,7 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) return 'Good Morning.';
     if (hour >= 12 && hour < 18) return 'Good Afternoon.';
-    if (hour >= 18 && hour < 22) return 'Good Evening.';
+    if (hour >= 18 && hour < 22) return 'Good Night.';
     return 'Good Night.';
   };
   
@@ -86,9 +86,9 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
                             <audio src={latestEntry.audioUrl} controls className="w-full" />
                         </div>
                     )}
-                    <p className="text-muted-foreground line-clamp-3 pt-2">
-                        {latestEntry.content}
-                    </p>
+                    <div className="text-muted-foreground pt-2 max-h-32 overflow-y-auto pr-2">
+                        <p className="whitespace-pre-wrap">{latestEntry.content}</p>
+                    </div>
                     {latestEntry.tags && latestEntry.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 items-center pt-2">
                             <Tag className="h-4 w-4 text-muted-foreground" />
