@@ -31,11 +31,13 @@ import Image from "next/image"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CustomCalendar, type DateRange } from "@/components/custom-calendar"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
+import { AiStoryWeaver } from "@/components/ai-story-weaver"
 
 import type { JournalEntry, Mood } from "@/lib/types"
 import { MOODS } from "@/lib/constants"
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns"
-import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2, MessageSquareQuote, PlayCircle, StopCircle } from "lucide-react"
+import { CalendarIcon, CalendarDays, Edit, Trash2, Search, XIcon, Tag, Mic, Loader2, MessageSquareQuote, PlayCircle, StopCircle, Wand2 } from "lucide-react"
 import { JournalFormFields } from "./journal-form-fields"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -73,6 +75,7 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
   const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedEntryIds, setSelectedEntryIds] = useState<Set<string>>(new Set());
 
   const sortedEntries = useMemo(() => [...entries].sort((a, b) => {
     const dateA = a.date ? (a.date as any).toDate() : new Date(0)
@@ -99,7 +102,12 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
 
   useEffect(() => {
     setCurrentPage(1);
+    setSelectedEntryIds(new Set());
   }, [searchTerm, moodFilter, dateRange]);
+
+  const selectedEntries = useMemo(() => {
+    return sortedEntries.filter(entry => selectedEntryIds.has(entry.id));
+  }, [selectedEntryIds, sortedEntries]);
 
   const totalPages = Math.ceil(filteredEntries.length / ENTRIES_PER_PAGE);
   const paginatedEntries = filteredEntries.slice(
@@ -172,13 +180,25 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
   const clearDateFilter = () => {
     setDateRange({ from: null, to: null });
   };
+  
+  const handleSelectEntry = (event: React.MouseEvent, entryId: string) => {
+    event.stopPropagation();
+    const newSelectedIds = new Set(selectedEntryIds);
+    if (newSelectedIds.has(entryId)) {
+      newSelectedIds.delete(entryId);
+    } else {
+      newSelectedIds.add(entryId);
+    }
+    setSelectedEntryIds(newSelectedIds);
+  };
+
 
   return (
     <>
       <Card>
         <CardHeader>
           <CardTitle>Journal History</CardTitle>
-          <CardDescription>A look back at your thoughts and feelings.</CardDescription>
+          <CardDescription>Select entries to weave into a story, or browse your past reflections.</CardDescription>
         </CardHeader>
         <CardContent>
            <div className="space-y-4 mb-6">
@@ -255,6 +275,11 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
               </div>
             </div>
           </div>
+          {selectedEntries.length > 0 && (
+            <div className="my-8">
+              <AiStoryWeaver selectedEntries={selectedEntries} />
+            </div>
+          )}
           {entries.length > 0 ? (
             paginatedEntries.length > 0 ? (
             <Accordion type="single" collapsible className="w-full"
@@ -268,6 +293,15 @@ export function PastEntries({ entries, isFormSubmitting }: PastEntriesProps) {
               {paginatedEntries.map((entry) => (
                 <AccordionItem value={entry.id} key={entry.id}>
                   <div className="flex items-center w-full">
+                    <div
+                      className="flex items-center gap-4 pl-4 cursor-pointer"
+                      onClick={(e) => handleSelectEntry(e, entry.id)}
+                    >
+                      <Checkbox
+                        checked={selectedEntryIds.has(entry.id)}
+                        aria-label={`Select entry from ${format(entry.date ? (entry.date as any).toDate() : new Date(), "MMMM d, yyyy")}`}
+                      />
+                    </div>
                     <AccordionTrigger>
                       <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 text-left">
                         <span className="text-3xl">{MOODS[entry.mood].emoji}</span>
@@ -679,3 +713,4 @@ function useUserAndFirestore() {
     const firestore = useFirestore();
     return { user, firestore };
 }
+
