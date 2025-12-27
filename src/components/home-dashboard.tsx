@@ -55,7 +55,7 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
         <AudioAmbiance />
         
         {/* Latest Reflection */}
-        <Card className="md:col-span-2">
+        <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <BookCheck className="h-5 w-5 text-primary" />
