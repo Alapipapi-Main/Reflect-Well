@@ -33,23 +33,17 @@ import { DreamInterpreter } from '@/components/dream-interpreter';
 import { MoreFeaturesSheet } from '@/components/more-features-sheet';
 import { EmotionExplorer } from '@/components/emotion-explorer';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
-import { Celebration } from '@/components/celebration';
-import { startOfWeek, endOfWeek, isWithinInterval, format, isPast } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+import { isPast } from 'date-fns';
 import { HomeDashboard } from '@/components/home-dashboard';
-
-const DEFAULT_GOAL = 3;
 
 function JournalPageContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
-  const { toast } = useToast();
   
   const [isSubmittingNewEntry, setIsSubmittingNewEntry] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -94,44 +88,6 @@ function JournalPageContent() {
     });
   }, [rawEntries]);
 
-  // Goal celebration logic
-  const weeklyProgress = useMemo(() => {
-    const now = new Date();
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-
-    const entriesThisWeek = entries.filter(entry => {
-      // Add a guard to ensure entry.date is not null before calling .toDate()
-      if (!entry.date) return false;
-      const entryDate = (entry.date as any).toDate();
-      return isWithinInterval(entryDate, { start: weekStart, end: weekEnd });
-    });
-    
-    const uniqueDays = new Set(entriesThisWeek.map(entry => format((entry.date as any).toDate(), 'yyyy-MM-dd')));
-    return uniqueDays.size;
-  }, [entries]);
-
-  const goal = settings?.goal ?? DEFAULT_GOAL;
-  
-  useEffect(() => {
-    const wasGoalMetPreviously = localStorage.getItem('goalMetWeek') === format(new Date(), 'yyyy-w');
-    const isGoalMetNow = weeklyProgress >= goal;
-
-    if (isGoalMetNow && !wasGoalMetPreviously) {
-      setShowCelebration(true);
-      toast({
-        variant: 'success',
-        title: "Goal Achieved!",
-        description: `Congratulations on journaling ${goal} times this week!`,
-        duration: 5000,
-      });
-      localStorage.setItem('goalMetWeek', format(new Date(), 'yyyy-w'));
-      
-      const timer = setTimeout(() => setShowCelebration(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [weeklyProgress, goal, toast]);
-
   const hasUnopenedCapsules = useMemo(() => {
     if (!timeCapsules) return false;
     return timeCapsules.some(capsule => 
@@ -152,12 +108,11 @@ function JournalPageContent() {
     return <EmailVerificationGate user={user} />;
   }
 
-  const moreFeaturesTabs = ['visual-prompt', 'templates', 'time-capsule', 'dream-interpreter', 'guided', 'gratitude', 'worry-box', 'ask', 'insights', 'stats', 'goals', 'yesterday', 'on-this-day', 'explorer'];
+  const moreFeaturesTabs = ['visual-prompt', 'templates', 'time-capsule', 'dream-interpreter', 'guided', 'gratitude', 'worry-box', 'ask', 'insights', 'stats', 'goals', 'yesterday', 'on-this-day', 'explorer', 'calendar'];
   const isMoreTabActive = moreFeaturesTabs.includes(activeTab);
 
   return (
       <main className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8 relative">
-        {showCelebration && <Celebration />}
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-2">
             <BookHeart className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
@@ -170,23 +125,19 @@ function JournalPageContent() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center">
                 <TabsList className="p-1.5 h-auto flex flex-wrap justify-center gap-2">
-                  <TabsTrigger value="home" >
+                  <TabsTrigger value="home" disabled={isSubmittingNewEntry}>
                     <Home className="mr-2 h-4 w-4" />
                     Home
                   </TabsTrigger>
-                  <TabsTrigger value="new-entry" >
+                  <TabsTrigger value="new-entry" disabled={isSubmittingNewEntry}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     New Entry
                   </TabsTrigger>
-                  <TabsTrigger value="history" >
+                  <TabsTrigger value="history" disabled={isSubmittingNewEntry}>
                     <BookOpen className="mr-2 h-4 w-4" />
                     History
                   </TabsTrigger>
-                   <TabsTrigger value="calendar">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Calendar
-                  </TabsTrigger>
-                  <TabsTrigger value="trends" >
+                  <TabsTrigger value="trends" disabled={isSubmittingNewEntry}>
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Trends
                   </TabsTrigger>
@@ -204,7 +155,8 @@ function JournalPageContent() {
                               'relative inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
                               // These classes mimic the TabsTrigger styles
                               'data-[state=inactive]:bg-transparent data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground',
-                              'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md'
+                              'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md',
+                              isSubmittingNewEntry && 'opacity-50 pointer-events-none'
                             )}
                           >
                             <MoreHorizontal className="h-4 w-4" />

@@ -1,8 +1,10 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
 import Script from 'next/script';
+import { GlobalCelebration } from '@/components/global-celebration';
 
 export const metadata: Metadata = {
   title: 'ReflectWell',
@@ -24,6 +26,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased h-full bg-background">
             <FirebaseClientProvider>
+              <GlobalCelebration />
               {children}
             </FirebaseClientProvider>
             <Toaster />

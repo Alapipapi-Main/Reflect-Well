@@ -5,7 +5,7 @@ import { SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { BarChart, BookCopy, Bot, Clock, Compass, Gift, Heart, HelpCircle, Image, Moon, Star, Sun, Trophy, Trash2 } from 'lucide-react';
+import { BarChart, BookCopy, Bot, Clock, Compass, Gift, Heart, HelpCircle, Image, Moon, Star, Sun, Trophy, Trash2, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
   
 interface MoreFeaturesSheetProps {
@@ -39,6 +39,7 @@ const features = [
             { value: 'gratitude', label: 'Gratitude Wall', icon: Heart },
             { value: 'worry-box', label: 'Worry Box', icon: Trash2 },
             { value: 'explorer', label: 'Emotion Explorer', icon: Compass },
+            { value: 'calendar', label: 'Calendar', icon: Calendar },
         ]
     },
     {
