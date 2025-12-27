@@ -53,6 +53,36 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         
+        <Card>
+            <CardHeader>
+                <CardTitle>Latest Reflection</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {latestEntry ? (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                    <span className="text-4xl">{MOODS[latestEntry.mood].emoji}</span>
+                    <div className="flex flex-col">
+                        <span className="font-semibold">{MOODS[latestEntry.mood].label}</span>
+                        <span className="text-sm text-muted-foreground">
+                        {format((latestEntry.date as any).toDate(), "MMMM d, yyyy")}
+                        </span>
+                    </div>
+                    </div>
+                    <p className="text-muted-foreground line-clamp-3">
+                    {latestEntry.content}
+                    </p>
+                </div>
+                ) : (
+                <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg h-full">
+                    <BookCheck className="h-12 w-12 mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">Ready for your first entry?</h3>
+                    <p>Your latest reflection will appear here.</p>
+                </div>
+                )}
+            </CardContent>
+        </Card>
+
         <AudioAmbiance />
         
         <ZenGarden />
