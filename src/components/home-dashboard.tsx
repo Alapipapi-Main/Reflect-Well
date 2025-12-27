@@ -5,13 +5,14 @@ import { useMemo } from 'react';
 import type { User } from 'firebase/auth';
 import type { JournalEntry, UserSettings } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { BookCheck, Tag } from 'lucide-react';
 import Balancer from 'react-wrap-balancer';
 import { MOODS } from '@/lib/constants';
 import { format } from 'date-fns';
+import Image from 'next/image';
 import { AudioAmbiance } from './audio-ambiance';
 import { ZenGarden } from './zen-garden';
-
 
 interface HomeDashboardProps {
   user: User;
@@ -60,18 +61,36 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
             <CardContent>
                 {latestEntry ? (
                 <div className="space-y-4">
+                    {latestEntry.videoUrl && (
+                        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary mb-4">
+                            <video src={latestEntry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                        </div>
+                    )}
+                    {latestEntry.imageUrl && !latestEntry.videoUrl && (
+                        <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
+                            <Image src={latestEntry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
+                        </div>
+                    )}
                     <div className="flex items-center gap-4">
-                    <span className="text-4xl">{MOODS[latestEntry.mood].emoji}</span>
-                    <div className="flex flex-col">
-                        <span className="font-semibold">{MOODS[latestEntry.mood].label}</span>
-                        <span className="text-sm text-muted-foreground">
-                        {format((latestEntry.date as any).toDate(), "MMMM d, yyyy")}
-                        </span>
-                    </div>
+                        <span className="text-4xl">{MOODS[latestEntry.mood].emoji}</span>
+                        <div className="flex flex-col">
+                            <span className="font-semibold">{MOODS[latestEntry.mood].label}</span>
+                            <span className="text-sm text-muted-foreground">
+                            {format((latestEntry.date as any).toDate(), "MMMM d, yyyy")}
+                            </span>
+                        </div>
                     </div>
                     <p className="text-muted-foreground line-clamp-3">
-                    {latestEntry.content}
+                        {latestEntry.content}
                     </p>
+                    {latestEntry.tags && latestEntry.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 items-center pt-2">
+                            <Tag className="h-4 w-4 text-muted-foreground" />
+                            {latestEntry.tags.map(tag => (
+                                <Badge key={tag} variant="secondary">{tag}</Badge>
+                            ))}
+                        </div>
+                    )}
                 </div>
                 ) : (
                 <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg h-full">
