@@ -445,6 +445,8 @@ function ViewJournalContent({ entry, onWriteLetter }: { entry: JournalEntry; onW
     }
   };
 
+  const isLetterEntry = entry.tags?.includes('letter to past self');
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2 justify-start">
@@ -463,14 +465,16 @@ function ViewJournalContent({ entry, onWriteLetter }: { entry: JournalEntry; onW
           )}
           {isPlaying ? 'Stop' : 'Listen'}
         </Button>
-         <Button
-          size="sm"
-          variant="outline"
-          onClick={onWriteLetter}
-        >
-            <Archive className="mr-2 h-4 w-4" />
-            Write a Letter to Past Self
-        </Button>
+         {!isLetterEntry && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onWriteLetter}
+            >
+                <Archive className="mr-2 h-4 w-4" />
+                Write a Letter to Past Self
+            </Button>
+        )}
       </div>
 
       {entry.videoUrl && (
@@ -735,6 +739,7 @@ function useUserAndFirestore() {
     const firestore = useFirestore();
     return { user, firestore };
 }
+
 
 
 
