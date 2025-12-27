@@ -1,16 +1,17 @@
 
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import type { User } from 'firebase/auth';
 import type { JournalEntry, UserSettings } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
 import { Target, BookCheck } from 'lucide-react';
 import Balancer from 'react-wrap-balancer';
 import { MOODS } from '@/lib/constants';
 import { CommunityGratitude } from './community-gratitude';
+import { AudioAmbiance } from './audio-ambiance';
 
 interface HomeDashboardProps {
   user: User;
@@ -31,8 +32,7 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
   
   const dashboardData = useMemo(() => {
     const goal = settings?.goal ?? DEFAULT_GOAL;
-    const latestEntry = entries && entries.length > 0 ? entries[entries.length - 1] : null;
-
+    
     if (!entries || entries.length === 0) {
       return {
         goal,
@@ -55,6 +55,12 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
     const weeklyProgress = uniqueDays.size;
     const progressPercentage = Math.min((weeklyProgress / goal) * 100, 100);
 
+    const latestEntry = [...entries].sort((a, b) => {
+        const dateA = a.date ? (a.date as any).toDate() : new Date(0);
+        const dateB = b.date ? (b.date as any).toDate() : new Date(0);
+        return dateB.getTime() - dateA.getTime();
+      })[0];
+
     return {
       goal,
       weeklyProgress,
@@ -75,7 +81,7 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         
-        <CommunityGratitude />
+        <AudioAmbiance />
         
         {/* Latest Reflection */}
         <Card>
@@ -85,9 +91,9 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
                     Latest Reflection
                 </CardTitle>
             </CardHeader>
-            <CardContent className="min-h-[120px]">
+            <CardContent className="min-h-[120px] flex items-center justify-center">
                 {dashboardData.latestEntry ? (
-                    <div className="space-y-2">
+                    <div className="space-y-2 w-full">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{format((dashboardData.latestEntry.date as any).toDate(), "MMMM d, yyyy")}</span>
                             <span className="text-lg">{MOODS[dashboardData.latestEntry.mood].emoji}</span>
@@ -97,7 +103,7 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
                         </p>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center text-center h-full text-muted-foreground">
+                    <div className="text-center text-muted-foreground">
                         <p>Your most recent entry will appear here.</p>
                     </div>
                 )}
