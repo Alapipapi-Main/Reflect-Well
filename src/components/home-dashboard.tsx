@@ -61,16 +61,6 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
             <CardContent>
                 {latestEntry ? (
                 <div className="space-y-4">
-                    {latestEntry.videoUrl && (
-                        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary mb-4">
-                            <video src={latestEntry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-                        </div>
-                    )}
-                    {latestEntry.imageUrl && !latestEntry.videoUrl && (
-                        <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
-                            <Image src={latestEntry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
-                        </div>
-                    )}
                     <div className="flex items-center gap-4">
                         <span className="text-4xl">{MOODS[latestEntry.mood].emoji}</span>
                         <div className="flex flex-col">
@@ -80,7 +70,17 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
                             </span>
                         </div>
                     </div>
-                    <p className="text-muted-foreground line-clamp-3">
+                    {latestEntry.videoUrl && (
+                        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-secondary">
+                            <video src={latestEntry.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                        </div>
+                    )}
+                    {latestEntry.imageUrl && !latestEntry.videoUrl && (
+                        <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+                            <Image src={latestEntry.imageUrl} alt="AI-generated image for the entry" fill objectFit="cover" />
+                        </div>
+                    )}
+                    <p className="text-muted-foreground line-clamp-3 pt-2">
                         {latestEntry.content}
                     </p>
                     {latestEntry.tags && latestEntry.tags.length > 0 && (
