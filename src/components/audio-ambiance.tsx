@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, Music4, Play, Pause, X } from 'lucide-react';
+import { Loader2, Sparkles, Volume2, Play, Pause, X } from 'lucide-react';
 import Balancer from 'react-wrap-balancer';
 
 declare const puter: any;
@@ -36,7 +36,7 @@ export function AudioAmbiance() {
       return;
     }
     if (!prompt.trim()) {
-      toast({ variant: 'destructive', title: 'Prompt Required', description: 'Please describe the audio you want to create.' });
+      toast({ variant: 'destructive', title: 'Affirmation Required', description: 'Please write an affirmation to listen to.' });
       return;
     }
 
@@ -48,26 +48,25 @@ export function AudioAmbiance() {
         setIsPlaying(false);
     }
     
-    const fullPrompt = `Generate a seamless, looping ambient soundscape based on the following theme: "${prompt}". Focus on creating an atmosphere, not speech or distinct melodies. For example, for "rainy library", generate sounds of rain, quiet page turns, and distant muffled sounds.`;
-
     try {
-      const audio = await puter.ai.txt2audio(fullPrompt);
+      const audio = await puter.ai.txt2speech(prompt, { voice: 'Matthew' });
       audioRef.current = audio;
       setGeneratedPrompt(prompt);
       
-      audio.loop = true;
+      audio.loop = false; // Affirmations shouldn't loop
       audio.play().catch(() => {});
       setIsPlaying(true);
 
       audio.onpause = () => setIsPlaying(false);
       audio.onplay = () => setIsPlaying(true);
+      audio.onended = () => setIsPlaying(false);
 
     } catch (error) {
-      console.error('Error generating audio ambiance:', error);
+      console.error('Error generating audio affirmation:', error);
       toast({
         variant: 'destructive',
         title: 'Audio Generation Failed',
-        description: 'Could not create a soundscape at this time. Please try again.',
+        description: 'Could not create audio at this time. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -106,12 +105,12 @@ export function AudioAmbiance() {
     <Card className="flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-            <Music4 className="h-5 w-5 text-primary" />
-            Audio Ambiance
+            <Volume2 className="h-5 w-5 text-primary" />
+            Personal Affirmation
         </CardTitle>
         <CardDescription>
             <Balancer>
-                Create a unique soundscape for your journaling session with AI.
+                Type an affirmation and hear it spoken in a calm voice.
             </Balancer>
         </CardDescription>
       </CardHeader>
@@ -119,7 +118,7 @@ export function AudioAmbiance() {
         {generatedPrompt ? (
             <div className="flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg h-full">
                 <p className="text-sm text-muted-foreground">Now playing:</p>
-                <p className="font-semibold text-lg capitalize mb-4">{generatedPrompt}</p>
+                <p className="font-semibold text-lg italic mb-4">"{generatedPrompt}"</p>
                 <Button onClick={handlePlayPause} size="lg" className="rounded-full w-16 h-16">
                     {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
                 </Button>
@@ -127,11 +126,11 @@ export function AudioAmbiance() {
         ) : (
             <div className="space-y-2">
                 <label htmlFor="ambiance-prompt" className="text-sm font-medium">
-                    Describe a mood or scene...
+                    Write your affirmation...
                 </label>
                 <Input
                     id="ambiance-prompt"
-                    placeholder="e.g., calm rainy library, peaceful forest"
+                    placeholder="e.g., I am focused and ready for the day."
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     disabled={isLoading}
