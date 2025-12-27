@@ -10,6 +10,7 @@ import Balancer from 'react-wrap-balancer';
 import { MOODS } from '@/lib/constants';
 import { format } from 'date-fns';
 import { AudioAmbiance } from './audio-ambiance';
+import { ZenGarden } from './zen-garden';
 
 
 interface HomeDashboardProps {
@@ -54,32 +55,7 @@ export function HomeDashboard({ user, entries, settings }: HomeDashboardProps) {
         
         <AudioAmbiance />
         
-        {/* Latest Reflection */}
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <BookCheck className="h-5 w-5 text-primary" />
-                    Latest Reflection
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="min-h-[120px] flex items-center justify-center">
-                {latestEntry ? (
-                    <div className="space-y-2 w-full">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>{format((latestEntry.date as any).toDate(), "MMMM d, yyyy")}</span>
-                            <span className="text-lg">{MOODS[latestEntry.mood].emoji}</span>
-                        </div>
-                        <p className="text-foreground/90 line-clamp-3 italic">
-                           "{latestEntry.content}"
-                        </p>
-                    </div>
-                ) : (
-                    <div className="text-center text-muted-foreground p-4">
-                        <p>Your most recent entry will appear here once you've saved one.</p>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+        <ZenGarden />
 
       </div>
     </div>
